@@ -1,0 +1,5 @@
+assign FailPpm5gGood=0
+
+tx att=0; r=80; pc=100; f=5500;
+tx attenuation=0; carrier=1; txgain=40; fa=1; chain=1; f=5500;stop='$Test.Error';
+report r='c f=fa.frequency;f=actual;w=15;d=6;f=delta;w=12;d=6;f=ppm;f=fail((ppm>15 | ppm<-15),$FailText,@FailPpm5gGood,$passtext);l=P/F;type=s;width=8;d=0;title=5G Frequency Acuracy: Radio1;'

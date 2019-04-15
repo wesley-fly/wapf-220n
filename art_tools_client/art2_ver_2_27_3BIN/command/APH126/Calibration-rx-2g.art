@@ -1,0 +1,6 @@
+#
+# rssi cal for 2G
+#
+link f=2412,2437,2462;iss=-50; tp=0; nf=100; rssical=1; r=f8; pc=20;txch=7;rxch=3;
+rep r='col f=rssi.frequency,chain,ce,rssi,nf,offset,nf+offset;type=d,d,s;label=frequency;'
+

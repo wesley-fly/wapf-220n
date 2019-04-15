@@ -1,0 +1,135 @@
+# init as both band on
+assign 2gOnly=0
+assign 5gOnly=0
+get opflags;
+
+assign FailText=FAIL
+assign PassText=.
+assign FText=FAIL
+assign PText=.
+assign ReportFilename=$mac.txt
+assign SensReportFile=$mac_sens.txt
+#
+# let's start with no failures
+#
+assign FailIdleCurrentGood=0
+assign FailCurrentGood=0
+assign FailCurrent=0
+assign FailPower2gGood=0
+assign FailPower2gBetter=0
+assign FailPower2gBest=0
+assign FailPower5gGood=0
+assign FailPower5gBetter=0
+assign FailPower5gBest=0
+
+assign FailPwrAll2gGood=0
+assign FailPwrAll2gBetter=0
+assign FailPwrAll2gBest=0
+assign FailPwrAll5gGood=0
+assign FailPwrAll5gBetter=0
+assign FailPwrAll5gBest=0
+
+assign FailPwrEVM2gGood=0
+assign FailPwrEVM2gBetter=0
+assign FailPwrEVM2gBest=0
+assign FailPwrEVM5gGood=0
+assign FailPwrEVM5gBetter=0
+assign FailPwrEVM5gBest=0
+assign FailEVM2g=0
+assign FailEVM5g=0
+
+assign FailSens2gGood=0
+assign FailSens2gBetter=0
+assign FailSens5gGood=0
+assign FailSens5gBetter=0
+assign FailPpm2gGood=0
+assign FailPpm5gGood=0
+assign FailMask2gGood=0
+assign FailMask5gGood=0
+
+assign FailTxTput2gGood=0
+assign FailTxTput5gGood=0
+assign FailRxTput2gGood=0
+assign FailRxTput5gGood=0
+assign FailTxTput2gPSR=0
+assign FailTxTput5gPSR=0
+
+assign FailBTxTput2gGood=0
+assign FailBTxTput5gGood=0
+assign FailBRxTput2gGood=0
+assign FailBRxTput5gGood=0
+assign FailBTxTput2gPSR=0
+assign FailBTxTput5gPSR=0
+
+assign FailPpm2gGood=0
+assign FailPpm5gGood=0
+
+assign FailTotal2gGoodpt=0
+assign FailTotal2gGoodft=0
+
+assign FailTotal5gGoodft=0
+assign FailTotal5gGoodpt=0
+
+assign 2_FailIdleCurrentGood=0
+assign 2_FailCurrentGood=0
+assign 2_FailCurrent=0
+assign 2_FailPower2gGood=0
+assign 2_FailPower2gBetter=0
+assign 2_FailPower2gBest=0
+assign 2_FailPower5gGood=0
+assign 2_FailPower5gBetter=0
+assign 2_FailPower5gBest=0
+
+assign 2_FailPwrAll2gGood=0
+assign 2_FailPwrAll2gBetter=0
+assign 2_FailPwrAll2gBest=0
+assign 2_FailPwrAll5gGood=0
+assign 2_FailPwrAll5gBetter=0
+assign 2_FailPwrAll5gBest=0
+       
+assign 2_FailPwrEVM2gGood=0
+assign 2_FailPwrEVM2gBetter=0
+assign 2_FailPwrEVM2gBest=0
+assign 2_FailPwrEVM5gGood=0
+assign 2_FailPwrEVM5gBetter=0
+assign 2_FailPwrEVM5gBest=0
+assign 2_FailEVM2g=0
+assign 2_FailEVM5g=0
+
+assign 2_FailSens2gGood=0
+assign 2_FailSens2gBetter=0
+assign 2_FailSens5gGood=0
+assign 2_FailSens5gBetter=0
+assign 2_FailPpm2gGood=0
+assign 2_FailPpm5gGood=0
+assign 2_FailMask2gGood=0
+assign 2_FailMask5gGood=0
+
+assign 2_FailTxTput2gGood=0
+assign 2_FailTxTput5gGood=0
+assign 2_FailRxTput2gGood=0
+assign 2_FailRxTput5gGood=0
+assign 2_FailTxTput2gPSR=0
+assign 2_FailTxTput5gPSR=0
+
+assign 2_FailBTxTput2gGood=0
+assign 2_FailBTxTput5gGood=0
+assign 2_FailBRxTput2gGood=0
+assign 2_FailBRxTput5gGood=0
+assign 2_FailBTxTput2gPSR=0
+assign 2_FailBTxTput5gPSR=0
+
+assign 2_FailPpm2gGood=0
+assign 2_FailPpm5gGood=0
+
+assign 2_FailTotal2gGoodpt=0
+assign 2_FailTotal2gGoodft=0
+
+assign 2_FailTotal5gGoodft=0
+assign 2_FailTotal5gGoodpt=0
+
+assign FailTotalGoodpt=0
+assign 2_FailTotalGoodpt=0
+
+assign FailTotalGoodft=0
+assign 2_FailTotalGoodft=0

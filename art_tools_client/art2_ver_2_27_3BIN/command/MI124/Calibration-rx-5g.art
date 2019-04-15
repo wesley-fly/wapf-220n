@@ -1,0 +1,8 @@
+#
+# rssi cal for 5G
+#
+set rxgain=0
+reset f=5180;
+link f=5180,5220,5320,5400,5500,5600,5700,5785;iss=-75; tp=0; nf=100; rssical=1; r=t8; pc=20;txch=3;rxch=3;
+rep r='col f=rssi.frequency,chain,ce,rssi,nf,offset,nf+offset;type=d,d,s;label=frequency;'
+

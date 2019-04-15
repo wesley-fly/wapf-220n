@@ -1,0 +1,63 @@
+assign passtext=.
+assign failtext=fail
+
+assign issmin=-70
+assign issmax=-60
+assign issinc=-2
+assign channel=5180,5500,5785
+assign rate=54,t7,f7
+assign isslimit=-65,-62,-59
+assign psrthreshold=90
+assign dipLimit=-3
+assign psrthreshold=90
+assign FailSens5gGood=0
+assign dipCount=0
+
+
+#link f=5180,5500,5785;r=54,t7,f7;tp=0;ch=1,2,4;iss=$issmax:$issmin:$issinc;
+rx f=5180,5320,5500,5700,5785;r=54;ch=1;iss=$issmax:$issmin:$issinc;delay=100;rxvsg=1;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+rx f=5180,5320,5500,5700,5785;r=54;ch=2;iss=$issmax:$issmin:$issinc;delay=100;rxvsg=1;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+rx f=5180,5320,5500,5700,5785;r=54;ch=4;iss=$issmax:$issmin:$issinc;delay=100;rxvsg=1;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+
+rx f=5180,5320,5500,5700,5785;r=t7;ch=1;iss=$issmax:$issmin:$issinc;delay=100;rxvsg=1;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+rx f=5180,5320,5500,5700,5785;r=t7;ch=2;iss=$issmax:$issmin:$issinc;delay=100;rxvsg=1;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+rx f=5180,5320,5500,5700,5785;r=t7;ch=4;iss=$issmax:$issmin:$issinc;delay=100;rxvsg=1;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+rx f=5180,5340,5500,5700,5785;r=f7;ch=1;iss=$issmax:$issmin:$issinc;delay=20;rxvsg=1;ht40=1;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+rx f=5180,5340,5500,5700,5785;r=f7;ch=2;iss=$issmax:$issmin:$issinc;delay=20;rxvsg=1;ht40=1;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+
+rx f=5180,5340,5500,5700,5785;r=f7;ch=4;iss=$issmax:$issmin:$issinc;delay=20;rxvsg=1;ht40=1;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;
+
+report r='sum title=5GHZ SENSITIVITY REPORT;k=frequency,rate,rxchain;l=chain;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,10,$psrthreshold);label=fit;width=8;f=lookup(rate,@rate,@isslimit);label=limit;w=8;f=fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta;w=8;f=test(fit(iss,psr,10,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens5gGood);label=limit;type=s,w=8;'
+report r='g x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,rx.rxchain;file=$SensReportFile;screen=0';
+

@@ -1,0 +1,8 @@
+APH126\test_flow_flags_APH126.art
+
+connect i=$2gr;host=192.168.1.2;port=2390;
+connect i=$5gr;host=192.168.1.2;port=2391;
+#connect i=$golden;host=192.168.1.3;port=2390;
+connect i=$golden;host=10.10.13.25;port=2390;
+
+

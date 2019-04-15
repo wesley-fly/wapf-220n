@@ -1,0 +1,16 @@
+
+assign rate=54,t7,t15,t23,f7,f15,f23
+assign tputlimit=30,50,100,150,100,200,300
+
+assign FailRxTput5gGood=0
+assign FailRxTput5gBetter=0
+assign FailRxTput5gBest=0
+
+assign passtext=.
+assign failtext=FAIL
+
+link att=40; pl=1500; ir=2; pc=2048; ch=7; r=t23,f23; agg=32; f=5180,5820; tx=1; bc=0; retry=0; sgi=0;
+
+report r='column title=5GHz RX THROUGHPUT;f=rx.frequency;l=frequency;f=rate;f=agg;l=agg;f=rx.rssi;f=rx.psr;f=duration,byte;f=0.001*rx.throughput;l=rx tput;f=lookup(rate,@rate,@tputlimit);label=limit;w=8;f=0.001*rx.throughput-lookup(rate,@rate,@tputlimit);label=delta;w=8;f=test(0.001*rx.throughput-lookup(rate,@rate,@tputlimit)>0,$passtext,$failtext,0,@FailRxTput5gGood);label=100%;type=s,w=8;'
+
+report r='column title=5GHz RX RSSI/EVM REPORT;f=rx.frequency;l=frequency;f=rate,rssi,rssi00,rssi01,rssi02,rssi10,rssi11,rssi12,evm0,evm1,evm2;'

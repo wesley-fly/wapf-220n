@@ -1,0 +1,11 @@
+load
+
+
+reset
+
+
+ew size=4;a=3fc;v=ffffffff;
+
+
+er size=2;a=3f0:3ff;
+

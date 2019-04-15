@@ -1,0 +1,88 @@
+assign 2_FailPwrEVM5gGood=0
+assign 2_FailPwrEVM5gBetter=0
+assign 2_FailPwrEVM5gBest=0
+assign 2_FailEVM5g=0
+
+assign ppmlimit5g=20
+assign rate=6,54,t0,t4,t7,t8,t12,t15,t16,t20,t23,f0,f7,f8,f12,f15,f16,f20,f23
+assign evmlimit=-5,-25,-7,-18,-28,-7,-18,-28,-7,-18,-28,-7,-28,-7,-18,-28,-7,-18,-28,
+
+# target power offset 1.8 for 2 stream, 3 chains
+assign tp2s=1.8
+
+#2 isolate, 1 combined
+
+assign avgEVM5g=5
+
+#_________________________________________________________
+# warm up when channel changes
+tx tx=$5gr; att=0; f=5180; pc=10; pl=4000; r=54;ch=7;tx99=1
+# 1stream, txch=1
+tx tx=$5gr; pl=4000;pc=1000000;f=5180;r=54,t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+# 2stream, 3 chains, tp offset 1.8
+tx tx=$5gr; pl=4000;pc=1000000;f=5180;r=t15,f15;ir=2;txch=7;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=(tp+$tp2s);l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-(tp+$tp2s);l=delta;f=test(((power-(tp+$tp2s))<=2.0 & (power-(tp+$tp2s))>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-(tp+$tp2s))<=1.5 & (power-(tp+$tp2s))>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-(tx.tp+$tp2s))<=1.0 & (power-(tx.tp+$tp2s))>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+# 3stream, 3 chains
+tx tx=$5gr; pl=4000;pc=1000000;f=5180;r=t23,f23;ir=2;txch=7;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+
+#_________________________________________________________
+# warm up when channel changes
+tx tx=$5gr; att=0; f=5500; pc=10; pl=4000; r=54;ch=7;tx99=1
+# 1stream, txch=1
+branch name=NOFREQACCU5G_EVM; action=goto; condition='$channAccDisable5g<>0'
+tx tx=$5gr; pl=4000;pc=1000000;f=5500;r=54;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+# PPM report
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=ppm;f=0-$ppmlimit5g;l=ppmMin;f=0+$ppmlimit5g;l=ppmMax;f=fail((ppm>$ppmlimit5g | ppm<-$ppmlimit5g),$FText,@FailPpm5gGood,$ptext);l=P/F;type=s;width=8;d=0;title=5G Frequency Acuracy'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+tx tx=$5gr; pl=4000;pc=1000000;f=5500;r=t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+branch name=FREQACCU5G_DONE;action=goto;
+branch name=NOFREQACCU5G_EVM; action=start;
+
+tx tx=$5gr; pl=4000;pc=1000000;f=5500;r=54,t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=FREQACCU5G_DONE; action=start;
+# 2stream, 3 chains, tp offset 1.8
+tx tx=$5gr; pl=4000;pc=1000000;f=5500;r=t15,f15;ir=2;txch=7;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=(tp+$tp2s);l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-(tp+$tp2s);l=delta;f=test(((power-(tp+$tp2s))<=2.0 & (power-(tp+$tp2s))>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-(tp+$tp2s))<=1.5 & (power-(tp+$tp2s))>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-(tx.tp+$tp2s))<=1.0 & (power-(tx.tp+$tp2s))>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+# 3stream, 3 chains
+tx tx=$5gr; pl=4000;pc=1000000;f=5500;r=t23,f23;ir=2;txch=7;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+
+#_________________________________________________________
+# warm up when channel changes
+tx tx=$5gr; att=0; f=5785; pc=10; pl=4000; r=54;ch=7;tx99=1
+# 1stream, txch=1
+tx tx=$5gr; pl=4000;pc=1000000;f=5785;r=54,t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+# 2stream, 3 chains, tp offset 1.8
+tx tx=$5gr; pl=4000;pc=1000000;f=5785;r=t15,f15;ir=2;txch=7;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=(tp+$tp2s);l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-(tp+$tp2s);l=delta;f=test(((power-(tp+$tp2s))<=2.0 & (power-(tp+$tp2s))>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-(tp+$tp2s))<=1.5 & (power-(tp+$tp2s))>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-(tx.tp+$tp2s))<=1.0 & (power-(tx.tp+$tp2s))>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+branch name=TX5G_DONE;action=goto;test='$Test.Error<>0';
+
+# 3stream, 3 chains
+tx tx=$5gr; pl=4000;pc=1000000;f=5785;r=t23,f23;ir=2;txch=7;evm=1;tx99=1;avg=$avgEVM5g;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@2_FailEVM5g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@2_FailPwrEVM5gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@2_FailPwrEVM5gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@2_FailPwrEVM5gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=5GHz EVM Accuracy with chain power;'
+
+branch name=TX5G_DONE; action=start;

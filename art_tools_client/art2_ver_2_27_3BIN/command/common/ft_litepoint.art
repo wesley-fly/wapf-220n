@@ -1,0 +1,297 @@
+#sl
+#sw a=BB_timing_control_5.cycpwr_thr1; v=4;
+sw a=BB_find_signal_low.firstep_low; v=8;
+sw a=BB_find_signal.firstep; v=8;
+hello
+#hello i=1;
+#rep r='c f=sl.name;l=Name;w=33;f=address;w=15;f=high,low,mask,hex,decimal,signed;title=FIELD/REGISTER OVERRIDES'
+
+common\bandSel.art
+
+#
+# rssi cal
+#
+branch name=RX5G_CAL; action=goto; condition='$rxCalDisable2g<>0'
+$refdesign\Calibration-rx-2g.art
+##-----------------------------------------------------------------
+branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=RX5G_CAL; action=start;
+branch name=RX2G_SENS; action=goto; condition='$rxCalDisable5g<>0'
+$refdesign\Calibration-rx-5g.art
+##-----------------------------------------------------------------
+branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz sensitivity test
+#
+branch name=RX2G_SENS; action=start;
+branch name=RX5G_SENS; action=goto; condition='$rxsensDisable2g<>0'
+$refdesign\sens_2g_vsg
+##-----------------------------------------------------------------
+branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz sensitivity test
+#
+branch name=RX5G_SENS; action=start;
+branch name=SENSERR_CHECK; action=goto; condition='$rxsensDisable5g<>0'
+$refdesign\sens_5g_vsg
+
+##-----------------------------------------------------------------
+# Test Error Check
+##-----------------------------------------------------------------
+branch name=SENSERR_CHECK; action=start;
+branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+
+# add some delay after sens test, before tput test
+#link att=40; pl=1500; ir=2; pc=2048; ch=7; r=t23; agg=32; f=2412; tx=0; bc=0; retry=0; sgi=0;
+
+#
+# 2GHz tx unicast Throughput
+#
+#branch name=TX2G_TPUT; action=start;
+#branch name=BTX2G_TPUT; action=goto; condition='$tputTx2gDisable<>0'
+#$refdesign\unicast_tput_2g_tx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz tx broadcast Throughput
+#
+#branch name=BTX2G_TPUT; action=start;
+#branch name=RX2G_TPUT; action=goto; condition='$btputTx2gDisable=1'
+#$refdesign\bcast_tput_2g_tx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz rx Throughput
+#
+#branch name=RX2G_TPUT; action=start;
+#branch name=TX5G_TPUT; action=goto; condition='$tputRx2gDisable<>0'
+#$refdesign\unicast_tput_2g_rx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz tx unicast Throughput
+#
+#branch name=TX5G_TPUT; action=start;
+#branch name=BTX5G_TPUT; action=goto; condition='$tputTx5gDisable<>0'
+#$refdesign\unicast_tput_5g_tx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz tx broadcast Throughput
+#
+#branch name=BTX5G_TPUT; action=start;
+#branch name=RX5G_TPUT; action=goto; condition='$btputTx5gDisable=1'
+#$refdesign\bcast_tput_5g_tx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz rx Throughput
+#
+#branch name=RX5G_TPUT; action=start;
+#branch name=SUMMARY_FT; action=goto; condition='$tputRx5gDisable<>0'
+#$refdesign\unicast_tput_5g_rx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+##-----------------------------------------------------------------
+# summary
+##-----------------------------------------------------------------
+branch name=SUMMARY_FT; action=start;
+common\calculate-ft.art
+
+##-----------------------------------------------------------------
+# Save configuration and calibration data to EEP
+# noEEPSaveOnFail: 0 saveEEP based on each save flag
+# noEEPSaveOnFail: 1 saveEEP based on each save flag only when all pass
+##-----------------------------------------------------------------
+#branch name=SAVE_EEPRXCAL; action=goto; condition='$noEEPSaveOnFail=0'
+#branch name=SAVE_EEPRXCAL; action=goto; condition='$FailTotalGoodft=0 & $FailTotalGoodPt=0'
+#comment title='	FT fails skip EEP writing!'
+#branch name=FT_DONE;action=goto
+
+
+#branch name=SAVE_EEPRXCAL; action=start;
+#branch name=EEPRX_CHECK; action=goto; condition='$saveEEPRxCalDisable<>0'
+#hello
+#comment title='	FT save EEP'
+#commit
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+#
+# check calibration data
+#
+#branch name=EEPRX_CHECK; action=start;
+#branch name=FT_DONE; action=goto; condition='$eepCheckDisable<>0'
+#hello
+#check
+#hello
+#rep r='c f=ec.address,code,template,length,major,minor,csm,csc,status;type=x,d,d,d,d,d,x,x,s;'
+
+comment title='	FT test Done!'
+
+branch name=NO_DBDC_FT1; action=goto; condition='$enableDBDC<>1'
+
+##-------------------------------------------------------------------
+#
+#   FT for second radio
+#
+#--------------------------------------------------------------------
+#sl
+#sw a=BB_timing_control_5.cycpwr_thr1; v=4;
+sw i=1;a=BB_find_signal_low.firstep_low; v=8;
+sw i=1;a=BB_find_signal.firstep; v=8;
+hello i=1;
+#rep r='c f=sl.name;l=Name;w=33;f=address;w=15;f=high,low,mask,hex,decimal,signed;title=FIELD/REGISTER OVERRIDES'
+
+#
+# rssi cal
+#
+branch name=DBDC_RX5G_CAL; action=goto; condition='$2_rxCalDisable2g<>0'
+$refdesign\2_Calibration-rx-2g.art
+##-----------------------------------------------------------------
+branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=DBDC_RX5G_CAL; action=start;
+branch name=DBDC_RX2G_SENS; action=goto; condition='$2_rxCalDisable5g<>0'
+$refdesign\2_Calibration-rx-5g.art
+##-----------------------------------------------------------------
+branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz sensitivity test
+#
+branch name=DBDC_RX2G_SENS; action=start;
+branch name=DBDC_RX5G_SENS; action=goto; condition='$2_rxsensDisable2g<>0'
+$refdesign\2_sens_2g_vsg
+##-----------------------------------------------------------------
+branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz sensitivity test
+#
+branch name=DBDC_RX5G_SENS; action=start;
+branch name=DBDC_SENSERR_CHECK; action=goto; condition='$2_rxsensDisable5g<>0'
+$refdesign\2_sens_5g_vsg
+
+##-----------------------------------------------------------------
+# Test Error Check
+##-----------------------------------------------------------------
+branch name=DBDC_SENSERR_CHECK; action=start;
+branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+
+
+# add some delay after sens test, before tput test
+#link att=40; pl=1500; ir=2; pc=2048; ch=7; r=t23; agg=32; f=2412; tx=0; bc=0; retry=0; sgi=0;
+
+#
+# 2GHz tx unicast Throughput
+#
+#branch name=DBDC_TX2G_TPUT; action=start;
+#branch name=DBDC_BTX2G_TPUT; action=goto; condition='$2_tputTx2gDisable<>0'
+#$refdesign\2_unicast_tput_2g_tx
+##-----------------------------------------------------------------
+#branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz tx broadcast Throughput
+#
+#branch name=DBDC_BTX2G_TPUT; action=start;
+#branch name=DBDC_RX2G_TPUT; action=goto; condition='$2_btputTx2gDisable=1'
+#$refdesign\2_bcast_tput_2g_tx
+##-----------------------------------------------------------------
+#branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz rx Throughput
+#
+#branch name=DBDC_RX2G_TPUT; action=start;
+#branch name=DBDC_TX5G_TPUT; action=goto; condition='$2_tputRx2gDisable<>0'
+#$refdesign\2_unicast_tput_2g_rx
+##-----------------------------------------------------------------
+#branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz tx unicast Throughput
+#
+#branch name=DBDC_TX5G_TPUT; action=start;
+#branch name=DBDC_BTX5G_TPUT; action=goto; condition='$2_tputTx5gDisable<>0'
+#$refdesign\2_unicast_tput_5g_tx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz tx broadcast Throughput
+#
+#branch name=DBDC_BTX5G_TPUT; action=start;
+#branch name=DBDC_RX5G_TPUT; action=goto; condition='$2_btputTx5gDisable=1'
+#$refdesign\2_bcast_tput_5g_tx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz rx Throughput
+#
+#branch name=DBDC_RX5G_TPUT; action=start;
+#branch name=DBDC_SUMMARY_FT; action=goto; condition='$2_tputRx5gDisable<>0'
+#$refdesign\2_unicast_tput_5g_rx
+##-----------------------------------------------------------------
+#branch name=FT_ERROR;action=goto;test='$Test.Error<>0';
+
+##-----------------------------------------------------------------
+# summary
+##-----------------------------------------------------------------
+branch name=DBDC_SUMMARY_FT; action=start;
+common\2_calculate-ft.art
+
+##-----------------------------------------------------------------
+# Save configuration and calibration data to EEP
+# noEEPSaveOnFail: 0 saveEEP based on each save flag
+# noEEPSaveOnFail: 1 saveEEP based on each save flag only when all pass
+##-----------------------------------------------------------------
+#branch name=DBDC_SAVE_EEPRXCAL; action=goto; condition='$2_noEEPSaveOnFail=0'
+#branch name=DBDC_SAVE_EEPRXCAL; action=goto; condition='$2_FailTotalGoodft=0 & $2_FailTotalGoodPt=0'
+#comment title='	FT fails skip EEP writing!'
+#branch name=DBDC_FT_DONE;action=goto
+
+
+#branch name=DBDC_SAVE_EEPRXCAL; action=start;
+#branch name=DBDC_EEPRX_CHECK; action=goto; condition='$2_saveEEPRxCalDisable<>0'
+#hello i=1
+#comment title='	FT save EEP'
+#commit i=1;memory=flash
+##-----------------------------------------------------------------
+#branch name=DBDC_FT_ERROR;action=goto;test='$Test.Error<>0';
+#
+# check calibration data
+#
+#branch name=DBDC_EEPRX_CHECK; action=start;
+#branch name=DBDC_FT_DONE; action=goto; condition='$2_eepCheckDisable<>0'
+#hello i=1
+#check i=1
+#hello i=1
+#rep r='c f=ec.address,code,template,length,major,minor,csm,csc,status;type=x,d,d,d,d,d,x,x,s;'
+
+branch name=DBDC_FT_DONE; action=goto;
+
+##-----------------------------------------------------------------
+branch name=FT_ERROR; action=start;
+show $Test.Error
+assign errDetected=1
+
+branch name=DBDC_FT_DONE; action=start;
+#sc a=BB_timing_control_5.cycpwr_thr1;
+sc i=1;a=BB_find_signal_low.firstep_low;
+sc i=1;a=BB_find_signal.firstep;
+comment title='	2_FT test Done!'
+
+branch name=NO_DBDC_FT1;action=start
+

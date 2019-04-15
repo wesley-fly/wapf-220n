@@ -1,0 +1,39 @@
+
+
+assign FailPower2gGood=0
+assign FailPower2gBetter=0
+assign FailPower2gBest=0
+
+assign pwrComb2=3
+
+tx att=0; f=2412; pc=10; pl=4000; r=6;txch=3;tx99=1;ht40=1;
+tx pl=1500;agg=32;pc=1000000;f=2412;r=6,t0,f0,t7,f7;ir=2;txch=1,2;pm=1;tx99=1;stop='$Test.Error';delay=40;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=tx.tp;l=target; f=tx.temp; l=temp; f=pm.power;l=meas pwr;f=pm.power-tx.tp;l=delta;f=test(((pm.power-tx.tp)<=2.0 & (pm.power-tx.tp)>=-2.0),$passtext,$FailText,0,@FailPower2gGood);l=2.0dB;type=s;width=8;f=test(((pm.power-tx.tp)<=1.5 & (pm.power-tx.tp)>=-1.5),$passtext,$FailText,0,@FailPower2gBetter);l=1.5dB;type=s;width=8;f=test(((pm.power-tx.tp)<=1.0 & (pm.power-tx.tp)>=-1.0),$passtext,$FailText,0,@FailPower2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz Power Accuracy;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+tx pl=1500;agg=32;pc=1000000;f=2412;r=t8,f8,t15,f15;ir=2;txch=3;pm=1;tx99=1;stop='$Test.Error';delay=30;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=tx.tp+$pwrComb2;l=target; f=tx.temp; l=temp; f=pm.power;l=meas pwr;f=pm.power-(tx.tp+$pwrComb2);l=delta;f=test(((pm.power-(tx.tp+$pwrComb2))<=2.0 & (pm.power-(tx.tp+$pwrComb2))>=-2.0),$passtext,$FailText,0,@FailPower2gGood);l=2.0dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb2))<=1.5 & (pm.power-(tx.tp+$pwrComb2))>=-1.5),$passtext,$FailText,0,@FailPower2gBetter);l=1.5dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb2))<=1.0 & (pm.power-(tx.tp+$pwrComb2))>=-1.0),$passtext,$FailText,0,@FailPower2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz Power Accuracy;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+
+tx att=0;f=2437; pc=10; pl=4000; r=6;txch=3;tx99=1;ht40=1;
+tx pl=1500;agg=32;pc=1000000;f=2437;r=1l,11s,6,t0,f0,t7,f7;ir=2;txch=1,2;pm=1;tx99=1;stop='$Test.Error';delay=40;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=tx.tp;l=target; f=tx.temp; l=temp; f=pm.power;l=meas pwr;f=pm.power-tx.tp;l=delta;f=test(((pm.power-tx.tp)<=2.0 & (pm.power-tx.tp)>=-2.0),$passtext,$FailText,0,@FailPower2gGood);l=2.0dB;type=s;width=8;f=test(((pm.power-tx.tp)<=1.5 & (pm.power-tx.tp)>=-1.5),$passtext,$FailText,0,@FailPower2gBetter);l=1.5dB;type=s;width=8;f=test(((pm.power-tx.tp)<=1.0 & (pm.power-tx.tp)>=-1.0),$passtext,$FailText,0,@FailPower2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz Power Accuracy;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+tx pl=1500;agg=32;pc=1000000;f=2437;r=t8,f8,t15,f15;ir=2;txch=3;pm=1;tx99=1;stop='$Test.Error';delay=30;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=tx.tp+$pwrComb2;l=target; f=tx.temp; l=temp; f=pm.power;l=meas pwr;f=pm.power-(tx.tp+$pwrComb2);l=delta;f=test(((pm.power-(tx.tp+$pwrComb2))<=2.0 & (pm.power-(tx.tp+$pwrComb2))>=-2.0),$passtext,$FailText,0,@FailPower2gGood);l=2.0dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb2))<=1.5 & (pm.power-(tx.tp+$pwrComb2))>=-1.5),$passtext,$FailText,0,@FailPower2gBetter);l=1.5dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb2))<=1.0 & (pm.power-(tx.tp+$pwrComb2))>=-1.0),$passtext,$FailText,0,@FailPower2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz Power Accuracy;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+
+tx att=0;f=2462; pc=10; pl=4000; r=6;txch=3;tx99=1;ht40=1;
+tx pl=1500;agg=32;pc=1000000;f=2462;r=6,t0,f0,t7,f7;ir=2;txch=1,2;pm=1;tx99=1;stop='$Test.Error';delay=40;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=tx.tp;l=target; f=tx.temp; l=temp; f=pm.power;l=meas pwr;f=pm.power-tx.tp;l=delta;f=test(((pm.power-tx.tp)<=2.0 & (pm.power-tx.tp)>=-2.0),$passtext,$FailText,0,@FailPower2gGood);l=2.0dB;type=s;width=8;f=test(((pm.power-tx.tp)<=1.5 & (pm.power-tx.tp)>=-1.5),$passtext,$FailText,0,@FailPower2gBetter);l=1.5dB;type=s;width=8;f=test(((pm.power-tx.tp)<=1.0 & (pm.power-tx.tp)>=-1.0),$passtext,$FailText,0,@FailPower2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz Power Accuracy;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+tx pl=1500;agg=32;pc=1000000;f=2462;r=t8,f8,t15,f15;ir=2;txch=3;pm=1;tx99=1;stop='$Test.Error';delay=30;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=tx.tp+$pwrComb2;l=target; f=tx.temp; l=temp; f=pm.power;l=meas pwr;f=pm.power-(tx.tp+$pwrComb2);l=delta;f=test(((pm.power-(tx.tp+$pwrComb2))<=2.0 & (pm.power-(tx.tp+$pwrComb2))>=-2.0),$passtext,$FailText,0,@FailPower2gGood);l=2.0dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb2))<=1.5 & (pm.power-(tx.tp+$pwrComb2))>=-1.5),$passtext,$FailText,0,@FailPower2gBetter);l=1.5dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb2))<=1.0 & (pm.power-(tx.tp+$pwrComb2))>=-1.0),$passtext,$FailText,0,@FailPower2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz Power Accuracy;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+
+branch name=TX2G_DONE; action=start;

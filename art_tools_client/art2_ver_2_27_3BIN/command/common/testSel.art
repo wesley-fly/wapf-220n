@@ -1,0 +1,156 @@
+##-----------------------------------------------------------------
+## For calibration
+##-----------------------------------------------------------------
+comment title='	Disable txCal test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt txCalDisable2g
+
+comment title='	Disable txCal test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt txCalDisable5g
+
+
+branch name=FT_CALSEL; action=start;
+branch name=PT_EEPSEL; action=goto; condition='$ftTestDisable=1'
+comment title='	Disable rxCal test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt rxCalDisable2g
+
+comment title='	Disable rxCal test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt rxCalDisable5g
+##-----------------------------------------------------------------
+## For EEP Operation
+##-----------------------------------------------------------------
+branch name=PT_EEPSEL; action=start;
+branch name=FT_EEPSEL; action=goto; condition='$ptTestDisable=1'
+comment title='	Disable EEP save After TxCal?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt saveEEPTxCalDisable
+
+comment title='	Disable PCIe save?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt savePCIeDisable
+
+comment title='	Disable EEP check?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt eepCheckDisable
+
+branch name=FT_EEPSEL; action=start;
+branch name=PT_TESTSEL; action=goto; condition='$ftTestDisable=1'
+comment title='	Disable EEP save After RxCal?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt saveEEPRxCalDisable
+
+##-----------------------------------------------------------------
+## For PT test
+##-----------------------------------------------------------------
+branch name=PT_TESTSEL; action=start;
+branch name=FT_TESTSEL; action=goto; condition='$ptTestDisable=1'
+
+comment title='	Disable tx target power test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt txPwrDisable2g
+
+comment title='	Disable tx target power test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt txPwrDisable5g
+
+comment title='	Disable Mask test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt maskDisable2g
+
+comment title='	Disable Mask test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt maskDisable5g
+
+comment title='	Disable channel accuracy test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt channAccDisable2g
+
+comment title='	Disable channel accuracy test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt channAccDisable5g
+
+comment title='	Disable tx current measurement?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt txCurrentDisable
+
+##-----------------------------------------------------------------
+## For Rx test
+##-----------------------------------------------------------------
+branch name=FT_TESTSEL; action=start;
+branch name=SEL_DONE; action=goto; condition='$ptTestDisable=1'
+
+comment title='	Disable sensitivity test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt sensDisable2g
+
+comment title='	Disable sensitivity test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt sensDisable5g
+
+comment title='	Disable Rx PER test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt rxPerDisable2g
+
+comment title='	Disable Rx PER test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt rxPerDisable5g
+
+##-----------------------------------------------------------------
+## For Throughput
+##-----------------------------------------------------------------
+comment title='	Disable Tx PER test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt txPerDisable2g
+
+comment title='	Disable Tx PER test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt txPerDisable5g
+
+comment title='	Disable Tx Throughput test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt tputTx2gDisable
+
+comment title='	Disable Tx Throughput test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt tputTx2gDisable
+
+comment title='	Disable Rx Throughput test for 2g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt tputTx2gDisable
+
+comment title='	Disable Rx Throughput test for 5g?'
+comment title='		1: Disable'
+comment title='		0: Enable'
+prompt tputTx2gDisable
+
+##-----------------------------------------------------------------
+## Done
+##-----------------------------------------------------------------
+branch name=SEL_DONE; action=start;

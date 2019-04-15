@@ -1,0 +1,18 @@
+
+assign rate=t23,f23
+assign tputlimit=140,220
+
+assign FailBTxTput2gGood=0
+assign FailBTxTput2gPSR=0
+
+
+#sw a=BB_cca_b0.cf_thresh62; v=28;
+#hello
+
+link att=40; pl=1500; ir=2; pc=2048; ch=7; r=t23,f23; agg=32; f=2412,2437,2462; tx=0; bc=1; retry=0; sgi=0;
+
+report r='column title=2GHz TX THROUGHPUT;f=tx.frequency;l=frequency;f=rate;f=agg;l=agg;f=rx.rssi;f=rx.psr;f=duration,byte;f=0.001*rx.throughput;l=rx tput;f=lookup(rate,@rate,@tputlimit);label=limit;w=8;f=0.001*rx.throughput-lookup(rate,@rate,@tputlimit);label=delta;w=8;f=test(0.001*rx.throughput-lookup(rate,@rate,@tputlimit)>0,$passtext,$failtext,0,@FailBTxTput2gGood);label=100%;type=s,w=8;f=test(rx.psr>90,$passtext,$failtext,0,@FailBTxTput2gPSR);label=PER;type=s,w=8;'
+
+report r='column title=2GHz TX RSSI/EVM REPORT;f=rx.frequency;l=frequency;f=rate,rssi,rssi00,rssi01,rssi02,rssi10,rssi11,rssi12,evm0,evm1,evm2;'
+
+#sc a=BB_cca_b0.cf_thresh62;

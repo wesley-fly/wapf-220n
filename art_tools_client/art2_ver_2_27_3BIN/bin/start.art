@@ -1,0 +1,51 @@
+#----------------------------------------------------------------
+#Pathlosses 
+#----------------------------------------------------------------
+#Dut to golden
+path device=golden;f=2442,5500;chain=1;loss=7.6,10.6;
+path device=golden;f=2442,5500;chain=2;loss=7.7,10.5;
+path device=golden;f=2442,5500;chain=4;loss=7.7,10.6;
+
+#dut to power meter
+path device=pm;f=2442,5500;chain=1;loss=20.7,23.3;
+path device=pm;f=2442,5500;chain=2;loss=21.1,23.4;
+path device=pm;f=2442,5500;chain=4;loss=20.5,23.5;
+
+#dut to spectrum analyzer
+path device=sa;f=2442,5500;chain=1;loss=20.7,23.3;
+path device=sa;f=2442,5500;chain=2;loss=21.1,23.4;
+path device=sa;f=2442,5500;chain=4;loss=20.5,23.5;
+
+#----------------------------------------------------------------
+#equipment models and types
+#----------------------------------------------------------------
+#power meters - arg is used to specify GPIB address
+#equipment model=litepoint; arg=192.168.105.117	# Litepoint
+equipment model=nrpz11;           #R&S USB power meter
+#equipment model=e4416a; arg=13;    #Agilent power meter
+
+#Variable attenuators 
+#equipment model=8210a; arg=10;  delay=100;	#Weinschel8210A
+equipment model=11713a; arg=1,2,3; delay=50;	#agilent
+
+#spectrum analyzer
+equipment model=E4404B; arg=18;    #agilent
+
+#current consumption
+#equipment model=Fluke45; arg=6;    #currently not supported
+
+
+#----------------------------------------------------------------
+# command file and log/report file paths
+#----------------------------------------------------------------
+assign artcommand=.\..\command;
+#assign artlog=.\..\log;
+#assign artreport=.\report;
+assign artlog=.\..\..\..\..\art2_logs\art2_ver_2_x\art2_ver_2_27\log;
+assign artreport=.\..\..\..\..\art2_logs\art2_ver_2_x\art2_ver_2_27\report;
+
+
+# default test flow selection setting flags
+test_flow_flags.art
+
+error code=7503,7504,7511; response=none;

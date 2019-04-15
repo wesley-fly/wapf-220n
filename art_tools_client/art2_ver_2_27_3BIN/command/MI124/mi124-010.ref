@@ -1,0 +1,82 @@
+#--------------------------------------------------------------------------------------
+# this build is for MI124 
+#--------------------------------------------------------------------------------------
+
+# AP specified test selection, over write the test selection in test_flow_flags.art
+# and Invalid testSel selection.
+mi124\test_flow_flags_MI124.art
+
+#subsystem and subverdor ID's
+set ssid=a124;
+set svid=168c;
+
+# set device type 
+# 1=>Cardbus, 2=>PCI, 3=>miniPCI, 4=>AP, 5=>PCIe mini, 6=>pcie express, 7=>pcie desktop
+set devicetype=4
+
+# set Reg domain
+# customers can set regulatory domain index here
+set regdmn=0
+
+#tx and rx chain mask: bit0 = chain0 enable, 
+#                      bit1 = chain1 enable, 
+#                      bit2 = chain2 enable 
+Set txmask=3;
+Set rxmask=3;
+
+#configure modes: 
+#	    bit0 = enable 5GHz
+#           bit1 = enable 2GHz
+#           bit2 = disable 5G HT40
+#           bit3 = disable 2G HT40
+#           bit4 = disable 5G HT20
+#           bit5 = disable 2G HT20
+#Note: these flags will be given individual commands in subsequent release 
+set opflags=3;
+
+#configuration for internal regulator
+set internalregulator=1;
+
+#antenna switch table control
+#2GHz
+set antctrlcommon2g=110;
+set antctrlcommon22g=eeeee;
+
+# for TB486
+#set antctrlcommon2g=110;
+#set antctrlcommon22g=44444;
+
+#set antCtrlChain2g=150, 150, 150;
+
+#5GHz
+set antctrlcommon5g=000;
+set antctrlcommon25g=eeeee;
+
+# tx gain table
+#             0(lowest_ob_db) – for xpa design - will provide lower power consumption 
+#             1(high_ob_db) – for no xpa design 
+#             2(low_ob_db) – for xpa design – will provide normal power consumption at 5G
+#             3(high_power) – for XPA design 
+#             4 – Mixed Gain table (5G XPA; 2G no XPA) Comment:  2GHz same as tx gain type 1, 5 GHz same as tx gain type 2
+#             5 – UB124 Tx gain table 
+#             6 – for XPA design. 2G spur is improved
+# rxgainTable	0: xlna	1: no xlna
+set txgainTable=4;
+set rxgainTable=0;
+
+
+
+#Temperature compensation
+set temperatureCompensation=1
+#set tempSlope2g=40
+#set tempSlope5g=68
+
+#enable spur mitigation
+#set spurchans2g=2464;
+
+#flags not supported yet - will be added in subsequent release
+# set eepmisc=   bit1: wakeupwireless
+# set rfSilent=0  bit0   bit1:polarity            bit2:5 GPIO line 
+
+#target power files
+$refdesign\mi124_trg_pwr.art

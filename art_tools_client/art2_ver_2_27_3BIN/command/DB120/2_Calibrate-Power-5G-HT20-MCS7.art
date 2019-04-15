@@ -1,0 +1,7 @@
+#
+# 5 GHz power calibration
+#
+clear
+tx tx=$5gr; att=0; txgain=65;pl=1500;agg=32;pc=1000000;r=t7;ch=1,2,4;cal=3;f=5180,5240,5320,5500,5620,5700,5745,5825;tx99=1;stop='$Test.Error';
+
+report r='c f=cal.frequency;label=frequency;f=txchain,txgain,power,pcorr,voltage,temp;title=5GHz Calibration Coefficients: Radio2';

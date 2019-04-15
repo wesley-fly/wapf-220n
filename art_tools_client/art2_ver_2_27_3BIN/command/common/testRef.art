@@ -1,0 +1,150 @@
+branch name=GET_REFDESIGN; condition='$manufAuto=1'
+
+branch name=DESIGN_START; action=start;
+### select test search ---------------------------------
+assign BoardIDType=0
+
+comment title='Please select test by:'; 	name=dump.txt
+comment title='		0: SSID'; 		name=dump.txt
+comment title='		1: refID'; 		name=dump.txt
+
+branch name=SKIP_LABEL; condition='$manufAuto<>2'
+comment title='		2: Atheros_label'; 	name=dump.txt
+
+branch name=SKIP_LABEL; action=start;
+prompt BoardIDType
+
+
+branch name=REFID_TEST; condition='$BoardIDType<>0'
+
+
+### test by SSID (BoardIDType=0) -----------------------
+get ssid;
+hello
+hello
+hello
+#show $ssid;
+
+branch name=SSID_TEST; action=start;
+refdesign ssid=$ssid;
+#show $refdesign
+branch name=DESIGN_FOUND; condition='$refdesign<>0'
+branch name=SSID_NOTFOUND; 
+
+### SSID not found  --------------------------
+branch name=SSID_NOTFOUND; action=start;
+#comment title=NOT FOUND SSID $ssid! 		name=dump.txt
+## run refDesign to list all available SSID, refID in productlist.ref
+comment title='  '; 					name=dump.txt
+comment title='Here are supported SSID, refID, HWrev:'; name=dump.txt
+refDesign
+
+comment title='		'; 				name=dump.txt
+comment title='Please re-select by:'; 			name=dump.txt
+comment title='		0: SSID'; 			name=dump.txt
+comment title='		1: change Board select Type'; 	name=dump.txt
+
+prompt reSelect
+
+branch name=DESIGN_START; condition='$reSelect=1'
+
+prompt ssid
+set ssid=$ssid
+branch name=SSID_TEST;
+
+
+### test by REFID (BoardIDType=1) -------------------------
+branch name=REFID_TEST; action=start;
+branch name=ATH_TEST; condition='$BoardIDType<>1'
+prompt refID
+branch name=GET_REFDESIGN; action=start;
+show $refID
+refdesign refid=$refID;
+#$show $refdesign
+#$show $ref_filename
+branch name=DESIGN_FOUND; condition='$refdesign<>0'
+#comment title=NOT FOUND label; 		name=dump.txt
+branch name=REFID_NOTFOUND; 
+
+### RefID not found  --------------------------
+branch name=REFID_NOTFOUND; action=start;
+comment title='	'; 							name=dump.txt
+
+comment title='Here are supported SSID, refID, HWrev:'; 		name=dump.txt
+refDesign
+branch name=DESIGN_START;
+
+
+### test by Atheros Label (BoardIDType=2) ---------------------
+branch name=ATH_TEST; action=start;
+prompt AtherosLabel
+
+branch name=NO_DBDC1;action=goto;condition='$enableDBDC<>1'
+prompt AtherosLabel2
+
+branch name=NO_DBDC1;action=start;
+refdesign label=$AtherosLabel;
+#show $refdesign
+#show $ref_filename
+branch name=DESIGN_FOUND; condition='$refdesign<>0'
+#comment title=NOT FOUND label; 				name=dump.txt
+branch name=ATHLABEL_NOTFOUND; 
+
+### RefID not found  --------------------------
+
+branch name=ATHLABEL_NOTFOUND; action=start;
+comment title='please enter label in format:  AAAAA-BBB-MCCCC'; 		name=dump.txt
+comment title='	AAAAA: 5 ASCII for RefID'; 					name=dump.txt
+comment title='	  BBB: 3 Hex Number for HWrev(nChip, BroadID, BroadMinorID)'; 	name=dump.txt
+comment title='	    M: 1 ASCII for manufactureID'; 				name=dump.txt
+comment title='	 CCCC: 4 Hex Number for Serial number'; 			name=dump.txt
+## run refDesign to list all available SSID, refID in productlist.ref
+comment title='  '; 								name=dump.txt
+comment title='Here are supported SSID, refID, HWrev:'; 			name=dump.txt
+refDesign
+comment title='	'; 								name=dump.txt
+branch name=ATH_TEST;
+
+
+###--------------------------------------------
+branch name=DESIGN_FOUND; action=start;
+#comment title="			FOUND Design!"; 		name=dump.txt
+branch name=SKIP_MACPROMPT; condition='$manufAuto=1'
+
+branch name=MAC_SCHEME; condition='$BoardIDType<>2'
+### Label Scheme ------------------------------
+
+set label=$AtherosLabel
+branch name=NO_DBDC2;action=goto;condition='$enableDBDC<>1'
+set i=1;label=$AtherosLabel2
+
+branch name=NO_DBDC2;action=start;
+
+assign ReportFileName=$AtherosLabel.txt
+assign SensReportFile=$AtherosLabel_sens.txt
+branch name=END_TESTREF;
+
+### MAC Scheme --------------------------------
+branch name=MAC_SCHEME; action=start;
+comment title='MAC address format: xx:xx:xx:xx:xx:xx'; 		name=dump.txt
+prompt macaddress
+set mac=$macaddress
+branch name=NO_DBDC3;action=goto;condition='$enableDBDC<>1'
+prompt macaddress2
+set i=1;mac=$macaddress2
+
+branch name=NO_DBDC3;action=start;
+###--------------------------------------------
+branch name=NAME_SET; action=start;
+assign ReportFileName=$mac_report.txt
+assign SensReportFile=$mac_sens.txt
+branch name=END_TESTREF;
+
+###--------------------------------------------
+branch name=SKIP_MACPROMPT; action=start;
+
+assign ReportFilename=$customer_report.txt
+assign SensReportFile=$customer_sens.txt
+branch name=END_TESTREF; action=start;
+
+#### end

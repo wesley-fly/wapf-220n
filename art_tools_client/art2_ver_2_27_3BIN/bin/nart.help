@@ -1,0 +1,732 @@
+<tag=load>
+Loads a new device. You must insert the device in the host computer before issuing this command.
+Normally, you do not need to specify any parameters as nart discovers information about the 
+device from the device itself. A search is performed to find valid calibration information
+in eeprom, flash, and otp memory.
+
+Examples:
+
+load
+
+Loads the device. nart automatically determines the device type and searches for the configuration
+and calibration information.
+
+load devid=30; memory=otp
+
+Loads the device. Forces it to be treated as device type 30. Loads calibration information from
+the otp memory, even if the device has information in eeprom.
+<tag=unload>
+Unloads the device. Please issue this command before physically removing the device from the
+host computer.
+
+Example:
+
+unload
+
+Unloads the device. When the command is finished, you may remove the device from the host computer.
+<tag=transmit>
+Transmits packets and compiles and reports statistics.
+<tag=receive>
+Receives packets and compiles and reports statistics.
+<tag=link>
+Coordinates the activities of a transmitter and a reciever so that packets are interchanged.
+Normally, the golden unit is the transmitter and the device under test is the receiver, although
+this can be reversed with the tx and rx parameters.
+<tag=txl>
+Coordinates the activities of a transmitter and a reciever so that packets are interchanged.
+Normally, the device under test is the transmitter and the golden unit is the receiver, although
+this can be reversed with the tx and rx parameters.
+<tag=carrier>
+Causes transmission of the carrier tone. To stop transmission use the "stop" or "cancel" command.
+
+Example:
+
+carrier f=2472;
+
+Transmits a single tone at 2472 MHz.
+<tag=sleep>
+Causes the process to delay for the specified number of milliseconds. This command is not usually 
+required. If you are trying to delay the performance of cart so that nart can catch up, the 
+"hello" command is more useful.
+
+Examples:
+
+sleep 1000
+
+Delays processing for one second.
+<tag=rr>
+Reads a device register.
+<tag=rw>
+Writes a device register.
+<tag=sr>
+Displays the list of "sticky writes". Sticky writes are performed after every 
+device reset. They are used to automatically change the state of the device from its default state.
+<tag=sw>
+Creates a "sticky write" for a device register or field. Sticky writes are performed after every 
+device reset. They are used to automatically change the state of the device from its default state.
+You may add a sequence of sticky writes to the same register or field by using the sw command repeatedly.
+
+Examples:
+
+sw a=ch0_therm.xpashort2gnd; v=1;
+
+The field ch0_them.xpashort2gnd is set to 1 after every device reset.
+
+sw a=4000; v=1;
+sw a=4000; v=2;
+sw a=4000; v=3;
+
+The register 4000 is set to 1, then to 2, and finally to 3 after every reset.
+<tag=sc>
+Removes a "sticky write" for a device register or field. Sticky writes are performed after every 
+device reset. They are used to automatically change the state of the device from its default state.
+If more than one sticky write to the specified register or field is in effect, the last one is
+removed. 
+
+Examples:
+
+sc a=ch0_therm.xpashort2gnd
+
+The field ch0_them.xpashort2gnd is no longer set to a special value after every reset.
+
+sw a=4000; v=1;
+sw a=4000; v=2;
+sw a=4000; v=3;
+sc a=4000;
+
+The sc command removes the last sticky write for register 4000. Thus, register 4000 is set to 1 and 
+then to 2 after every reset. It isno longer also set to 3.
+<tag=fr>
+Read a field from a device register.
+
+Examples:
+
+fr a=ch0_therm.xpashort2gnd;
+
+The field ch0_them.xpashort2gnd is read and the value returned.
+
+fr a=16290[5,2]
+
+Reads a custom field defined as bits 5 through 2 of register 16290. 
+<tag=fw>
+Writes a field to a device register.
+
+Examples:
+
+fw a=ch0_therm.xpashort2gnd; v=1;
+
+The field ch0_them.xpashort2gnd is set to 1 immediately.
+
+fw a=16290[2,2]; v=0;
+
+Sets bit 2 of register 16290 to 0. 
+<tag=fl>
+List the valid field names matching a specified pattern.
+<tag=tgr>
+Transmit gain table read.
+<tag=tgw>
+Transmit gain table write.
+<tag=pl>
+Turns on the packet log.
+<tag=set>
+Sets a device configuration parameter. These parameters are not written to the device until a commit 
+or pcie command is performed.
+<tag=get>
+Reads a device configuration parameter from the device.
+<tag=setTP>
+Set target power.
+<tag=getTP>
+Get target power.
+<tag=channel>
+Retrieves a list of valid channels from the device.
+<tag=paprecal>
+Obsolete command?
+<tag=noisefloor>
+Calculates the noise floor.
+<tag=nfg>
+Retrieves noise floor values.
+<tag=targetpower>
+Retrieves target power values for any frequency and any rate.
+<tag=reference>
+Retrieves a list of valid reference designs. The supported reference designs may vary at different
+installations.
+designs.
+<tag=version>
+Provides the process version number and build date.
+<tag=meas>
+Enables the use of cart to control test equipment without using nart to control a device.
+<tag=test>
+This command processes an equation. You may use any variable in the equation by preceeding the name 
+with a $. You may assign the result to another variable or simply display the result on the screen.
+This command may be used to calculate loop control variables.
+
+Examples:
+
+assign it=0;
+label name=top;
+show $it;
+test it=$it+1;
+branch name=top; test='$it<10';
+
+Performs a loop counting from 0 to 9.
+You can put more interesting commands than "show $it;" inside the loop.
+
+test 2*3
+
+Multiplies 2 times 3 and prints the result. Hopefully, it is 6.
+<tag=comment>
+This command displays a single line of text on the console or appends the line of text to a file.
+
+Examples:
+
+comment file=experiment.txt; title="DONE"; screen=0;
+
+Writes the word DONE at the end of the file experiment.txt. Does not display the word on the console screen.
+
+comment screen=1; file=""; title="Hello user."
+
+Displays the line "Hello user." on the console screen.
+<tag=report>
+The report command allows you to display the collected data in nice easy to read reports. You can perform 
+computations and manipulations on the data before it is displayed. You can choose from among a number
+of report styles to suit your purposes: row, column, table, graph, or histogram.
+
+Reports can be complex. For a simpler (although often uglier) presentation, please use the dump command.
+
+Examples:
+
+SEE EXAMPLES FROM USER GUIDE
+ 
+<tag=template>
+This command allows you to set the default behavior with respect to saving calibration
+and configuration information to the device. Normally, in order to conserve device memory, the device's
+calibration information is compared to software resident templates and only the differences with
+the best fit are written to the device. 
+
+You may specify which templates are used in this comparison, whether compression is allowed, and which 
+type of memory should be used to store the results.
+
+You may also specify which template should be used to initialize the configuration and calibration 
+information for a blank card.
+
+This command determines the default behavior. All of these values may be overridden by the commands that 
+directly access the memory. For example, the template used for a blank card may also be specified in the 
+load command. And the memory type selection, allowed templates, and compression scheme may be specified 
+in the commit command.
+
+Templates include:
+
+    	OspreyGeneric=2,
+	HB112=3,
+	HB116=4,
+	XB112=5,
+	XB113=6,
+	XB114=7,
+	TB417=8,
+	AP111=9,
+	AP121=10,
+	HornetGeneric=11,
+
+Examples:
+
+template memory=otp; prefer=5; allowed=2,5; compress=1; overwrite=0; 
+
+This command forces the use of otp. On load, a blank card's calibration data is intialized with template 5.
+It turns compression on using only templates 2 and 5. It turns overwriting off. These last two parameters are 
+unneccesary as these are the only allowed options for otp.
+
+template memory=auto; address=1K
+
+Any type of memory may be used. nart searches for valid memory in the order: eeprom, flash, otp. It uses the first
+type that it finds. The calibration data is written at a starting adress of 3ff (1K) no matter how much
+memory is found on the device. No restrictions on the use of templates is imposed. The other parameters are left
+at their default values.
+<tag=clear>
+Deletes all of the data records in the internal database. The database is cleared automatically at the
+beginning of each link, tx, rx,or data command.
+
+Example:
+
+clear
+<tag=reset>
+Resets the device. Tunes to the specified center frequency and conducts the self test. Normally, resetting 
+the device is performed automaticaly when needed and you do not need to use this command.
+
+Examples:
+
+reset i=0; f=2472; ht40=2
+
+Tunes the device under test to channel 2472 and enables ht40 mode.
+
+reset i=1; f=5500; ht40=0; chain=3
+
+Tunes the golden unit to channel 5500, disables ht40 mode, and restricts usage to chain mask 3.
+<tag=hello>
+The communication link between cart and nart is tested and the status is reported. Since this command pauses
+processing until it is completed, it can be used to synchronize the actions of cart and nart.
+
+Examples:
+
+hello
+
+Waits for a response from the device under test.
+
+hello i=1
+
+Waits for a response from the golden unit.
+<tag=prompt>
+Creates a variable and asks the user to assign it a value. Variables can be created with any name and assigned
+any value. Variables can be used to control program flow with the branch command and can be used or displayed
+in reports. Variables can also be created with the assign command and can be deleted with the deassign command.
+
+When created with the prompt command, you may specify restrictions on the variable value. The user will be asked
+to supply a new value if the given value does not meet these restrictions. You may specify the variable type, a 
+minimum or maximum value, and the number of elements in a vector value. You may supply a default value. You may 
+also supply the units used for numeric values and a brief help message that may beshown to the user.
+
+This command is typically used in a command file to prompt the user for information.
+
+Examples:
+
+prompt x;
+
+The user is asked to supply a value for the variable x. No constraints on the value are enforced.
+
+prompt name=y;type=decimal;minimum=45;maximum=97;default=53;
+
+The user is asked to supply a value for the variable y. The value must be a decimal integer between 45 and 97. 
+The default value is 53. The default value is used if the user responds by typing a carriage return with no 
+other input.
+<<tag=assign>
+Creates a variable and assigns it a value. Variables can be created with any name and assigned any value.
+Variables can be used to control program flow with the branch command and can be used or displayed in reports.
+Variables can also be created with the prompt command and can be deleted with the deassign command.
+
+Examples:
+
+assign x=105;
+
+Sets the variable x to 105.
+
+assign SensitivityLimit=95
+
+Sets the variable SensitivtyLimit to the value 95.
+<tag=deassign>
+Deletes the specified variable.
+
+Example:
+
+deassign x
+
+Deletes the variable x.
+<tag=show>
+Displays the variables and their values. Variables may be created and set by nart or by a user with 
+the assign or prompt command.
+
+Examples:
+
+show
+
+Displays all of the variables and their values. 
+
+show Test.Error
+
+Displays the value of the variable Test.Error. Test.Error is created automatically and contains a code
+describing the results of the last test operation. A value of 0 means the operation was successful. Any
+other value indicates an error.
+
+<tag=help>
+Displays the online documentation. Documentation is available for all of the commands and parameters 
+and some additional topics. The documentation consists on a one line synopsis of the command
+or parameter, a list of all of the command's parameters including the parameter type, limits, units, 
+and default value, and a detailed  description with examples.
+
+Examples:
+
+help
+
+Displays a list of all of the commands.
+
+help path
+
+Displays the documentation for the path command.
+
+help path:device
+
+Displays the documentation for the device parameter of the path command.
+<tag=commit>
+Saves the configuration and calibration information on the device. Configuration information can 
+be stored in eeprom, otp, or flash memory depending upon which memories are available on the device.
+It may be stored in a compressed or an uncompressed form. If the data will not fit uncompressed, nart 
+will automatically compress it. It may be saved as incremental updates or it may overwrite and 
+replace the previous information. If the memory may not be changed (e.g. otp), it will always
+be saved as incremental updates.
+
+commit
+
+If eeprom exists on the device, the configuration information is written in it. It is uncompressed. 
+It starts at address 3ff. It overwrites any old data. If there is no eeprom on the device,
+the information is written in the otp in the compressed form starting at the next available
+location.
+
+commit memory=eeprom; address=1k; compress=1; overwrite=0
+
+The configuration information is written into the eeprom in the next available location starting 
+at address 3ff. The data is compressed and stored as an incremental change from the previous values. 
+This action mimics the manner in which otp is usually written.
+
+commit memory=flash
+
+The configuration information is written into flash memory.
+<tag=check>
+Reads and verifies the configuration information on the device. you can specify where the data is
+located. Normally, you should leave the parameters at their default values and allow nart to search 
+for the data. 
+
+You may use the report or dump commands to view the three types of returned data records. 
+
+ec records give information about each commit operation performed on the device.
+ecb records give information about each block with the commit.
+ecv record give information about eeach individual field.
+
+Examples:
+
+check
+hello
+report r='c f=ec.address,code,template,length,major,minor,csm,csc,status;type=x,d,d,d,d,d,x,x,s;'
+
+Searches for and reads the configuration information from the device. Then it prints the information
+about the commit operations in a nice table.
+
+check all=1
+hello
+dump type=ecv
+
+Searches for and reads the configuration information from the device. Then it prints every field value
+for every incremental commit operation in an ugly table. This command shows you everything that has
+been saved on the device.
+<tag=restore>
+Restores the internal configuration information to the state saved on the device. Normally, this 
+information is restored when the device is loaded. You can use this command to restore data from a 
+different memory or to overwrite any changes that you have made since the last commit operation.
+
+Examples:
+
+restore
+
+Restores the configuration information to the initial state for the device.
+
+restore memory=otp
+
+Restores the configuration information from the otp even if there is eeprom on the device.
+<tag=pcie>
+Writes the initilization registers in the pcie configuration space. You may select which memory 
+is used or let nart determine the correct memory by probing the device. If the decision if left 
+to nart, it will use eeprom if it exists and otp if there is no eeprom.
+
+Examples:
+
+pcie
+
+Writes the initialization registers to the eeprom if it exists or to the otp if there is no eeprom.
+
+pcie memory=otp
+
+Forces the pcie initilization registers to be written to otp even if eeprom exists on the device.
+<tag=log>
+Opens log file.
+<tag=log:file>
+Specifies the name of the log file.
+<tag=er>
+Directly reads the specified location of the eeprom on the device. There is no need to use this 
+command in normal operation.
+
+Examples:
+
+er size=2; address=0;
+
+Reads and returns the 2 byte value found at location 0 from device 0.
+
+er instance=1; size=1; address=100:120;
+
+Reads and returns the single byte values in location 100 through 120 of the eeprom on device 1.
+<tag=ew>
+Directly writes the specified location of the eeprom on the device. There is no need to use this
+command in normal operation.
+
+Examples:
+
+ew size=2; address=0; value=f0f0;
+
+Writes the 2 byte value f0f0 at location 0 on device 0.
+
+ew instance=1; size=1; address=100; value=0,1,2,3,4,5,6,7,8,9;
+
+Writes the ten single byte values in the eeprom starting at location 100 on device 1.
+<tag=or>
+Directly reads the specified location of the otp on the device. There is no need to use this 
+command in normal operation.
+
+Examples:
+
+or size=2; address=0;
+
+Reads and returns the 2 byte value found at location 0 from device 0.
+
+or instance=1; size=1; address=100:120;
+
+Reads and returns the single byte values in location 100 through 120 of the otp on device 1.
+<tag=ow>
+Directly writes the specified location of the otp on the device. There is no need to use this
+command in normal operation.
+
+Examples:
+
+ow size=2; address=0; value=f0f0;
+
+Writes the 2 byte value f0f0 at location 0 on device 0.
+
+ow instance=1; size=1; address=100; value=0,1,2,3,4,5,6,7,8,9;
+
+Writes the ten single byte values in the eeprom starting at location 100 on device 1.
+<tag=cr>
+Directly reads the specified location of the pcie config space on the device. There is no need to use this 
+command in normal operation.
+
+Examples:
+
+cr size=2; address=0;
+
+Reads and returns the 2 byte value found at location 0 from device 0.
+<tag=cw>
+Directly writes the specified location of the pcie config space on the device. There is no need to use this
+command in normal operation.
+
+Examples:
+
+cw size=2; address=0; value=f0f0;
+
+Writes the 2 byte value f0f0 at location 0 on device 0.
+<tag=mr>
+Directly reads the specified location of the shared memory between the host and the device. There is no need 
+to use this command in normal operation.
+
+Examples:
+
+mr size=2; address=0;
+
+Reads and returns the 2 byte value found at location 0 from device 0.
+
+mr instance=1; size=1; address=100:120;
+
+Reads and returns the single byte values in location 100 through 120 of the shared memory on device 1.
+<tag=mw>
+Directly writes the specified location of the shared memory between the host and the device. There is no need
+to use this command in normal operation.
+
+Examples:
+
+mw size=2; address=0; value=f0f0;
+
+Writes the 2 byte value f0f0 at location 0 on device 0.
+
+mw instance=1; size=1; address=100; value=0,1,2,3,4,5,6,7,8,9;
+
+Writes the ten single byte values in the shared memory starting at location 100 on device 1.
+<tag=path>
+Specifies the path loss between the DUT and the test equipment.
+You may specify path losses at up to %d different frequencies.
+The path loss used is interpolated between the measurements you specify.
+You may query the path loss by specifying "loss=?.
+
+Examples:
+
+path device=golden; frequency=2412; loss=13.0,13.2,13.1;
+
+Sets the path loss between the dut and the golden unit at 2412MHz for chain 0, 1,
+and 2 to 13.0dB, 13.2dB, and 13.1dB respectively.
+
+path device=powermeter; frequency=5180; chain=1; loss=15; frequency=5780; loss=19;
+
+Sets the path loss between the dut and the powermeter at 5180MHz for chain mask 1 
+(chain 0) to 15dB and at 5780MHz to 19dB.
+
+path device=golden; frequency=5180,5480,5780; chain=3; loss=?;
+
+Queries the path loss between the dut and the golden unit at 5180MHz, 5480MHz, and 5780MHz 
+for chain mask 3 (chain 0 and chain 1). The returned values shown below are interpolated 
+from the user supplied measurement data.
+
+      Device        Frequency Chain Loss
+      PowerMeter       5180      1  15.0
+      PowerMeter       5180      2   0.0
+      PowerMeter       5480      1  17.0
+      PowerMeter       5480      2   0.0
+      PowerMeter       5780      1  19.0
+      PowerMeter       5780      2   0.0
+<tag=error>
+Allows you to control the response of the system to various error conditions. You can control 
+the response for all messages of a certain class or type or you can control the response for
+individual messages. The error types are: debug, control, info, warning, and error. If you
+specify one of these types, all messages of this type are affected. You can also 
+change the response for only a single message by supplying its 4-digit message code.
+
+Normally the messages are displayed in the format:
+
+[code] [type] [message]
+
+You may control the format of the message by specifying "code", "type", or "message" on the command 
+line for the "parameter response". If you specify "code", the code is displayed. Similarly for "type" 
+and "message". If you specify "all", all three of these fields are displayed. If you specify "none", 
+none of them are displayed.
+
+You may also specify "bell" and "pause". If you specify "bell", a noise will alert you to the
+error. If you specify "pause", the program will wait for you to acknowledge the error before
+proceeding.
+
+Examples:
+
+error type=control; response=code
+
+Turns on the display of control messages codes. Most users will not want to see these messages, but they
+are useful when cart is controlled by another process.
+
+error code=2017; response=all,pause,bell
+
+Causes the program to display all of the fields and to make a noise and wait for you to acknowledge 
+error 2017 before proceeding. 
+
+error code=1012; response=message
+
+Causes the program to display only the message (and not the code and type) for message 1012. This 
+message is used to display the online help, so if you try this, and type help again, you'll see
+the effect immediately.
+<tag=branch>
+Allows you to control the flow of commands by providing a means to branch to another command.
+If the specified condition is true, control is transfered to the named command line. If the 
+condition is not true, the next command line in the file is performed. If no condition is 
+specified, the branch is always performed. Named command lines can be created using the label
+command. The condition may be any equation created using $variables, constants, and 
+standard arithmetic, logical, and comparison operators, such as:
++, -, *, /, **, &, |, ^, !, <, <=, =, >, >=, <>
+
+This command may only appear in command files; it may not be typed by a user.
+
+Examples:
+
+branch name=start;
+
+Always transfer control to the line "label name=start;"
+
+assign it=0;
+label name=top;
+show $it;
+test it=$it+1;
+branch name=top; test='$it<10';
+
+Performs a loop counting from 0 to 9.
+You can put more interesting commands than "show $it;" inside the loop.
+<tag=label>
+Allows you to label a specific command so that the "branch" command can transfer control to it.
+
+This command may only appear in command files; it may not be typed by a user.
+
+Example:
+
+assign it=0;
+label name=top;
+show $it;
+test it=$it+1;
+branch name=top; test='$it<10';
+
+Performs a loop counting from 0 to 9.
+You can put more interesting commands than "show $it;" inside the loop.
+<tag=connect>
+Makes a network connection between cart and nart on the specified host and port. You may 
+connect to up to 3 different nart processes controlling 3 different cards. Conventionally 
+instance=0 refers to the device under test (dut); instance=1 refers to the golden unit; and 
+instance=2 refers to the blocker unit. 
+
+Examples:
+
+connect
+
+Connects to the nart process on the same host as the one on which cart is running. The nart
+process is running at its usual port number 2390. This nart is treated as the device under test.
+
+connect instance=1; host=10.10.13.35; port=2391
+
+Connects to the nart process on the host with ip address 10.10.13.35. The nart process is
+operating with an unusual port number 2391. This nart is treated as the golden unit.
+<tag=equipment>
+Loads the software that controls the specified test equipment. Attempts to connect to
+the equipment and resets the equipment. 
+
+You must have the dynamic link library (dll) of equipment control software loaded on 
+your computer under the name specifed as the model name.
+
+If you do not specify the equipment type, cart tries to figure it out based on the functions
+it finds in the dll.
+
+cart passes whatever text you supply as the argument to the equipment's load function. The 
+specification of this argument is up to the dll implementor. Typically, the gpib address
+of the equipment is passed in this argument.
+
+Examples:
+
+equipment model=e4416a; arg=13;
+
+Loads the software to support an Agilent model e4416a power meter in the file e4416a.dll.
+The software expects to find the power meter at gpib address 13.
+
+equipment model=11713a; arg=1,2,3;
+
+Loads the software to support Agilent model 11713a programable attenuators from the file 11713a.dll.
+The software expects to find 3 banks of attenuators at gpib addresses 1, 2, and 3.
+<tag=data>
+Reads the contents of a file and restores it to the internal database.
+
+Examples:
+
+data file=091229100545.log; filter=rx;
+
+Reads the content of the file 091229100545.log and restores only the rx data records.
+
+data file='';
+
+Clears the internal database.
+<tag=dump>
+Writes the contents of the internal database to a file or to the screen. The data is written in a condensed
+form that is often hard to read. For a prettier presentation, please use the report command.
+
+Examples:
+
+dump
+
+Writes all of the data in the internal database to a file with a name in the format specified by $LogFileName.
+At the same time, the data records are displayed on the screen.
+
+dump file=''; screen=1;
+
+Displays all of the data in the internal database on the screen. Does not write a file.
+
+dump file=mydata.txt; filter=tx; screen=1;
+
+Dumps only the tx data records to a file called mydata.txt.
+At the same time, the data records are displayed on the screen.
+<tag=help>
+Display online documentation about the commands and parameters.
+<tag=exit>
+Ends operation of the program.
+<tag=stop>
+Cancels the current command. This is usually used for a link, tx, or rx command that may otherwise 
+take a long time to finish. This command may only be issued by a user; it may not occur in command files.
+<tag=pause>
+Pauses the current command. This is usually used for a link, tx, or rx command that may take a 
+long time to finish. This command may only be issued by a user; it may not occur in command files.
+<tag=resume>
+Resumes the current command. This is usually used for a link, tx, or rx command that may take a 
+long time to finish. This command may only be issued by a user; it may not occur in command files.
+<tag=other>
+This is sample documentation for something other than a command.
+<tag=end>

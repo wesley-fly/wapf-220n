@@ -1,0 +1,15 @@
+sleep 5
+show $2gOnly
+show $5gOnly
+
+branch name=2GONLY_FLAGS; condition='$5gOnly=0'
+# this is 5gOnly DUT
+$refDesign\test_flow_flags_$refDesign.art
+
+branch name=2GONLY_FLAGS; action=start;
+branch name=BOTH_BAND; condition='$2gOnly=0'
+# this is 2gOnly DUT
+$refDesign\test_flow_flags_$refDesign.art
+
+branch name=BOTH_BAND; action=start;
+# for both band DUT, keep the test_flow_flags.art run in start.art

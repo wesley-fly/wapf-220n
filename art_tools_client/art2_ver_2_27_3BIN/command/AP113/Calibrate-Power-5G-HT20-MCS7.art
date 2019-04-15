@@ -1,0 +1,6 @@
+#
+# 5 GHz power calibration
+#
+tx att=0; txgain=42;pl=1500;agg=32;pc=1000000;r=t7;ch=1,2,4;cal=3;txgmaximum=100;f=5180,5220,5340,5420,5500,5620,5745,5825;tx99=1;
+
+report r='c f=cal.frequency;label=frequency;f=txchain,txgain,power,pcorr,voltage,temp;title=5GHz Calibration Coefficients';

@@ -1,0 +1,59 @@
+#
+# Calculate FT summary
+#
+assign FailTotal2gGoodft=0
+
+branch name=TXBPER2G_CAL; action=goto; condition='$btputTx2gDisable<>0'
+calculate FailTotal2gGoodft=$FailTotal2gGoodft+$FailBTxTput2gGood
+
+branch name=TXBPER2G_CAL; action=start;
+branch name=TXTPUT2G_CAL; action=goto; condition='$btxPerDisable2g<>0'
+calculate FailTotal2gGoodft=$FailTotal2gGoodft+$FailBTxTput2gPSR
+
+branch name=TXTPUT2G_CAL; action=start;
+branch name=TXPER2G_CAL; action=goto; condition='$tputTx2gDisable<>0'
+calculate FailTotal2gGoodft=$FailTotal2gGoodft+$FailTxTput2gGood
+
+branch name=TXPER2G_CAL; action=start;
+branch name=RXTPUT2G_CAL; action=goto; condition='$txPerDisable2g<>0'
+calculate FailTotal2gGoodft=$FailTotal2gGoodft+$FailTxTput2gPSR
+
+branch name=RXTPUT2G_CAL; action=start;
+branch name=RXSENS2G_CAL; action=goto; condition='$tputRx2gDisable<>0'
+calculate FailTotal2gGoodft=$FailTotal2gGoodft+$FailRxTput2gGood
+
+branch name=RXSENS2G_CAL; action=start;
+branch name=SUM2G_CAL; action=goto; condition='$rxsensDisable2g<>0'
+calculate FailTotal2gGoodft=$FailTotal2gGoodft+$FailSens2gGood
+
+branch name=SUM2G_CAL; action=start;
+
+#######################   5G summary   #######################
+assign FailTotal5gGoodft=0
+
+branch name=TXBPER5G_CAL; action=goto; condition='$btputTx5gDisable<>0'
+calculate FailTotal5gGoodft=$FailTotal5gGoodft+$FailBTxTput5gGood
+
+branch name=TXBPER5G_CAL; action=start;
+branch name=TXTPUT5G_CAL; action=goto; condition='$btxPerDisable5g<>0'
+calculate FailTotal5gGoodft=$FailTotal5gGoodft+$FailBTxTput5gPSR
+
+branch name=TXTPUT5G_CAL; action=start;
+branch name=TXPER5G_CAL; action=goto; condition='$tputTx5gDisable<>0'
+calculate FailTotal5gGoodft=$FailTotal5gGoodft+$FailTxTput5gGood
+
+branch name=TXPER5G_CAL; action=start;
+branch name=RXTPUT5G_CAL; action=goto; condition='$txPerDisable5g<>0'
+calculate FailTotal5gGoodft=$FailTotal5gGoodft+$FailTxTput5gPSR
+
+branch name=RXTPUT5G_CAL; action=start;
+branch name=RXSENS5G_CAL; action=goto; condition='$tputRx5gDisable<>0'
+calculate FailTotal5gGoodft=$FailTotal5gGoodft+$FailRxTput5gGood
+
+branch name=RXSENS5G_CAL; action=start;
+branch name=SUM5G_CAL; action=goto; condition='$rxsensDisable5g<>0'
+calculate FailTotal5gGoodft=$FailTotal5gGoodft+$FailSens5gGood
+
+branch name=SUM5G_CAL; action=start;
+
+calculate FailTotalGoodft=$FailTotal2gGoodft+$FailTotal5gGoodft

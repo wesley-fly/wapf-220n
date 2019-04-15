@@ -1,0 +1,9 @@
+#
+# Calculate PT summary
+#
+calculate FailTotal2gGoodpt=$FailPower2gGood+$FailPwrAll2gGood+$FailPpm2gGood+$FailMask2gGood+$FailPwrEVM2gGood+$FailEVM2g
+
+calculate FailTotal5gGoodpt=$FailPower5gGood+$FailPwrAll5gGood+$FailPpm5gGood+$FailMask5gGood+$FailPwrEVM5gGood+$FailEVM5g
+
+#calculate FailTotalGoodpt=$FailTotal2gGoodpt+$FailTotal5gGoodpt+$FailIdleCurrentGood+$FailCurrentGood
+calculate FailTotalGoodpt=$FailTotal2gGoodpt+$FailTotal5gGoodpt

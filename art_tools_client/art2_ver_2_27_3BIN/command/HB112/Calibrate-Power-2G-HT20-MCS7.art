@@ -1,0 +1,6 @@
+#
+# 2 GHz power calibration
+#
+tx att=0; txgain=55;pl=1500;agg=32;pc=1000000;r=t7;cal=3;ch=1,2,4;f=2412,2437,2462;tx99=1;stop='$Test.Error';
+
+report r='c f=cal.frequency;label=frequency;f=txchain,txgain,power,pcorr,voltage,temp;title=2GHz Calibration Coefficients';

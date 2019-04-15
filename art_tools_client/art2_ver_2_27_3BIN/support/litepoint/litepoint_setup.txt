@@ -1,0 +1,70 @@
+RFPORT=0;			# 0: left RFport(default), 1: right RFport
+DUALHEAD_ENABLE=0;		# 0: dual head disable(default), 1: dual head enable 
+
+#################################################################################
+# POWER MEASUREMENT PARAMETERS
+#################################################################################
+POWER_MEAS_SAMPLE_TIME=80;	# usec (default=80usec)
+POWER_MEAS_TRIGGER_TYPE=1;	# 0:free run (default), 1:trigger
+
+#################################################################################
+# EVM MIMO ANALYSIS PARAMETERS
+#################################################################################
+# for 11n mimo  EVM analysis channal estimation
+# 1: enable full channal estimation(default), 0: disable	
+EVM_MIMO_ANALYSIS_CHANN_EST=1;
+
+# for 11n mimo EVM analysis freq synchronization
+# 1: short training symbol, 	2: (default) short and long training symbol
+# 3: full packet, 		4: short and long training symbols and L-SIG and HT-SIG fields
+EVM_MIMO_ANALYSIS_FREQ_SYNC=2;
+
+# for 11n mimo  EVM analysis Phase Correction Mode
+# 1: enable (default), 	0: disable
+EVM_MIMO_ANALYSIS_PHASE_CORRECTION=1;
+
+# for 11n mimo  EVM analysis Symbol Timing Correction
+# 1: enable (default), 0: disable
+EVM_MIMO_ANALYSIS_SYMBOL_TIMING_CORRECTION=1;
+
+# for 11n mimo  EVM analysis Amplitude Tracking
+# 1: enable, 0: disable  (default)
+EVM_MIMO_ANALYSIS_AMPLITUDE_TRACKING=0;
+
+# for 11n mimo  EVM analysis Decode PSDU
+# 1: enable, 0: disable  (default)
+EVM_MIMO_ANALYSIS_DECODE_PSDU=0;
+
+#################################################################################
+# EVM Legacy ANALYSIS PARAMETERS
+#################################################################################
+# for Legacy  EVM analysis channal estimation
+# 1: Raw Channel Estimate (based on long trainling symbols) 
+# 2: 2nd Order Polyfit
+# 3: Full packet estimate (default)
+EVM_LEGACY_ANALYSIS_CHANN_EST=3;
+
+# for Legacy  EVM analysis Phase Correction Mode
+# 1: Phase correction off
+# 2: Symbol-by-symbol correction (Default)
+# 3: Moving avg. correction (10 symbols)
+EVM_LEGACY_ANALYSIS_PHASE_CORRECTION=2;
+
+# for Legacy  EVM analysis Symbol Timing Correction
+# 1: Symbol Timing Correction Off
+# 2: Symbol Timing Correction ON (Default)
+EVM_LEGACY_ANALYSIS_SYMBOL_TIMING_CORRECTION=2;
+
+# for Legacy  EVM analysis freq synchronization
+# 1: Short Training Symbol
+# 2: Long Training Symbol (Default)
+# 3: Full Data Packet
+EVM_LEGACY_ANALYSIS_FREQ_SYNC=2;
+
+# for Legacy  EVM analysis Amplitude Tracking
+# 1: Amplitude tracking off (Default)
+# 2: Amplitude tracking on
+EVM_LEGACY_ANALYSIS_AMPLITUDE_TRACKING=1;
+
+
+

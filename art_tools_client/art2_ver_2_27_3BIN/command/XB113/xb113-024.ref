@@ -1,0 +1,100 @@
+#specify the best template to use to result in less information stored in OTP or eeprom
+#select template types from
+#    	OspreyGeneric=2,
+#	HB112=3,
+#	HB116=4,
+#	XB112=5,
+#	XB113=6,
+template prefer=6; allow=6,2; install=yes;
+
+#subsystem and subverdor ID's
+set ssid=205;
+set svid=168c;
+
+# set device type 
+# 1=>Cardbus, 2=>PCI, 3=>miniPCI, 4=>AP, 5=>PCIe mini, 6=>pcie express, 7=>pcie desktop
+set devicetype=5;
+
+# set Reg domain
+# customers can set regulatory domain index here
+set regdmn=0;
+
+#tx and rx chain mask: bit0 = chain0 enable, 
+#                      bit1 = chain1 enable, 
+#                      bit2 = chain2 enable 
+Set txmask=7;
+Set rxmask=7;
+
+#configure modes: 
+#	    bit0 = enable 5GHz
+#           bit1 = enable 2GHz
+#           bit2 = disable 5G HT40
+#           bit3 = disable 2G HT40
+#           bit4 = disable 5G HT20
+#           bit5 = disable 2G HT20
+#Note: these flags will be given individual commands in subsequent release 
+set opflags=1;
+
+#antenna switch table control
+#5GHz
+set antctrlcommon5g=222;
+set antctrlcommon25g=11111;
+set antCtrlChain5g=150, 150, 150;
+
+#strong signal parameters
+set xatten1Margin5g=0,0,0;
+set xatten1Marginlow5g=0,0,0;
+set xatten1Marginhigh5g=0,0,0;
+
+set xatten1db5g=0,0,0;
+set xatten1dblow5g=0,0,0;
+set xatten1dbhigh5g=0,0,0;
+
+set miscellaneous.quickdropenable=0;
+set quickdrop5g=-34;
+set quickdroplow=-34;
+set quickdrophigh=-34;
+
+# tx gain table
+#	0 – for client based designs containing an XPA
+#	1 – for no xpa design
+#	2 – for AP based (or modules that will be used in an AP) designs containing an XPA
+#	3 – not currently used
+set txgainTable=2;
+
+# rxgainTable	
+#    0: xlna
+#    1: no xlna
+set rxgainTable=0;
+
+#Temperature compensation
+set temperatureCompensation=1
+set tempSlope5g=76
+set tempSlopelow=65
+set tempSlopehigh=79
+
+#force chainX thermometer at all times
+set thermometer=1;
+
+#GPIO for EEPROM protect
+set eepromWriteEnable=6;
+
+#enable spur mitigation
+#set spurchans5g=5500;
+
+set xpabiaslvl5g=0xf;
+
+#set rfSilent by calling this file if needed
+#common\rfkill.art
+
+#set wake-on-wireless by calling this file if needed
+#common\wow.art
+
+#target power files
+XB113\xb113-024_trg_pwr.art
+
+#CTL Files
+common\ctl_generic.art
+
+#set CLKOBS disable in bootup
+common\clkobs_disable.art

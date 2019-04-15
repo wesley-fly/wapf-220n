@@ -1,0 +1,87 @@
+#--------------------------------------------------------------------------------------
+# this build is for DB120 Second Radio - Onboard Osprey
+#--------------------------------------------------------------------------------------
+
+#subsystem and subverdor ID's
+set i=$5gr;ssid=a120;
+set i=$5gr;svid=168c;
+
+# set device type 
+# 1=>Cardbus, 2=>PCI, 3=>miniPCI, 4=>AP, 5=>PCIe mini, 6=>pcie express, 7=>pcie desktop
+set i=$5gr;devicetype=4;
+
+# set Reg domain
+# customers can set regulatory domain index here
+set i=$5gr;regdmn[0]=0
+set i=$5gr;regdmn[1]=0x1f
+
+#tx and rx chain mask: bit0 = chain0 enable, 
+#                      bit1 = chain1 enable, 
+#                      bit2 = chain2 enable 
+Set  i=$5gr;txmask=3;
+Set  i=$5gr;rxmask=3;
+
+#configure modes: 
+#	    bit0 = enable 5GHz
+#           bit1 = enable 2GHz
+#           bit2 = disable 5G HT40
+#           bit3 = disable 2G HT40
+#           bit4 = disable 5G HT20
+#           bit5 = disable 2G HT20
+#Note: these flags will be given individual commands in subsequent release 
+set  i=$5gr;opflags=1;
+
+#antenna switch table control
+#2GHz
+set  i=$5gr;antctrlcommon5g=220;
+set  i=$5gr;antctrlcommon25g=11111;
+set  i=$5gr;antCtrlChain5g=150, 150, 150;
+
+# tx gain table
+#             0(lowest_ob_db) – for xpa design - will provide lower power consumption 
+#             1(high_ob_db) – for no xpa design 
+#             2(low_ob_db) – for xpa design – will provide normal power consumption at 5G
+#             3(high_power) – for XPA design 
+#             4 – Mixed Gain table (5G XPA; 2G no XPA) Comment:  2GHz same as tx gain type 1, 5 GHz same as tx gain type 2
+#             5 – UB124 Tx gain table 
+#             6 – for XPA design. 2G spur is improved
+set  i=$5gr;txgainTable=3;
+
+# rxgainTable	0: xlna	1: no xlna
+set  i=$5gr;rxgainTable=0;
+
+
+#Temperature compensation
+#Temperature compensation
+set i=$5gr;temperatureCompensation=1
+set i=$5gr;Tempslope5g=78
+set i=$5gr;Tempslopelow=64
+set i=$5gr;Tempslopehigh=86
+
+
+
+#force chainX thermometer at all times
+set i=$5gr;thermometer=1;
+
+#enable spur mitigation
+set  i=$5gr;spurchans2g=2464;
+
+#enable PA Pre-Distortion for enhanced tx EVM on FEMless design
+set  i=$5gr;papdenable=0
+
+set i=$5gr;xpabiaslvl5g=0xf
+
+set i=$5gr;5GHz.TransmitCalibration.Frequency[0]=4920;
+set i=$5gr;5GHz.TransmitCalibration.Frequency[1]=5180;
+set i=$5gr;5GHz.TransmitCalibration.Frequency[2]=5320;
+set i=$5gr;5GHz.TransmitCalibration.Frequency[3]=5500;
+set i=$5gr;5GHz.TransmitCalibration.Frequency[4]=5620;
+set i=$5gr;5GHz.TransmitCalibration.Frequency[5]=5700;
+set i=$5gr;5GHz.TransmitCalibration.Frequency[6]=5745;
+set i=$5gr;5GHz.TransmitCalibration.Frequency[7]=5825;
+
+#target power files
+db120-730\2_db120_trg_pwr.art
+
+#CTL Files
+common\2_ctl_generic.art

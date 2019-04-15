@@ -1,0 +1,101 @@
+
+##-----------------------------------------------------------------
+#        For Dual Radio Calibration, set the flag 'enableDBDC' to 1 
+##-----------------------------------------------------------------
+assign enableDBDC=0
+calculate golden=$enableDBDC + 1
+
+
+##-----------------------------------------------------------------
+# manufAuto: 1 	For manufacure auto test, no user enter required
+# 		refID need to be setup correctly, BoardIDType=1
+#	     0  For manufacure test with user selection
+#		refID and SSID will be entered by user
+#	     2  for atheros internal
+#		BoardIDType, refID need to be entered by user
+##-----------------------------------------------------------------
+
+assign manufAuto=2
+assign BoardIDType=1
+assign refID=DB120-020
+
+## default test selection 0: run the test,  1: disable the test 
+##-----------------------------------------------------------------
+## Select TP, FT test
+##-----------------------------------------------------------------
+assign ptTestDisable=0
+assign ftTestDisable=0
+##-----------------------------------------------------------------
+## 
+# LitepointDisable=0 using Litepoint for EVM/mask and as vsg for Rx sens 
+assign LitepointDisable=1
+##-----------------------------------------------------------------
+assign isFlashCal=1
+##-----------------------------------------------------------------
+## For calibration
+##-----------------------------------------------------------------
+assign txCalDisable2g=1
+assign txCalDisable5g=0
+assign rxCalDisable2g=1
+assign rxCalDisable5g=1
+##----------------------------------------------------------------
+## For EEP Operation
+##-----------------------------------------------------------------
+assign saveEEPTxCalDisable=0
+assign saveEEPRxCalDisable=1
+assign savePCIeDisable=0
+assign eepCheckDisable=1
+assign noEEPSaveOnFail=0
+##-----------------------------------------------------------------
+## For Tx Test
+##-----------------------------------------------------------------
+assign txPwrDisable2g=1
+assign txPwrDisable5g=0
+assign txPwrAllChainDisable2g=1
+assign txPwrAllChainDisable5g=1
+assign maskDisable2g=1
+assign maskDisable5g=0
+assign txEVMDisable2g=1
+assign txEVMDisable5g=1
+assign channAccDisable2g=1
+assign channAccDisable5g=0
+assign xtalCalDisable=0
+##-----------------------------------------------------------------
+## For Rx Test
+##-----------------------------------------------------------------
+assign rxsensDisable2g=1
+assign rxsensDisable5g=0
+assign rxPerDisable2g=1
+assign rxPerDisable5g=0
+assign rxiqcal2gDisable=1
+assign rxiqcal5gDisable=1
+##-----------------------------------------------------------------
+## For TX unicast Throughput Test
+##-----------------------------------------------------------------
+assign txPerDisable2g=1
+assign txPerDisable5g=0
+assign tputTx2gDisable=1
+assign tputTx5gDisable=0
+##-----------------------------------------------------------------
+## For TX broadcast Throughput Test
+## 0: enable test,	1: disable test
+## 2: enable test, but pass/fail results don't count at final summary
+##-----------------------------------------------------------------
+assign btxPerDisable2g=1
+assign btxPerDisable5g=1
+assign btputTx2gDisable=1
+assign btputTx5gDisable=1
+##-----------------------------------------------------------------
+## For rX Throughput Test 
+##-----------------------------------------------------------------
+assign tputRx2gDisable=1
+assign tputRx5gDisable=0
+##-----------------------------------------------------------------
+## For current measurement
+##-----------------------------------------------------------------
+assign rxCurrentDisable=1
+assign txCurrentDisable=1
+##-----------------------------------------------------------------
+
+
+

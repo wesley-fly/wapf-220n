@@ -1,0 +1,106 @@
+
+assign issinc=-2
+assign channel=2412,2437,2462
+assign rate=1L,54,t16,t23,f16,f23
+assign isslimit=-90,-65,-82,-64,-79,-61
+assign isslimit_4p=-87,-62,-79,-61,-76,-58
+assign psrthreshold=90
+assign psrthreshold_4p=96
+assign dipLimit=-3
+
+assign FailText=FAIL
+assign PassText=.
+
+assign 2_FailSens2gGood=0
+assign 2_FailSens2gBetter=0
+
+assign dipCount=0
+
+#sw a=BB_timing_control_5.cycpwr_thr1;v=4; #doesn't help to solve
+#sw a=BB_find_signal_low.firstep_low;v=8;
+#sw a=BB_find_signal.firstep; v=8;
+sw i=$2gr;a=BB_control_no_update_noisefloor;v=0;
+sw i=$2gr;a=BB_timing_control_5.cycpwr_thr1;v=0;
+sw i=$2gr;a=BB_timing_control_5.cycpwr_thr1_ext;v=0;
+sw i=$2gr;a=BB_find_signal_low.firstep_low;v=0;
+sw i=$2gr;a=BB_find_signal.firstep; v=0;
+
+assign issmin=-100
+assign issmax=-80
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS1; action=goto; condition='$rxiqcal2gDisable<>0'
+link rx=$5gr; tx=$golden;f=2437;r=1l;tp=8;ch=1;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS1; action=start;
+link rx=$5gr; tx=$golden; f=2437;r=1l;tp=8;ch=1;pl=100;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=CCK chain0 SENSITIVITY :Radio2;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@2_FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@2_FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,tx.txchain;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS2; action=goto; condition='$rxiqcal2gDisable<>0'
+link rx=$5gr; tx=$golden; f=2437;r=1l;tp=8;ch=2;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS2; action=start;
+link rx=$5gr; tx=$golden; f=2437;r=1l;tp=8;ch=2;pl=100;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=CCK chain1 SENSITIVITY :Radio2;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@2_FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@2_FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,tx.txchain;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS3; action=goto; condition='$rxiqcal2gDisable<>0'
+link rx=$5gr; tx=$golden; f=2437;r=1l;tp=8;ch=4;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS3; action=start;
+link rx=$5gr; tx=$golden; f=2437;r=1l;tp=8;ch=4;pl=100;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=CCK chain2 SENSITIVITY :Radio2;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@2_FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@2_FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,tx.txchain;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+assign issmin=-100
+assign issmax=-40
+
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS4; action=goto; condition='$rxiqcal2gDisable<>0'
+link rx=$5gr; tx=$golden; f=2412;r=f0;tp=8;ch=7;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS4; action=start;
+link rx=$5gr; tx=$golden; f=2412;r=t16,t23,f16,f23;tp=8;ch=7;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=2GHZ SENSITIVITY :Radio2;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@2_FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@2_FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS5; action=goto; condition='$rxiqcal2gDisable<>0'
+link rx=$5gr; tx=$golden; f=2437;r=f0;tp=8;ch=7;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS5; action=start;
+link rx=$5gr; tx=$golden; f=2437;r=t16,t23,f16,f23;tp=8;ch=7;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=2GHZ SENSITIVITY :Radio2;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@2_FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@2_FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS6; action=goto; condition='$rxiqcal2gDisable<>0'
+link rx=$5gr; tx=$golden; f=2462;r=f0;tp=8;ch=7;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS6; action=start;
+link rx=$5gr; tx=$golden; f=2462;r=t16,t23,f16,f23;tp=8;ch=7;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=2GHZ SENSITIVITY :Radio2;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@2_FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@2_FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate;file=$SensReportFile;screen=0';
+
+branch name=RX2G_DONE; action=start;
+
+sc i=$2gr;a=BB_control_no_update_noisefloor 
+sc i=$2gr;a=BB_timing_control_5.cycpwr_thr1 
+sc i=$2gr;a=BB_timing_control_5.cycpwr_thr1_ext 
+sc i=$2gr;a=BB_find_signal_low.firstep_low 
+sc i=$2gr;a=BB_find_signal.firstep

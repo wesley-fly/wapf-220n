@@ -1,0 +1,18 @@
+assign artreport=C:\data\ART_LAB\nart\dvt_report\txper\11g;
+link tx=$2gr;iss=-50;ch=3;pl=1500;pc=50;f=2412,2437,2462,2472;r=1L,11S;tp=10:25:1;
+report r='table title="2GHz Legacy Tx PER";x=frequency;y=tp;z=rx.psr;d=0;key=rate;file=$customer_txper.txt;'
+
+
+assign artreport=C:\data\ART_LAB\nart\dvt_report\txper\11g;
+link tx=$2gr;iss=-50;ch=3;pl=1500;pc=200;f=2412,2437,2462,2472;r=6,54;tp=10:25:1;
+report r='table title="2GHz Legacy Tx PER";x=frequency;y=tp;z=rx.psr;d=0;key=rate;file=$customer_txper.txt;'
+
+
+assign artreport=C:\data\ART_LAB\nart\dvt_report\txper\11g;
+link tx=$2gr;iss=-50;ch=3;pl=1500;pc=400;f=2412,2437,2462,2472;r=t0,t7,t8,t15;tp=10:25:1;
+report r='table title="2GHz Legacy Tx PER";x=frequency;y=tp;z=rx.psr;d=0;key=rate;file=$customer_txper.txt;'
+
+assign artreport=C:\data\ART_LAB\nart\dvt_report\txper\11g;
+link tx=$2gr;iss=-50;ch=3;pl=1500;pc=400;f=2432,2447,2452;r=t7,f0,f7,f8,f15;tp=10:25:1;
+report r='table title="2GHz Legacy Tx PER";x=frequency;y=tp;z=rx.psr;d=0;key=rate;file=$customer_txper.txt;'
+

@@ -1,0 +1,7 @@
+#
+# rssi cal for 5G
+#
+clear
+link rx=$5gr; tx=$golden; f=5180,5220,5340,5420,5500,5620,5745;iss=-75; tp=0; nf=100; rssical=1; r=f16; pc=20;
+rep r='col f=rssi.frequency,chain,ce,rssi,nf,offset,nf+offset;type=d,d,s;label=frequency;title=5GHz RSSI Calibration: Radio2'
+

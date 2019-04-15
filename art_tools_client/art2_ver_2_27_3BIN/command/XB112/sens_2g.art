@@ -1,0 +1,90 @@
+
+assign issinc=-2
+assign channel=2412,2437,2462
+assign rate=1L,54,t16,t23,f16,f23
+assign isslimit=-90,-65,-82,-64,-79,-61
+assign isslimit_4p=-87,-62,-79,-61,-76,-58
+assign psrthreshold=90
+assign psrthreshold_4p=96
+assign dipLimit=-3
+
+assign FailText=FAIL
+assign PassText=.
+
+assign FailSens2gGood=0
+assign FailSens2gBetter=0
+
+assign dipCount=0
+
+assign issmin=-100
+assign issmax=-80
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS1; action=goto; condition='$rxiqcal2gDisable<>0'
+link f=2437;r=1l;tp=8;ch=1;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS1; action=start;
+link f=2437;r=1l;tp=8;ch=1;pl=100;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=CCK chain0 SENSITIVITY;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,tx.txchain;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS2; action=goto; condition='$rxiqcal2gDisable<>0'
+link f=2437;r=1l;tp=8;ch=2;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS2; action=start;
+link f=2437;r=1l;tp=8;ch=2;pl=100;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=CCK chain1 SENSITIVITY;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,tx.txchain;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS3; action=goto; condition='$rxiqcal2gDisable<>0'
+link f=2437;r=1l;tp=8;ch=4;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS3; action=start;
+link f=2437;r=1l;tp=8;ch=4;pl=100;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=CCK chain2 SENSITIVITY;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate,tx.txchain;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+assign issmin=-100
+assign issmax=-60
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS4; action=goto; condition='$rxiqcal2gDisable<>0'
+link f=2412;r=f0;tp=8;ch=7;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS4; action=start;
+link f=2412;r=t16,t23,f16,f23;tp=8;ch=7;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=2GHZ SENSITIVITY;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS5; action=goto; condition='$rxiqcal2gDisable<>0'
+link f=2437;r=f0;tp=8;ch=7;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS5; action=start;
+link f=2437;r=t16,t23,f16,f23;tp=8;ch=7;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=2GHZ SENSITIVITY;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate;file=$SensReportFile;screen=0';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#run rxIQ Cal if its enabled.
+branch name=2G_SENS6; action=goto; condition='$rxiqcal2gDisable<>0'
+link f=2462;r=f0;tp=8;ch=7;pc=500;pl=100;iss=$issmax;rxiqcal=1;stop='$Test.Error';
+branch name=RX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=2G_SENS6; action=start;
+link f=2462;r=t16,t23,f16,f23;tp=8;ch=7;iss=$issmax:$issmin:$issinc;stop='$Test.Error';
+report r='summary title=2GHZ SENSITIVITY;k=frequency,rate;f=dip(iss,psr,$psrthreshold);label=dip;width=8;f=fit(iss,psr,20,$psrthreshold);label=fit 10%;width=8;f=lookup(rate,@rate,@isslimit);label=limit 10%;w=8;f=fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit);label=delta 10%;w=8;f=test(fit(iss,psr,20,$psrthreshold)-lookup(rate,@rate,@isslimit)<0,$passtext,$failtext,0,@FailSens2gGood);label=limit 10%;type=s,w=8;f=fit(iss,psr,20,$psrthreshold_4p);label=fit 4%;width=8;f=lookup(rate,@rate,@isslimit_4p);label=limit 4%;w=8;f=fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p);label=delta 4%;w=8;f=test(fit(iss,psr,20,$psrthreshold_4p)-lookup(rate,@rate,@isslimit_4p)<0,$passtext,$failtext,0,@FailSens2gBetter);label=limit 4%;type=s,w=8;'
+report r='graph x=rx.iss;min=$issmin;max=$issmax;inc=$issinc;y=rx.psr;min=0;max=100;inc=10;sort=rx.frequency,rx.rate;file=$SensReportFile;screen=0';
+
+branch name=RX2G_DONE; action=start;

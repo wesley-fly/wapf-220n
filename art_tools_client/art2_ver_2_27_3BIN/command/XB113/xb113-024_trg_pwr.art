@@ -1,0 +1,47 @@
+# Target power freq piers for OFDM legacy 5G, Max 8 piers, in order of f0, f1, ...f7
+set caltgtfreq5g=5180,5260,5320,5500,5600,5700,5745,5825;
+
+# Target power for each pier defined in caltgtfreq5g
+# 4 values represent the target power in dBm for the following data rate
+# r6_24,r36,r48,r54
+set caltgtpwr5g=v.(22,22,20,18),f.0;
+set caltgtpwr5g=v.(22,22,20,18),f.1;
+set caltgtpwr5g=v.(22,22,20,18),f.2;
+set caltgtpwr5g=v.(22,22,20,18),f.3;
+set caltgtpwr5g=v.(22,22,20,18),f.4;
+set caltgtpwr5g=v.(22,22,20,18),f.5;
+set caltgtpwr5g=v.(22,22,20,18),f.6;
+set caltgtpwr5g=v.(22,22,20,18),f.7;
+
+
+# Target power freq piers for HT20 5G, Max 8 piers, in order of f0, f1, ...f7
+set caltgtfreqht205g=5180,5260,5320,5500,5600,5700,5745,5825;
+
+# Target power for each pier defined in caltgtfreqht205g
+# 14 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set caltgtpwrht205g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.0;
+set caltgtpwrht205g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.1;
+set caltgtpwrht205g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.2;
+set caltgtpwrht205g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.3;
+set caltgtpwrht205g=v.(22,22,22,21,18,17,20,20,17,16,20,20,17,16),f.4;
+set caltgtpwrht205g=v.(22,22,22,21,18,17,20,20,17,16,20,20,17,16),f.5;
+set caltgtpwrht205g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.6;
+set caltgtpwrht205g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.7;
+
+
+# Target power freq piers for HT40 5G, Max 8 piers, in order of f0, f1, ...f7
+set caltgtfreqht405g=5190,5270,5310,5510,5590,5670,5755,5795;
+
+# Target power for each pier defined in caltgtfreqht405g
+# 14 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set caltgtpwrht405g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.0;
+set caltgtpwrht405g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.1;
+set caltgtpwrht405g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.2;
+set caltgtpwrht405g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.3;
+set caltgtpwrht405g=v.(22,22,22,21,18,17,20,20,17,16,20,20,17,16),f.4;
+set caltgtpwrht405g=v.(22,22,22,21,18,17,20,20,17,16,20,20,17,16),f.5;
+set caltgtpwrht405g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.6;
+set caltgtpwrht405g=v.(22,22,22,21,18,16,20,20,16,15,20,20,16,15),f.7;
+

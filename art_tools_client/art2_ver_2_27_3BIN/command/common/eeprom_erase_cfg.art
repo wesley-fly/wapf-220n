@@ -1,0 +1,44 @@
+load
+
+
+reset
+
+sleep 1000;
+
+
+
+ew size=2; a=0;  v=ffff;
+ew size=2; a=2;  v=ffff;
+ew size=2; a=4;  v=ffff;
+ew size=2; a=6;  v=ffff;
+ew size=2; a=8;  v=ffff;
+ew size=2; a=a;  v=ffff;
+ew size=2; a=c;  v=ffff;
+ew size=2; a=e;  v=ffff;
+ew size=2; a=10; v=ffff;
+ew size=2; a=12; v=ffff;
+ew size=2; a=14; v=ffff;
+ew size=2; a=16; v=ffff;
+ew size=2; a=18; v=ffff;
+ew size=2; a=1a; v=ffff;
+ew size=2; a=1c; v=ffff;
+ew size=2; a=1e; v=ffff;
+ew size=2; a=20; v=ffff;
+ew size=2; a=22; v=ffff;
+ew size=2; a=24; v=ffff;
+ew size=2; a=26; v=ffff;
+ew size=2; a=28; v=ffff;
+ew size=2; a=2a; v=ffff;
+ew size=2; a=2c; v=ffff;
+ew size=2; a=2e; v=ffff;
+ew size=2; a=30; v=ffff;
+ew size=2; a=32; v=ffff;
+ew size=2; a=34; v=ffff;
+ew size=2; a=36; v=ffff;
+ew size=2; a=38; v=ffff;
+ew size=2; a=3a; v=ffff;
+ew size=2; a=3c; v=ffff;
+ew size=2; a=3e; v=ffff;
+
+
+er size=2; a=0:3f;

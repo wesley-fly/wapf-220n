@@ -1,0 +1,106 @@
+; Copyright Atheros 2002
+
+[Version]
+Signature="$Chicago$"
+Class=AtherosMDK
+ClassGUID={A35AB82A-FDAF-4680-8595-4E2A4ACBF46E}
+ClassGUID={BC8527B6-FF66-463A-9EF6-E9AF5E18A9A4}
+Provider=%Provider%
+DriverVer=01/06/2002
+
+[Manufacturer]
+%Manufacturer%=AtherosPCI
+
+[AtherosPCI]
+; The Vendor ID is 168c: Atheros
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_1107
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0101
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0102
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0103
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0104
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0004
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0105
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0005
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0006
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0107
+%DKar5210%=DKar5210, PCI\VEN_168c&DEV_0007
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_0010
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_0011
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_f011
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_e011
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_f11b
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_ff12
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_0012
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_f012
+%DKar5211%=DKar5210, PCI\VEN_168c&DEV_e012
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0013
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_ff13
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_f013
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_ff15
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_ff16
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_001a
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_001b
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_001c
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_ff19
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0023
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0024
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0025
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0026
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0027
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0028
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_0029
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_002a
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_002b
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_002c
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_002d
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_002e
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_ff1d
+%DKar5212%=DKar5210, PCI\VEN_168c&DEV_ff1c
+%DKar9300%=DKar5210, PCI\VEN_168c&DEV_0030
+%DKar9300%=DKar5210, PCI\VEN_168c&DEV_0033
+%DKar9480%=DKar5210, PCI\VEN_168c&DEV_0034
+%DKar9300%=DKar5210, PCI\VEN_168c&DEV_abcd
+
+%DKaUART%=DKar5210, PCI\VEN_168c&DEV_ff96
+%DKaUART%=DKar5210, PCI\VEN_168c&DEV_1001
+
+[DKar5210]
+Log_Config=Base1
+
+[Base1]
+IRQConfig=3,4,5,7,9,10,11,14,15
+
+[ClassInstall32]
+Addreg=AtherosDKClassReg
+
+[DKar5210.services]
+Addservice = anwiwdm, 0x00000002, DKar5210.addservice
+
+[DKar5210.AddService]
+DisplayName    = %usb.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_ON_DEMAND
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\anwiwdm.sys
+
+[AtherosDKClassReg]
+HKR,,,,AtherosMDK
+HKR,,Icon,,-5
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,anwiwdm.sys
+
+[DestinationDirs]
+DefaultDestDir=10
+
+[ControlFlags]
+
+[Strings]
+Provider="Atheros"
+Manufacturer="Atheros"
+usb.SvcDesc="Anwi Driver client"
+DKar5210="Atheros AR5000 Anwi Diagnostic Kernel Driver"
+DKar5211="Atheros AR5001 Anwi Diagnostic Kernel Driver"
+DKar5212="Atheros AR5002 Anwi Diagnostic Kernel Driver"
+DKar9300="Atheros AR9300 Anwi Diagnostic Kernel Driver"
+DKar9480="Atheros AR9460 Anwi Diagnostic Kernel Driver"
+DKaUART="Atheros UART Anwi Diagnostic Kernel Driver"

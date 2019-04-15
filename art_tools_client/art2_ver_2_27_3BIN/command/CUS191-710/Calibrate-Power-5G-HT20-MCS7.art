@@ -1,0 +1,17 @@
+#
+# 5 GHz power calibration
+#
+tx att=0; txgain=20;pl=1500;pc=100;r=t7;ch=1,2,4;f=4920,5180,5320,5500,5620,5700,5745,5825;tx99=1;stop='$Test.Error';
+branch name=CAL_ERR;action=goto;test='$Test.Error<>0';
+
+tx att=0; txgain=30;pl=1500;pc=100;r=t7;ch=1,2,4;f=4920,5180,5320,5500,5620,5700,5745,5825;tx99=1;stop='$Test.Error';
+branch name=CAL_ERR;action=goto;test='$Test.Error<>0';
+
+tx att=0; txgain=40;pl=1500;pc=100;r=t7;ch=1,2,4;f=4920,5180,5320,5500,5620,5700,5745,5825;tx99=1;stop='$Test.Error';
+branch name=CAL_ERR;action=goto;test='$Test.Error<>0';
+
+tx att=0; txgain=40;pl=1500;agg=32;pc=1000000;r=t7;ch=1,2,4;cal=3;txgmaximum=95;f=4920,5180,5320,5500,5620,5700,5745,5825;tx99=1;stop='$Test.Error';
+
+report r='c f=cal.frequency;label=frequency;f=txchain,txgain,power,pcorr,voltage,temp;title=5GHz Calibration Coefficients';
+
+branch name=CAL_ERR; action=start;

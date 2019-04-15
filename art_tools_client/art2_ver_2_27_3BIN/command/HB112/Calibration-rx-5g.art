@@ -1,0 +1,13 @@
+#
+# rssi cal for 5G
+#
+branch name=rxcal_LP; action=goto; condition='$LitepointDisable=0'
+link f=5180,5220,5340,5420,5500,5620,5745;iss=-75; tp=0; nf=100; rssical=1; r=f16; pc=20;
+branch name=rxcal_LP_DONE; action=goto;
+
+branch name=rxcal_LP; action=start;
+rx stat=3;f=5180,5220,5340,5420,5500,5620,5745;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;reset=-1;rssical=1;nf=100;iss=-50;pc=20;r=0,1,0;ch=7;rxvsg=1;
+branch name=rxcal_LP_DONE; action=start;
+
+rep r='col f=rssi.frequency,chain,ce,rssi,nf,offset,nf+offset;type=d,d,s;label=frequency;title=5GHz RSSI Calibration'
+

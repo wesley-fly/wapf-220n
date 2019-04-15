@@ -1,0 +1,116 @@
+#specify the best template to use to result in less information stored in OTP or eeprom
+#select template types from
+#    	OspreyGeneric=2,
+#	HB112=3,
+#	HB116=4,
+#	XB112=5,
+#	XB113=6,
+template prefer=3; allow=3,2; install=yes;
+
+#subsystem and subverdor ID's
+set ssid=3110;
+set svid=168c;
+
+# set device type 
+# 1=>Cardbus, 2=>PCI, 3=>miniPCI, 4=>AP, 5=>PCIe mini, 6=>pcie express, 7=>pcie desktop
+set devicetype=5;
+
+# set Reg domain
+# customers can set regulatory domain index here
+set regdmn=0;
+
+#tx and rx chain mask: bit0 = chain0 enable, 
+#                      bit1 = chain1 enable, 
+#                      bit2 = chain2 enable 
+Set txmask=7;
+Set rxmask=7;
+
+#configure modes: 
+#	    bit0 = enable 5GHz
+#           bit1 = enable 2GHz
+#           bit2 = disable 5G HT40
+#           bit3 = disable 2G HT40
+#           bit4 = disable 5G HT20
+#           bit5 = disable 2G HT20
+#Note: these flags will be given individual commands in subsequent release 
+set opflags=3;
+
+#antenna switch table control
+#2GHz
+set antctrlcommon2g=110;
+set antctrlcommon22g=44444;
+set antCtrlChain2g=10, 10, 10;
+
+#5GHz
+set antctrlcommon5g=220;
+set antctrlcommon25g=44444;
+set antCtrlChain5g=10, 10, 10;
+
+#strong signal parameters
+set xatten1Margin2g=b,b,b;
+set xatten1Margin5g=b,b,b;
+set xatten1Marginlow5g=10,10,10;
+set xatten1Marginhigh5g=b,b,b;
+
+set xatten1db2g=18,18,18;
+set xatten1db5g=1e,1e,1e;
+set xatten1dblow5g=1b,1b,1b;
+set xatten1dbhigh5g=1e,1e,1e;
+
+set miscellaneous.quickdropenable=1;
+set quickdrop2g=-44;
+set quickdrop5g=-34;
+set quickdroplow=-34;
+set quickdrophigh=-34;
+
+# tx gain table
+#	0 – for client based designs containing an XPA
+#	1 – for no xpa design
+#	2 – for AP based (or modules that will be used in an AP) designs containing an XPA
+#	3 – not currently used
+set txgainTable=1;
+
+# rxgainTable	
+#    0: xlna
+#    1: no xlna
+set rxgainTable=0;
+
+#Temperature compensation
+set temperatureCompensation=1
+set tempSlope2g=25
+set tempSlope5g=70
+set tempSlopelow=35
+set tempSlopehigh=50
+
+#force chainX thermometer at all times
+set thermometer=1;
+
+#GPIO for EEPROM protect
+set eepromWriteEnable=6;
+
+#enable spur mitigation
+set spurchans2g=2464;
+
+#enable PA Pre-Distortion for enhanced tx EVM on FEMless design
+set papdenable=1;
+
+#set to 1 to enable Adapter power management
+set ChainMaskReduce=0;
+
+#set rfSilent by calling this file if needed
+#common\rfkill.art
+
+#set wake-on-wireless by calling this file if needed
+#common\wow.art
+
+#target power files
+hb112\hb112_trg_pwr_v2.art
+
+#CTL Files
+hb112\ctl_hb112_notxbf.art
+
+#set aspm latency registers properly for system BIOS to auto config ASPM for PC designs
+common\aspm.art
+
+#set CLKOBS disable in bootup
+common\clkobs_disable.art

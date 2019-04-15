@@ -1,0 +1,53 @@
+Installation and setup for running litepoint with cart/nart:
+1) Install dotnetframework support\dotnetfx.exe
+2) Install cart/nart (copy folder bin, command, support folder to your PC)
+3) Install matlab runtime v79 to make sure Litepoint dlls runs on your PC, ask Litepoint for this.
+   For IQ2010, install IQ201x GUI come from Litepoint, which will install 
+	Matlab runtime v79
+	IQ2010 device driver (check from device manager to make sure IQ2010 driver is installed ok)
+4) Run microsoft redistribution exe support\vcredist_x86.exe
+   For art2_v2_21 up, Also need to run microsoft 2008 redistribution exe support\litepoint\vcredist_x86-VC2008.exe
+5) For art2_v2_21 up, Run support\Litepoint\Litepoint_install.bat to install Litepoint related files.
+6) In bin\start.art, 
+   (a) Set up path loss:
+       For art2_v4_x and up:
+	   You need to set path loss for device=VSA, device=VSG, and device=SA 
+	   The path loss values are same for all type. (From Litepoint RF port to DUT RF connectors.)
+       For art2_v2_x and art2_v3_x:
+	   You need to set path loss for device=PM, and device=SA (VSA, VSG will are use PM path loss)
+	   The path loss values are same for both type. (From Litepoint RF port to DUT RF connectors.)
+   (b) Set up equipment:
+	For IQView, IQFlex:
+       		equipment model=litepoint; arg=192.168.100.254
+	For IQnxn  (only work with art2_4_x up)
+	        equipment model=litepoint; arg=192.168.100.254,192.168.100.253,192.168.100.252;
+	For IQ2010 
+	        equipment model=litepoint; arg=127.0.0.1
+   (c) Comment out all the other equipements setting in start.art (including variable attenuators)
+7) start nart in one console window
+8) start cart -local localhost in another console window
+9) type test_flow in cart console window to start the manufacture flow test.
+10) This release doesn't tested Litepoint box together with Golden unit and external Attenuators for throughput test.
+
+
+Setting parameters for Litepoint test in bin\Litepoint_setup.txt
+If user doesn't have this file in bin folder or never change any setting since the Atheros release,
+all the Litepoint related settings are as default (described in the Litepoint_setup.txt)
+1) If customer wants to use dual head two litepoint testers during manufacture test set up, 
+   please change the Litepoint_setup.txt as:
+	(a) For the cart to run Litepoint connect to left RF port, RFPORT=0; DUALHEAD_ENABLE=1;
+	    User should start the test_flow of this tester first.
+	(b) For the cart to run Litepoint connect to right RF port, RFPORT=1; DUALHEAD_ENABLE=1;
+	    User should start the test_flow of this tester after (a) start the flow test.
+2) User can change the EVM analysis parameters in Litepoint_setup.txt to evaluate EVM in different way.
+   This applies for both mimo and legacy OFDM EVM evaluation analysis parameters seperately.
+
+
+
+Test flags in test script command line setting:
+1) For single box, composite EVM measurement in Tx command line, always setting evm=1; The report power is stream power.
+   For IQnxn DVT EVM measurement 
+	EVM: 1 (report stream power and stream EVM value)
+	     2 (report chain power and chain EVM value)
+	Note: for single stream data rate you have to use txchain=7; evm=2; to get each chain's power and evm.
+	      for single stream data rate, evm=1, no matter what you set for txchain, it only gives you first stream(=chain)'s power and evm.

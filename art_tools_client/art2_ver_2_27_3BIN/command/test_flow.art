@@ -1,0 +1,116 @@
+##-----------------------------------------------------------------
+# run testSel, user can select above test item at runtime
+##-----------------------------------------------------------------
+#common\testSel.art
+
+branch name=SELTEST_START; action=start;
+##-----------------------------------------------------------------
+# load card
+##-----------------------------------------------------------------
+branch name=AP_LOAD; action=goto; condition='$isFlashCal=1'
+load
+
+branch name=AP_LOAD; action=start;
+branch name=START_TEST; action=goto; condition='$isFlashCal<>1'
+load caldata=flash;
+
+branch name=NO_DBDC;action=goto;condition='$enableDBDC<>1'
+load i=1;caldata=flash;
+branch name=NO_DBDC; action=start;
+
+branch name=START_TEST; action=start;
+show $Test.Error
+loop name=nocard;action=goto;test='$Test.Error<>0';
+hello
+
+common\assign_init.art
+
+assign FailTotalGoodPt=0;
+assign FailTotalGoodFt=0;
+
+##-----------------------------------------------------------------
+# Find the card's reference design from productList.ref
+##-----------------------------------------------------------------
+common\testRef.art
+show $refdesign
+show $ref_filename
+assign errDetected=0
+
+equipmentCtl statu=on
+
+##-----------------------------------------------------------------
+# Tx related test
+##-----------------------------------------------------------------
+branch name=PT_TEST; action=start;
+branch name=FT_TEST; action=goto; condition='$ptTestDisable=1'
+common\pt.art
+branch name=TEST_ERR;action=goto;test='$errDetected=1';
+
+##-----------------------------------------------------------------
+# Rx and throughput tests
+##-----------------------------------------------------------------
+branch name=FT_TEST; action=start;
+branch name=SUMMARY_PT; action=goto; condition='$ftTestDisable=1'
+
+branch name=FT_LP; action=goto; condition='$LitepointDisable=0'
+common\ft.art
+branch name=TEST_ERR;action=goto;test='$errDetected=1';
+branch name=SUMMARY_PT; action=goto;
+
+branch name=FT_LP; action=start;
+common\ft_litepoint.art
+branch name=TEST_ERR;action=goto;test='$errDetected=1';
+
+##-----------------------------------------------------------------
+# summary
+##-----------------------------------------------------------------
+branch name=SUMMARY_PT; action=start;
+equipmentCtl status=off
+branch name=SUMMARY_FT; action=goto; condition='$ptTestDisable=1'
+common\summary-pt.art
+
+branch name=SUMMARY_FT; action=start;
+branch name=LOOP; action=goto; condition='$ftTestDisable=1'
+common\summary-ft.art
+
+branch name=LOOP; action=start;
+
+comment title="  "
+calculate FailTotal=$FailTotalGoodpt+$FailTotalGoodft
+comment title="=================================================================="
+comment title="                       Total:     $FailTotal"
+comment title="=================================================================="
+
+loop label=PrintFail;action=goto;condition='$FailTotalGoodpt>0'
+loop label=PrintFail;action=goto;condition='$FailTotalGoodft>0'
+comment title="                        PASS"
+comment file=current.log;title="PASS	$mac $customer";
+unload
+loop label=done;action=goto
+
+loop label=PrintFail;action=start;
+comment title="                        FAIL"
+comment file=current.log;title="FAIL	$mac $customer";
+unload
+loop label=done;action=goto
+
+loop label=nocard;action=start;
+comment title="      NO CARD Loaded    FAIL"
+comment file=current.log;title="FAIL	$mac $customer";
+loop label=done;action=goto
+
+loop label=TEST_ERR;action=start;
+comment title="      Test Error        FAIL"
+comment file=current.log;title="FAIL	$mac $customer";
+
+loop label=done;action=goto
+
+###----------------------------------------------
+branch name=DONE; action=start;
+equipmentCtl status=off
+comment title=Done Test!
+
+#branch name=DONESAVE_SKIP; action=goto; condition='$doneFile=0'
+#comment file=TestDone.txt;title="TEST DONE";
+branch name=DONESAVE_SKIP; action=start;
+

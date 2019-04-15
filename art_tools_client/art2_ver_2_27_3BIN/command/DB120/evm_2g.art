@@ -1,0 +1,75 @@
+assign FailPwrEVM2gGood=0
+assign FailPwrEVM2gBetter=0
+assign FailPwrEVM2gBest=0
+assign FailEVM2g=0
+
+assign ppmlimit2g=20
+assign rate=6,54,11s,t0,t4,t7,t8,t12,t15,t16,t20,t23,f0,f7,f8,f12,f15,f16,f20,f23
+assign evmlimit=-5,-25,-10,-7,-18,-28,-7,-18,-28,-7,-18,-28,-7,-28,-7,-18,-28,-7,-18,-28,
+
+# target power offset 1.8 for 2 stream, 3 chains
+#assign tp2s=1.8
+# target power offset 0 for 2 stream, 2 chains
+assign tp2s=0
+
+
+#2 isolate, 1 combined
+
+assign avgEVM2g=5
+
+#_________________________________________________________
+# warm up when channel changes
+tx tx=$2gr; att=0; f=2412; pc=10; pl=4000; r=54;ch=3;tx99=1;
+# 1stream, txch=1
+tx tx=$2gr; pl=4000;pc=1000000;f=2412;r=54,t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+# 2stream, 3 chains, tp offset 1.8
+tx tx=$2gr; pl=4000;pc=1000000;f=2412;r=t15,f15;ir=2;txch=3;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=(tp+$tp2s);l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-(tp+$tp2s);l=delta;f=test(((power-(tp+$tp2s))<=2.0 & (power-(tp+$tp2s))>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-(tp+$tp2s))<=1.5 & (power-(tp+$tp2s))>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-(tx.tp+$tp2s))<=1.0 & (power-(tx.tp+$tp2s))>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#_________________________________________________________
+# warm up when channel changes
+tx tx=$2gr; att=0; f=2437; pc=10; pl=4000; r=54;ch=7;tx99=1;
+# 1stream, txch=1
+branch name=NOFREQACCU2G_EVM; action=goto; condition='$channAccDisable2g<>0'
+tx tx=$2gr; pl=4000;pc=1000000;f=2437;r=54;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+# PPM report
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=ppm;f=0-$ppmlimit2g;l=ppmMin;f=0+$ppmlimit2g;l=ppmMax;f=fail((ppm>$ppmlimit2g | ppm<-$ppmlimit2g),$FText,@FailPpm2gGood,$ptext);l=P/F;type=s;width=8;d=0;title=2G Frequency Acuracy'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+tx tx=$2gr; pl=4000;pc=1000000;f=2437;r=t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+branch name=FREQACCU2G_DONE;action=goto;
+branch name=NOFREQACCU2G_EVM; action=start;
+
+tx tx=$2gr; pl=4000;pc=1000000;f=2437;r=54,t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=FREQACCU2G_DONE; action=start;
+# 2stream, 3 chains, tp offset 1.8
+tx tx=$2gr; pl=4000;pc=1000000;f=2437;r=t15,f15;ir=2;txch=3;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=(tp+$tp2s);l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-(tp+$tp2s);l=delta;f=test(((power-(tp+$tp2s))<=2.0 & (power-(tp+$tp2s))>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-(tp+$tp2s))<=1.5 & (power-(tp+$tp2s))>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-(tx.tp+$tp2s))<=1.0 & (power-(tx.tp+$tp2s))>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+#_________________________________________________________
+# warm up when channel changes
+tx tx=$2gr; att=0; f=2462; pc=10; pl=4000; r=54;ch=3;tx99=1;
+# 1stream, txch=1
+tx tx=$2gr; pl=4000;pc=1000000;f=2462;r=54,t7,f7;ir=2;txch=1;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate,txchain;f=tp;l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-tp;l=delta;f=test(((power-tp)<=2.0 & (power-tp)>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-tp)<=1.5 & (power-tp)>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-tx.tp)<=1.0 & (power-tx.tp)>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+# 2stream, 3 chains, tp offset 1.8
+tx tx=$2gr; pl=4000;pc=1000000;f=2462;r=t15,f15;ir=2;txch=3;evm=1;tx99=1;avg=$avgEVM2g;delay=40;stop='$Test.Error';
+report r='c f=evm.freq;l=freq;width=5;f=rate;l=rate;f=txchain;l=stream;f=(tp+$tp2s);l=target;f=tx.temp;l=temp;f=evm.power;l=meas pwr;f=evmv;l=meas_EVM;f=lookup(rate,@rate,@evmlimit);l=EVMLimit;f=fail((evmv>lookup(rate,@rate,@evmlimit)),$FText,@FailEVM2g,$PText);l=evmP/F;type=s;width=7;f=power-(tp+$tp2s);l=delta;f=test(((power-(tp+$tp2s))<=2.0 & (power-(tp+$tp2s))>=-2.0),$PText,$FText,0,@FailPwrEVM2gGood);l=2.0dB;type=s;width=8;f=test(((power-(tp+$tp2s))<=1.5 & (power-(tp+$tp2s))>=-1.5),$PText,$FText,0,@FailPwrEVM2gBetter);l=1.5dB;type=s;width=8;f=test(((power-(tx.tp+$tp2s))<=1.0 & (power-(tx.tp+$tp2s))>=-1.0),$PText,$FText,0,@FailPwrEVM2gBest);l=1.0dB;type=s;width=8;d=0;screen=1;title=2GHz EVM Accuracy with chain power;'
+branch name=TX2G_DONE;action=goto;test='$Test.Error<>0';
+
+branch name=TX2G_DONE; action=start;

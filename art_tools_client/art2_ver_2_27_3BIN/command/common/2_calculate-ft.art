@@ -1,0 +1,27 @@
+#
+# Calculate FT summary
+#
+
+branch name=DBDC_TXBPER2G_CAL; action=goto; condition='$2_btputTx2gDisable<>0'
+calculate 2_FailTotal2gGoodft=$2_FailTotal2gGoodft+$2_FailBTxTput2gGood
+
+branch name=DBDC_TXBPER2G_CAL; action=start;
+branch name=DBDC_SUM2G_CAL; action=goto; condition='$2_btxPerDisable2g<>0'
+calculate 2_FailTotal2gGoodft=$2_FailTotal2gGoodft+$2_FailBTxTput2gPSR
+
+branch name=DBDC_SUM2G_CAL; action=start;
+calculate 2_FailTotal2gGoodft=$2_FailTotal2gGoodft+$2_FailSens2gGood+$2_FailTxTput2gGood+$2_FailRxTput2gGood+$2_FailTxTput2gPSR
+
+#######################   5G summary   #######################
+
+branch name=DBDC_TXBPER5G_CAL; action=goto; condition='$2_btputTx5gDisable<>0'
+calculate 2_FailTotal5gGoodft=$2_FailTotal5gGoodft+$2_FailBTxTput5gGood
+
+branch name=DBDC_TXBPER5G_CAL; action=start;
+branch name=DBDC_SUM5G_CAL; action=goto; condition='$2_btxPerDisable5g<>0'
+calculate 2_FailTotal5gGoodft=$2_FailTotal5gGoodft+$2_FailBTxTput5gPSR
+
+branch name=DBDC_SUM5G_CAL; action=start;
+calculate 2_FailTotal5gGoodft=$2_FailTotal5gGoodft+$2_FailSens5gGood+$2_FailTxTput5gGood+$2_FailRxTput5gGood+$2_FailTxTput5gPSR
+
+calculate FailTotalGoodft=$FailTotalGoodft+$2_FailTotal2gGoodft+$2_FailTotal5gGoodft

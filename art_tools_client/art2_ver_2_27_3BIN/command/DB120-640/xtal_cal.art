@@ -1,0 +1,6 @@
+tx attenuation=0; carrier=1; txgain=40; chain=1; f=5500; xtalcal=1;
+
+set FeatureEnable.TuningCaps=1;
+
+report r='col f=xtal.frequency; l=frequency; f=xtal.factual; w=15; d=6; l=factual; f=xtal.ppm; l=ppm; f=xtal.cap; l=cap; title=Xtal Cal Radio 1;'
+

@@ -1,0 +1,77 @@
+#--------------------------------------------------------------------------------------
+# this build is for DB120 
+#--------------------------------------------------------------------------------------
+
+# AP specified test selection, over write the test selection in test_flow_flags.art
+# and Invalid testSel selection.
+ap123\test_flow_flags_ap123.art
+
+#subsystem and subverdor ID's
+set ssid=a123;
+set svid=168c;
+
+# set device type 
+# 1=>Cardbus, 2=>PCI, 3=>miniPCI, 4=>AP, 5=>PCIe mini, 6=>pcie express, 7=>pcie desktop
+set devicetype=4
+
+# set Reg domain
+# customers can set regulatory domain index here
+set regdmn[0]=0
+set regdmn[1]=0x1f
+
+#tx and rx chain mask: bit0 = chain0 enable, 
+#                      bit1 = chain1 enable, 
+#                      bit2 = chain2 enable 
+Set txmask=3;
+Set rxmask=3;
+
+#configure modes: 
+#	    bit0 = enable 5GHz
+#           bit1 = enable 2GHz
+#           bit2 = disable 5G HT40
+#           bit3 = disable 2G HT40
+#           bit4 = disable 5G HT20
+#           bit5 = disable 2G HT20
+#Note: these flags will be given individual commands in subsequent release 
+set opflags=2;
+
+#configuration for internal regulator
+set internalregulator=1;
+
+#antenna switch table control
+#2GHz
+set antctrlcommon2g=220; 
+set antctrlcommon22g=11111; 
+
+
+# tx gain table
+#	0 – for xpa design - will provide lower power consumption (this table is still in characterization)
+#	1 – for no xpa design
+#	2 – for xpa design – will provide normal power consumption
+#	3 – for high power PA design
+set txgainTable=1;
+
+# rxgainTable	0: xlna	1: no xlna
+set rxgainTable=1;
+
+#Temperature compensation
+set temperatureCompensation=1
+set tempSlope2g=25
+
+
+#enable spur mitigation
+set spurchans2g=2400,2425,2450,2464;
+
+set papdenable=1;
+set 2GHz.PaPredistortion.Ht20=0x0c00e0e0;
+set 2GHz.PaPredistortion.Ht40=0x0000e0e0;
+#5G does not require PaPreD
+set 5GHz.PaPredistortion.Ht20=0x0;
+set 5GHz.PaPredistortion.Ht40=0x0;
+
+#flags not supported yet - will be added in subsequent release
+# set eepmisc=   bit1: wakeupwireless
+# set rfSilent=0  bit0   bit1:polarity            bit2:5 GPIO line 
+
+#target power files
+$refdesign\ap123_trg_pwr.art

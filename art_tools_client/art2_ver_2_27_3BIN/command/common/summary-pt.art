@@ -1,0 +1,110 @@
+#
+# write PT summary
+#
+comment title=" "
+comment title=" dut: $NartVersion $NartBuildDate $mac $customer"
+comment title="cart: $CartVersion $CartBuildDate"
+comment title="spectrum analyzer: $Equipment.SpectrumAnalyzer"
+comment title="      power meter: $Equipment.PowerMeter"
+#comment title="multimeter: $Equipment.MultiMeter"
+comment title="       attenuator: $Equipment.Attenuator[0]"
+comment title=" "
+
+comment title="                            PT TEST SUMMARY"
+comment title="=================================================================="
+comment title="                                Good"
+
+branch name=EVM2G_PRINT; action=goto; condition='$txPwrDisable2g<>0'
+comment title="2GHz Power Accuracy by chain:     $FailPower2gGood"
+
+branch name=EVM2G_PRINT; action=start;
+branch name=FREQACC2G_PRINT; action=goto; condition='$txEVMDisable2g<>0'
+comment title="   2GHz Power (EVM) Accuracy:     $FailPwrEVM2gGood"
+comment title="           2GHz EVM Accuracy:     $FailEVM2g"
+
+branch name=FREQACC2G_PRINT; action=start;
+branch name=MASK2G_PRINT; action=goto; condition='$channAccDisable2g<>0'
+comment title="     2GHz Frequency Accuracy:     $FailPpm2gGood"
+
+branch name=MASK2G_PRINT; action=start;
+branch name=TXSUM2G_PRINT; action=goto; condition='$maskDisable2g<>0'
+comment title="          2GHz Spectral Mask:     $FailMask2gGood"
+
+branch name=TXSUM2G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  2GHz Total:     $FailTotal2gGoodpt"
+comment title="=================================================================="
+
+#######################   5G summary   #######################
+branch name=EVM5G_PRINT; action=goto; condition='$txPwrDisable5g<>0'
+comment title="5GHz Power Accuracy by chain:     $FailPower5gGood"
+
+branch name=EVM5G_PRINT; action=start;
+branch name=FREQACC5G_PRINT; action=goto; condition='$txEVMDisable5g<>0'
+comment title="   5GHz Power (EVM) Accuracy:     $FailPwrEVM5gGood"
+comment title="           5GHz EVM Accuracy:     $FailEVM5g"
+
+branch name=FREQACC5G_PRINT; action=start;
+branch name=MASK5G_PRINT; action=goto; condition='$channAccDisable5g<>0'
+comment title="     5GHz Frequency Accuracy:     $FailPpm5gGood"
+
+branch name=MASK5G_PRINT; action=start;
+branch name=TXSUM5G_PRINT; action=goto; condition='$maskDisable5g<>0'
+comment title="          5GHz Spectral Mask:     $FailMask5gGood"
+
+branch name=TXSUM5G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  5GHz Total:     $FailTotal5gGoodpt"
+comment title="=================================================================="
+
+
+branch name=NO_DBDC_SUMMARY_PT; action=goto; condition='$enableDBDC<>1'
+comment title="                            PT TEST SUMMARY - Radio2"
+comment title="=================================================================="
+comment title="                                Good"
+
+branch name=DBDC_EVM2G_PRINT; action=goto; condition='$2_txPwrDisable2g<>0'
+comment title="2GHz Power Accuracy by chain:     $2_FailPower2gGood"
+
+branch name=DBDC_EVM2G_PRINT; action=start;
+branch name=DBDC_FREQACC2G_PRINT; action=goto; condition='$2_txEVMDisable2g<>0'
+comment title="   2GHz Power (EVM) Accuracy:     $2_FailPwrEVM2gGood"
+comment title="           2GHz EVM Accuracy:     $2_FailEVM2g"
+
+branch name=DBDC_FREQACC2G_PRINT; action=start;
+branch name=DBDC_MASK2G_PRINT; action=goto; condition='$2_channAccDisable2g<>0'
+comment title="     2GHz Frequency Accuracy:     $2_FailPpm2gGood"
+
+branch name=DBDC_MASK2G_PRINT; action=start;
+branch name=DBDC_TXSUM2G_PRINT; action=goto; condition='$2_maskDisable2g<>0'
+comment title="          2GHz Spectral Mask:     $2_FailMask2gGood"
+
+branch name=DBDC_TXSUM2G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  2GHz Total:     $2_FailTotal2gGoodpt"
+comment title="=================================================================="
+
+#######################   5G summary   #######################
+branch name=DBDC_EVM5G_PRINT; action=goto; condition='$2_txPwrDisable5g<>0'
+comment title="5GHz Power Accuracy by chain:     $2_FailPower5gGood"
+
+branch name=DBDC_EVM5G_PRINT; action=start;
+branch name=DBDC_FREQACC5G_PRINT; action=goto; condition='$2_txEVMDisable5g<>0'
+comment title="   5GHz Power (EVM) Accuracy:     $2_FailPwrEVM5gGood"
+comment title="           5GHz EVM Accuracy:     $2_FailEVM5g"
+
+branch name=DBDC_FREQACC5G_PRINT; action=start;
+branch name=DBDC_MASK5G_PRINT; action=goto; condition='$2_channAccDisable5g<>0'
+comment title="     5GHz Frequency Accuracy:     $2_FailPpm5gGood"
+
+branch name=DBDC_MASK5G_PRINT; action=start;
+branch name=DBDC_TXSUM5G_PRINT; action=goto; condition='$2_maskDisable5g<>0'
+comment title="          5GHz Spectral Mask:     $2_FailMask5gGood"
+
+branch name=DBDC_TXSUM5G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  5GHz Total:     $2_FailTotal5gGoodpt"
+comment title="=================================================================="
+
+branch name=NO_DBDC_SUMMARY_PT; action=start
+comment title="                    PT TOTAL:     $FailTotalGoodpt"

@@ -1,0 +1,144 @@
+#
+# write FT summary
+#
+comment title=" "
+comment title="       dut: $NartVersion $NartBuildDate $mac $customer"
+branch name=FT_NO_DBDC_GOLDEN1; action=goto; condition='$enableDBDC<>1'
+comment title="    golden: $NartVersion2 $NartBuildDate2 $mac2 $customer2"
+branch name=FT_CART_VERSION; action=goto
+branch name=FT_NO_DBDC_GOLDEN1; action=start
+comment title="    golden: $NartVersion1 $NartBuildDate1 $mac1 $customer1"
+branch name=FT_CART_VERSION; action=start
+comment title="      cart: $CartVersion $CartBuildDate" 
+comment title="attenuator: $Equipment.Attenuator[0]" 
+comment title=" "
+
+comment title="                              FT TEST SUMMARY"
+comment title="=================================================================="
+comment title="                                Good"
+branch name=TXTPUT2G_PRINT; action=goto; condition='$rxsensDisable2g<>0'
+comment title="            2GHz Sensitivity:     $FailSens2gGood"
+
+branch name=TXTPUT2G_PRINT; action=start;
+branch name=TXBTPUT2G_PRINT; action=goto; condition='$tputTx2gDisable<>0'
+comment title="  Unicast 2GHz TX Throughput:     $FailTxTput2gGood"
+
+branch name=TXBTPUT2G_PRINT; action=start;
+branch name=TXPER2G_PRINT; action=goto; condition='$btputTx2gDisable<>0'
+comment title="Broadcast 2GHz TX Throughput:     $FailBTxTput2gGood"
+
+branch name=TXPER2G_PRINT; action=start;
+branch name=TXBPER2G_PRINT; action=goto; condition='$txPerDisable2g<>0'
+comment title="         Unicast 2GHz TX PER:     $FailTxTput2gPSR"
+
+branch name=TXBPER2G_PRINT; action=start;
+branch name=RXTPUT2G_PRINT; action=goto; condition='$btxPerDisable2g<>0'
+comment title="       Broadcast 2GHz TX PER:     $FailBTxTput2gPSR"
+
+branch name=RXTPUT2G_PRINT; action=start;
+branch name=SUM2G_PRINT; action=goto; condition='$tputRx2gDisable<>0'
+comment title="          2GHz RX Throughput:     $FailRxTput2gGood"
+
+branch name=SUM2G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  2GHz Total:     $FailTotal2gGoodft"
+comment title="=================================================================="
+
+
+#######################   5G summary   #######################
+branch name=RXSENS5G_PRINT; action=start;
+branch name=TXTPUT5G_PRINT; action=goto; condition='$rxsensDisable5g<>0'
+comment title="            5GHz Sensitivity:     $FailSens5gGood"
+
+branch name=TXTPUT5G_PRINT; action=start;
+branch name=TXBTPUT5G_PRINT; action=goto; condition='$tputTx5gDisable<>0'
+comment title="  Unicast 5GHz TX Throughput:     $FailTxTput5gGood"
+
+branch name=TXBTPUT5G_PRINT; action=start;
+branch name=TXPER5G_PRINT; action=goto; condition='$btputTx5gDisable<>0'
+comment title="Broadcast 5GHz TX Throughput:     $FailBTxTput5gGood"
+
+branch name=TXPER5G_PRINT; action=start;
+branch name=TXBPER5G_PRINT; action=goto; condition='$txPerDisable5g<>0'
+comment title="         Unicast 5GHz TX PER:     $FailTxTput5gPSR"
+
+branch name=TXBPER5G_PRINT; action=start;
+branch name=RXTPUT5G_PRINT; action=goto; condition='$btxPerDisable5g<>0'
+comment title="       Broadcast 5GHz TX PER:     $FailBTxTput5gPSR"
+
+branch name=RXTPUT5G_PRINT; action=start;
+branch name=SUM5G_PRINT; action=goto; condition='$tputRx5gDisable<>0'
+comment title="          5GHz RX Throughput:     $FailRxTput5gGood"
+
+branch name=SUM5G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  5GHz Total:     $FailTotal5gGoodft"
+comment title="=================================================================="
+
+
+branch name=NO_DBDC_SUMMARY_FT; action=goto; condition='$enableDBDC<>1'
+
+comment title="                              FT TEST SUMMARY - Radio2"
+comment title="=================================================================="
+comment title="                                Good"
+branch name=DBDC_TXTPUT2G_PRINT; action=goto; condition='$2_rxsensDisable2g<>0'
+comment title="            2GHz Sensitivity:     $2_FailSens2gGood"
+
+branch name=DBDC_TXTPUT2G_PRINT; action=start;
+branch name=DBDC_TXBTPUT2G_PRINT; action=goto; condition='$2_tputTx2gDisable<>0'
+comment title="  Unicast 2GHz TX Throughput:     $2_FailTxTput2gGood"
+
+branch name=DBDC_TXBTPUT2G_PRINT; action=start;
+branch name=DBDC_TXPER2G_PRINT; action=goto; condition='$2_btputTx2gDisable<>0'
+comment title="Broadcast 2GHz TX Throughput:     $2_FailBTxTput2gGood"
+
+branch name=DBDC_TXPER2G_PRINT; action=start;
+branch name=DBDC_TXBPER2G_PRINT; action=goto; condition='$2_txPerDisable2g<>0'
+comment title="         Unicast 2GHz TX PER:     $2_FailTxTput2gPSR"
+
+branch name=DBDC_TXBPER2G_PRINT; action=start;
+branch name=DBDC_RXTPUT2G_PRINT; action=goto; condition='$2_btxPerDisable2g<>0'
+comment title="       Broadcast 2GHz TX PER:     $2_FailBTxTput2gPSR"
+
+branch name=DBDC_RXTPUT2G_PRINT; action=start;
+branch name=DBDC_SUM2G_PRINT; action=goto; condition='$2_tputRx2gDisable<>0'
+comment title="          2GHz RX Throughput:     $2_FailRxTput2gGood"
+
+branch name=DBDC_SUM2G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  2GHz Total:     $2_FailTotal2gGoodft"
+comment title="=================================================================="
+
+
+#######################   5G summary   #######################
+branch name=DBDC_RXSENS5G_PRINT; action=start;
+branch name=DBDC_TXTPUT5G_PRINT; action=goto; condition='$2_rxsensDisable5g<>0'
+comment title="            5GHz Sensitivity:     $2_FailSens5gGood"
+
+branch name=DBDC_TXTPUT5G_PRINT; action=start;
+branch name=DBDC_TXBTPUT5G_PRINT; action=goto; condition='$2_tputTx5gDisable<>0'
+comment title="  Unicast 5GHz TX Throughput:     $2_FailTxTput5gGood"
+
+branch name=DBDC_TXBTPUT5G_PRINT; action=start;
+branch name=DBDC_TXPER5G_PRINT; action=goto; condition='$2_btputTx5gDisable<>0'
+comment title="Broadcast 5GHz TX Throughput:     $2_FailBTxTput5gGood"
+
+branch name=DBDC_TXPER5G_PRINT; action=start;
+branch name=DBDC_TXBPER5G_PRINT; action=goto; condition='$2_txPerDisable5g<>0'
+comment title="         Unicast 5GHz TX PER:     $2_FailTxTput5gPSR"
+
+branch name=DBDC_TXBPER5G_PRINT; action=start;
+branch name=DBDC_RXTPUT5G_PRINT; action=goto; condition='$2_btxPerDisable5g<>0'
+comment title="       Broadcast 5GHz TX PER:     $2_FailBTxTput5gPSR"
+
+branch name=DBDC_RXTPUT5G_PRINT; action=start;
+branch name=DBDC_SUM5G_PRINT; action=goto; condition='$2_tputRx5gDisable<>0'
+comment title="          5GHz RX Throughput:     $2_FailRxTput5gGood"
+
+branch name=DBDC_SUM5G_PRINT; action=start;
+comment title="=================================================================="
+comment title="                  5GHz Total:     $2_FailTotal5gGoodft"
+comment title="=================================================================="
+
+branch name=NO_DBDC_SUMMARY_FT; action=start
+comment title="                    FT TOTAL:     $FailTotalGoodft"

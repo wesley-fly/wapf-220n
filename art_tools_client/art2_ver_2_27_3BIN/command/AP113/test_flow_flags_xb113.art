@@ -1,0 +1,72 @@
+## default test selection 0: run the test,  1: disable the test 
+##-----------------------------------------------------------------
+## Select TP, FT test
+##-----------------------------------------------------------------
+assign ptTestDisable=0
+assign ftTestDisable=0
+##-----------------------------------------------------------------
+## 
+##-----------------------------------------------------------------
+assign isFlashCal=0
+##-----------------------------------------------------------------
+## For calibration
+##-----------------------------------------------------------------
+assign txCalDisable2g=1
+assign txCalDisable5g=0
+assign rxCalDisable2g=1
+assign rxCalDisable5g=1
+##-----------------------------------------------------------------
+## For EEPROM Write Operation
+##-----------------------------------------------------------------
+assign saveEEPTxCalDisable=0
+assign saveEEPRxCalDisable=1
+assign savePCIeDisable=0
+assign eepCheckDisable=0
+# noEEPSaveOnFail: 0 saveEEP based on above flag
+# noEEPSaveOnFail: 1 saveEEP based on above flag and when all pass
+assign noEEPSaveOnFail=0
+# doneFile: 1 there is a TestDone.txt saved after flow_test
+#assign doneFile=0
+##-----------------------------------------------------------------
+## For Tx Test
+##-----------------------------------------------------------------
+assign txPwrDisable2g=1
+assign txPwrDisable5g=0
+assign txPwrAllChainDisable2g=1
+assign txPwrAllChainDisable5g=1
+assign maskDisable2g=1
+assign maskDisable5g=0
+assign channAccDisable2g=1
+# not supported
+assign channAccDisable5g=0	
+##-----------------------------------------------------------------
+## For Rx Test
+##-----------------------------------------------------------------
+assign rxsensDisable2g=1
+assign rxsensDisable5g=0
+assign rxPerDisable2g=1
+assign rxPerDisable5g=1
+##-----------------------------------------------------------------
+## For Throughput Test
+##-----------------------------------------------------------------
+assign txPerDisable2g=1
+assign txPerDisable5g=0
+assign tputTx2gDisable=1
+assign tputTx5gDisable=0
+# not supported
+assign tputRx2gDisable=1	
+# not supported
+assign tputRx5gDisable=1
+##-----------------------------------------------------------------
+## For sleep for warm up
+##-----------------------------------------------------------------
+assign sleeptx2gDisable=1
+assign sleeptx5gDisable=1
+##-----------------------------------------------------------------
+## For current measurement
+##-----------------------------------------------------------------
+# not supported
+assign rxCurrentDisable=1
+assign txCurrentDisable=1
+##-----------------------------------------------------------------
+## End of test default test selection

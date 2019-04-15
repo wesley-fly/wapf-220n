@@ -1,0 +1,464 @@
+#
+# Sample calibration and test flow
+#
+# use with cart version and nart v0.10 
+#
+
+#-----------------------------------------
+# set board configuration parameters
+#-----------------------------------------
+hello
+get mac
+get customer
+hello
+
+
+branch name=LOAD_REF; action=goto; condition='$txCalDisable2g=0'
+branch name=LOAD_REF; action=goto; condition='$txCalDisable5g=0'
+branch name=LOAD_REF_SKIP; action=goto;
+
+branch name=LOAD_REF; action=start;
+$refdesign\$ref_filename.ref
+branch name=LOAD_REF_SKIP; action=start;
+
+get opflags;
+set mac=$mac
+set customer=$customer
+
+
+#sl
+hello
+
+branch name=NO_BANDSEL; action=goto; condition='$enableDBDC=1'
+common\bandSel.art
+branch name=NO_BANDSEL; action=start;
+
+#rep r='c f=sl.name;l=Name;w=25;f=address,high,low,mask,hex,decimal,signed;title=FIELD/REGISTER OVERRIDES'
+#
+# warmup, Might remove in future
+#
+branch name=TXCAL5G_WARMUP; action=goto; condition='$5gOnly=1'
+tx f=2412;r=t0;pc=5000;txgain=60;ch=7;
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=TXCAL2G_TEST; action=goto;
+
+branch name=TXCAL5G_WARMUP; action=start;
+$refdesign\warmup_5g.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# read hardware calibration results and put in report
+#
+common\read_hw_cal
+#
+# measure current
+#
+#currentMeasure.art
+
+#
+# 2GHz power calibration
+#
+branch name=TXCAL2G_TEST; action=start;
+branch name=TXCAL5G_TEST; action=goto; condition='$txCalDisable2g<>0'
+#comment title='	run 2g Tx Cal
+$refdesign\Calibrate-Power-2G-HT20-MCS7.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz power calibration
+#
+branch name=TXCAL5G_TEST; action=start;
+branch name=XTALCAL_TEST; action=goto; condition='$txCalDisable5g<>0'
+#comment title='	run 5g Tx Cal'
+$refdesign\Calibrate-Power-5G-HT20-MCS7.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# Xtal calibration
+#
+branch name=XTALCAL_TEST; action=start;
+branch name=TXPWR2G_TEST; action=goto; condition='$xtalCalDisable<>0'
+#comment title='	run xtal cal'
+$refdesign\xtal_cal.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz target power accuracy
+#
+branch name=TXPWR2G_TEST; action=start;
+branch name=TXPWR5G_TEST; action=goto; condition='$txPwrDisable2g<>0'
+#comment title='	run 2g Tx pwr'
+$refdesign\target_test_2g.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz target power accuracy
+#
+branch name=TXPWR5G_TEST; action=start;
+branch name=TXEVM2G_TEST; action=goto; condition='$txPwrDisable5g<>0'
+#comment title='	run 5g Tx pwr'
+$refdesign\target_test_5g.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz EVM measurement at target power
+#
+branch name=TXEVM2G_TEST; action=start;
+branch name=TXEVM5G_TEST; action=goto; condition='$txEVMDisable2g<>0'
+#comment title='	run 2g Tx EVM'
+sw a=BB_scrambler_seed.fixed_scrambler_seed;v=1
+sw a=BB_phyonly_control.generate_scrambler;v=0
+$refdesign\evm_2g.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz EVM measurement at target power
+#
+branch name=TXEVM5G_TEST; action=start;
+branch name=TXCURRENT_TEST; action=goto; condition='$txEVMDisable5g<>0'
+#comment title='	run 5g Tx EVM'
+sw a=BB_scrambler_seed.fixed_scrambler_seed;v=1
+sw a=BB_phyonly_control.generate_scrambler;v=0
+$refdesign\evm_5g.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# measure tx current
+#
+branch name=TXCURRENT_TEST; action=start;
+branch name=FREQACCU2G_CAL; action=goto; condition='$txCurrentDisable<>0'
+#comment title='	Measure Tx current'
+$refdesign\txCurrentMeasure.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz frequency accuracy test
+#
+branch name=FREQACCU2G_CAL; action=start;
+branch name=FREQACCU5G_CAL; action=goto; condition='$channAccDisable2g<>0'
+branch name=FREQACCU5G_CAL; action=goto; condition='$txEVMDisable2g=0'
+#comment title='	2g freq accuracy test'
+$refdesign\xfrequency_accuracy_cal_flow_2g
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz frequency accuracy test (currently doesn't work)
+#
+branch name=FREQACCU5G_CAL; action=start;
+branch name=MASK2G_TEST; action=goto; condition='$channAccDisable5g<>0'
+branch name=MASK2G_TEST; action=goto; condition='$txEVMDisable5g=0'
+#comment title='	5g freq accuracy test'
+$refdesign\xfrequency_accuracy_cal_flow_5g
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz spectral mask test
+#
+branch name=MASK2G_TEST; action=start;
+branch name=MASK5G_TEST; action=goto; condition='$maskDisable2g<>0'
+#comment title='	2g mask test'
+$refdesign\xmask_cal_flow_2g
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz spectral mask test
+#
+branch name=MASK5G_TEST; action=start;
+branch name=CAL_PT; action=goto; condition='$maskDisable5g<>0'
+#comment title='	5g mask test'
+$refdesign\xmask_cal_flow_5g
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+
+##-----------------------------------------------------------------
+# summary
+##-----------------------------------------------------------------
+branch name=CAL_PT; action=start;
+common\calculate-pt.art
+
+##-----------------------------------------------------------------
+# Save configuration and calibration data to EEP
+# noEEPSaveOnFail: 0 saveEEP based on each save flag
+# noEEPSaveOnFail: 1 saveEEP based on each save flag only when all pass
+##-----------------------------------------------------------------
+branch name=SAVE_EEPTXCAL; action=goto; condition='$noEEPSaveOnFail=0'
+branch name=SAVE_EEPTXCAL; action=goto; condition='$FailTotalGoodpt=0'
+comment title='	PT fails skip EEP writing!'
+branch name=PT_DONE;action=goto
+
+branch name=SAVE_EEPTXCAL; action=start;
+branch name=SAVE_PCIE; action=goto; condition='$saveEEPTxCalDisable<>0'
+comment title='	save EEP'
+hello
+branch name=CALINFLASH; action=goto; condition='$isFlashCal=1'
+commit
+branch name=SAVE_PCIE;action=goto;
+
+branch name=CALINFLASH;action=start
+commit memory=flash
+
+##-----------------------------------------------------------------
+branch name=SAVE_PCIE; action=start;
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=EEP_CHECK; action=goto; condition='$savePCIeDisable<>0'
+comment title='	save PCIe'
+pcie
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=EEP_CHECK; action=start;
+branch name=PT_DONE; action=goto; condition='$eepCheckDisable<>0'
+#comment title='	EEP check'
+check
+hello
+rep r='c f=ec.address,code,template,length,major,minor,csm,csc,status;type=x,d,d,d,d,d,x,x,s;'
+
+branch name=PT_DONE; action=goto;
+
+branch name=PT_ERROR; action=start;
+show $Test.Error
+assign errDetected=1
+
+branch name=PT_DONE; action=start;
+comment title='	PT test Done!'
+
+
+##*********************************************************************
+#Second Radio Calibration if DBDC is enabled
+##*********************************************************************
+
+
+branch name=NO_DBDC_PT1; action=goto; condition='$enableDBDC<>1'
+
+hello i=1;
+get i=1;mac
+get i=1;customer
+hello i=1;
+
+
+branch name=DBDC_LOAD_REF; action=goto; condition='$2_txCalDisable2g=0'
+branch name=DBDC_LOAD_REF; action=goto; condition='$2_txCalDisable5g=0'
+branch name=DBDC_LOAD_REF_SKIP; action=goto;
+
+branch name=DBDC_LOAD_REF; action=start;
+$refdesign\2_$ref_filename.ref
+branch name=DBDC_LOAD_REF_SKIP; action=start;
+
+#sl
+hello i=1
+
+#rep r='c f=sl.name;l=Name;w=25;f=address,high,low,mask,hex,decimal,signed;title=FIELD/REGISTER OVERRIDES'
+#
+# warmup, Might remove in future
+#
+branch name=DBDC_TXCAL5G_WARMUP; action=goto; condition='$2_txCalDisable2g<>0'
+tx tx=1;f=2412;r=t0;pc=5000;txgain=60;ch=7;
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=DBDC_TXCAL2G_TEST; action=goto;
+branch name=DBDC_TXCAL5G_WARMUP; action=start;
+tx tx=1;f=5180;r=t0;pc=5000;txgain=60;ch=7;
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# read hardware calibration results and put in report
+#
+common\read_hw_cal
+#
+# measure current
+#
+#currentMeasure.art
+
+#
+# 2GHz power calibration
+#
+branch name=DBDC_TXCAL2G_TEST; action=start;
+branch name=DBDC_TXCAL5G_TEST; action=goto; condition='$2_txCalDisable2g<>0'
+#comment title='	run 2g Tx Cal
+$refdesign\2_Calibrate-Power-2G-HT20-MCS7.art
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz power calibration
+#
+branch name=DBDC_TXCAL5G_TEST; action=start;
+branch name=DBDC_XTALCAL_TEST; action=goto; condition='$2_txCalDisable5g<>0'
+#comment title='	run 5g Tx Cal'
+$refdesign\2_Calibrate-Power-5G-HT20-MCS7.art
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# Xtal calibration
+#
+branch name=DBDC_XTALCAL_TEST; action=start;
+branch name=DBDC_TXPWR2G_TEST; action=goto; condition='$2_xtalCalDisable<>0'
+#comment title='	run xtal cal'
+$refdesign\2_xtal_cal.art
+##-----------------------------------------------------------------
+branch name=PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz target power accuracy
+#
+branch name=DBDC_TXPWR2G_TEST; action=start;
+branch name=DBDC_TXPWR5G_TEST; action=goto; condition='$2_txPwrDisable2g<>0'
+#comment title='	run 2g Tx pwr'
+$refdesign\2_target_test_2g.art
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz target power accuracy
+#
+branch name=DBDC_TXPWR5G_TEST; action=start;
+branch name=DBDC_TXEVM2G_TEST; action=goto; condition='$2_txPwrDisable5g<>0'
+#comment title='	run 5g Tx pwr'
+$refdesign\2_target_test_5g.art
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz EVM measurement at target power
+#
+branch name=DBDC_TXEVM2G_TEST; action=start;
+branch name=DBDC_TXEVM5G_TEST; action=goto; condition='$2_txEVMDisable2g<>0'
+#comment title='	run 2g Tx EVM'
+sw i=1;a=BB_scrambler_seed.fixed_scrambler_seed;v=1
+sw i=1;a=BB_phyonly_control.generate_scrambler;v=0
+$refdesign\2_evm_2g.art
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz EVM measurement at target power
+#
+branch name=DBDC_TXEVM5G_TEST; action=start;
+branch name=DBDC_TXCURRENT_TEST; action=goto; condition='$2_txEVMDisable5g<>0'
+#comment title='	run 5g Tx EVM'
+sw i=1;a=BB_scrambler_seed.fixed_scrambler_seed;v=1
+sw i=1;a=BB_phyonly_control.generate_scrambler;v=0
+$refdesign\2_evm_5g.art
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# measure tx current
+#
+branch name=DBDC_TXCURRENT_TEST; action=start;
+branch name=DBDC_FREQACCU2G_CAL; action=goto; condition='$2_txCurrentDisable<>0'
+#comment title='	Measure Tx current'
+$refdesign\txCurrentMeasure.art
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz frequency accuracy test
+#
+branch name=DBDC_FREQACCU2G_CAL; action=start;
+branch name=DBDC_FREQACCU5G_CAL; action=goto; condition='$2_channAccDisable2g<>0'
+branch name=DBDC_FREQACCU5G_CAL; action=goto; condition='$2_txEVMDisable2g=0'
+#comment title='	2g freq accuracy test'
+$refdesign\2_xfrequency_accuracy_cal_flow_2g
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz frequency accuracy test (currently doesn't work)
+#
+branch name=DBDC_FREQACCU5G_CAL; action=start;
+branch name=DBDC_MASK2G_TEST; action=goto; condition='$2_channAccDisable5g<>0'
+branch name=DBDC_MASK2G_TEST; action=goto; condition='$2_txEVMDisable5g=0'
+#comment title='	5g freq accuracy test'
+$refdesign\2_xfrequency_accuracy_cal_flow_5g
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 2GHz spectral mask test
+#
+branch name=DBDC_MASK2G_TEST; action=start;
+branch name=DBDC_MASK5G_TEST; action=goto; condition='$2_maskDisable2g<>0'
+#comment title='	2g mask test'
+$refdesign\2_xmask_cal_flow_2g
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+#
+# 5GHz spectral mask test
+#
+branch name=DBDC_MASK5G_TEST; action=start;
+branch name=DBDC_CAL_PT; action=goto; condition='$2_maskDisable5g<>0'
+#comment title='	5g mask test'
+$refdesign\2_xmask_cal_flow_5g
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+
+##-----------------------------------------------------------------
+# summary
+##-----------------------------------------------------------------
+branch name=DBDC_CAL_PT; action=start;
+common\2_calculate-pt.art
+
+##-----------------------------------------------------------------
+# Save configuration and calibration data to EEP
+# noEEPSaveOnFail: 0 saveEEP based on each save flag
+# noEEPSaveOnFail: 1 saveEEP based on each save flag only when all pass
+##-----------------------------------------------------------------
+branch name=DBDC_SAVE_EEPTXCAL; action=goto; condition='$2_noEEPSaveOnFail=0'
+branch name=DBDC_SAVE_EEPTXCAL; action=goto; condition='$2_FailTotalGoodpt=0'
+comment title='	PT fails skip EEP writing!'
+branch name=DBDC_PT_DONE;action=goto
+
+branch name=DBDC_SAVE_EEPTXCAL; action=start;
+branch name=DBDC_SAVE_PCIE; action=goto; condition='$2_saveEEPTxCalDisable<>0'
+comment title='	save EEP'
+hello i=1
+commit i=1;memory=flash
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=DBDC_SAVE_PCIE; action=start;
+branch name=DBDC_EEP_CHECK; action=goto; condition='$2_savePCIeDisable<>0'
+comment title='	save PCIe'
+pcie i=1
+##-----------------------------------------------------------------
+branch name=DBDC_PT_ERROR;action=goto;test='$Test.Error<>0';
+
+branch name=DBDC_EEP_CHECK; action=start;
+branch name=DBDC_PT_DONE; action=goto; condition='$2_eepCheckDisable<>0'
+#comment title='	EEP check'
+check i=1
+hello i=1
+rep r='c f=ec.address,code,template,length,major,minor,csm,csc,status;type=x,d,d,d,d,d,x,x,s;'
+
+branch name=DBDC_PT_DONE; action=goto;
+
+branch name=DBDC_PT_ERROR; action=start;
+show $Test.Error
+assign errDetected=1
+
+branch name=DBDC_PT_DONE; action=start;
+comment title='	PT test Done!'
+
+branch name=NO_DBDC_PT1;action=start

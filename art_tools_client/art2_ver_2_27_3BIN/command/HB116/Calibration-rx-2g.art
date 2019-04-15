@@ -1,0 +1,11 @@
+#
+# rssi cal for 2G
+#
+branch name=rxcal_LP; action=goto; condition='$LitepointDisable=0'
+link f=2412,2437,2462;iss=-75; tp=0; nf=100; rssical=1; r=f8; pc=20; ch=3;
+branch name=rxcal_LP_DONE; action=goto;
+
+branch name=rxcal_LP; action=start;
+rx stat=3;f=2412,2437,2462;ht40=0;macrx=01.00.00.C0.FF.EE;mactx=01.00.00.C0.FF.EE;bssid=01.00.00.C0.FF.EE;reset=-1;rssical=1;nf=100;iss=-50;pc=20;r=0,1,0;ch=3;rxvsg=1;
+branch name=rxcal_LP_DONE; action=start;
+rep r='col f=rssi.frequency,chain,ce,rssi,nf,offset,nf+offset;type=d,d,s;label=frequency;title=2GHz RSSI Calibration'

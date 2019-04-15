@@ -1,0 +1,3 @@
+rx f=5180:5800:100;duration=1;nf=1;
+
+rep r='graph x=nf.frequency;min=5100;max=5800;inc=100;y=nf.median;min=-125;max=-100;inc=1;key=nf.chain;file=$customer.txt;screen=1;bar=1'

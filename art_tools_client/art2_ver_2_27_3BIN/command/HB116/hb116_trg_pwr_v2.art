@@ -1,0 +1,88 @@
+# Target power freq piers for CCK, Max 2 piers, in order of f0, f1, f2
+set caltgtfreqcck=2412,2472;
+
+# Target power for each pier defined in caltgtfreqcck
+# 4 values represent the target power in dBm for the following data rate
+# 1L_5L,5S,11L,11S
+set caltgtpwrcck=v.(17,17,17,17),f.0;
+set caltgtpwrcck=v.(17,17,17,17),f.1;
+
+
+# Target power freq piers for OFDM legacy 2G, Max 3 piers, in order of f0, f1, f2
+set caltgtfreq2g=2412,2442,2472;
+
+# Target power for each pier defined in caltgtfreq2g
+# 4 values represent the target power in dBm for the following data rate
+# r6_24,r36,r48,r54
+set caltgtpwr2g=v.(17,17,16,16),f.0;
+set caltgtpwr2g=v.(17,17,16,16),f.1;
+set caltgtpwr2g=v.(17,17,16,16),f.2;
+
+
+# Target power freq piers for OFDM legacy 5G, Max 8 piers, in order of f0, f1, ...f7
+set caltgtfreq5g=5180,5260,5320,5500,5600,5700,5745,5825;
+
+# Target power for each pier defined in caltgtfreq5g
+# 4 values represent the target power in dBm for the following data rate
+# r6_24,r36,r48,r54
+set caltgtpwr5g=v.(15,15,14,12),f.0;
+set caltgtpwr5g=v.(15,15,14,12),f.1;
+set caltgtpwr5g=v.(15,15,14,12),f.2;
+set caltgtpwr5g=v.(15,15,14,12),f.3;
+set caltgtpwr5g=v.(15,15,14,11),f.4;
+set caltgtpwr5g=v.(15,15,14,11),f.5;
+set caltgtpwr5g=v.(15,15,14,11),f.6;
+set caltgtpwr5g=v.(15,15,14,11),f.7;
+
+
+# Target power freq piers for HT20 2G, Max 3 piers, in order of f0, f1, f2
+set caltgtfreqht202g=2412,2442,2472;
+# Target power for each pier defined in caltgtfreqht202g
+# 14 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set caltgtpwrht202g=v.(16,16,16,16,16,15,16,16,15,14,0,0,0,0),f.0;
+set caltgtpwrht202g=v.(16,16,16,16,16,15,16,16,15,14,0,0,0,0),f.1;
+set caltgtpwrht202g=v.(16,16,16,16,16,15,16,16,15,14,0,0,0,0),f.2;
+
+
+# Target power freq piers for HT20 5G, Max 8 piers, in order of f0, f1, ...f7
+set caltgtfreqht205g=5180,5260,5320,5500,5600,5700,5745,5825;
+
+# Target power for each pier defined in caltgtfreqht205g
+# 14 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set caltgtpwrht205g=v.(15,15,15,14,13,12,15,14,13,12,0,0,0,0),f.0;
+set caltgtpwrht205g=v.(15,15,15,14,13,12,15,14,13,12,0,0,0,0),f.1;
+set caltgtpwrht205g=v.(15,15,15,14,12,11,15,13,12,11,0,0,0,0),f.2;
+set caltgtpwrht205g=v.(15,15,15,14,12,11,15,13,12,11,0,0,0,0),f.3;
+set caltgtpwrht205g=v.(15,15,15,13,11,10,15,12,10,8,0,0,0,0),f.4;
+set caltgtpwrht205g=v.(15,15,15,13,11,10,15,12,10,8,0,0,0,0),f.5;
+set caltgtpwrht205g=v.(15,15,15,12,10,9,15,11,10,8,0,0,0,0),f.6;
+set caltgtpwrht205g=v.(15,15,15,12,10,9,15,11,10,8,0,0,0,0),f.7;
+
+
+# Target power freq piers for HT40 2G, Max 3 piers, in order of f0, f1, f2
+set caltgtfreqht402g=2422,2447,2462;
+
+# Target power for each pier defined in caltgtfreqht402g
+# 14 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set caltgtpwrht402g=v.(15,15,15,15,15,14,15,15,14,13,0,0,0,0),f.0;
+set caltgtpwrht402g=v.(15,15,15,15,15,14,15,15,14,13,0,0,0,0),f.1;
+set caltgtpwrht402g=v.(15,15,15,15,15,14,15,15,14,13,0,0,0,0),f.2;
+
+
+# Target power freq piers for HT40 5G, Max 8 piers, in order of f0, f1, ...f7
+set caltgtfreqht405g=5190,5270,5310,5510,5590,5670,5755,5795;
+
+# Target power for each pier defined in caltgtfreqht405g
+# 14 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set caltgtpwrht405g=v.(14,14,14,13,12,11,14,13,12,11,0,0,0,0),f.0;
+set caltgtpwrht405g=v.(14,14,14,13,12,11,14,13,12,11,0,0,0,0),f.1;
+set caltgtpwrht405g=v.(14,14,14,13,11,10,14,13,11,10,0,0,0,0),f.2;
+set caltgtpwrht405g=v.(14,14,14,13,11,10,14,13,11,10,0,0,0,0),f.3;
+set caltgtpwrht405g=v.(14,14,14,12,10,9,14,12,9,8,0,0,0,0),f.4;
+set caltgtpwrht405g=v.(14,14,14,12,10,9,14,12,9,8,0,0,0,0),f.5;
+set caltgtpwrht405g=v.(14,14,14,11,9,8,14,11,9,8,0,0,0,0),f.6;
+set caltgtpwrht405g=v.(14,14,14,11,9,8,14,11,9,8,0,0,0,0),f.7;

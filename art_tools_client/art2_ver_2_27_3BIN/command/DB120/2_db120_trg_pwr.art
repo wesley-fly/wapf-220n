@@ -1,0 +1,47 @@
+
+# Target power freq piers for OFDM legacy 5G, Max 11 piers, in order of f0, f1, ...f7
+set i=$5gr;5GHz.Target.Frequency.Legacy=5180,5240,5320,5400,5500,5600,5700,5825;
+
+# Target power for each pier defined in caltgtfreq5g
+# 4 values represent the target power in dBm for the following data rate
+# r6_24,r36,r48,r54
+set i=$5gr;5GHz.Target.Power.Legacy[0]=19,19,15,14;
+set i=$5gr;5GHz.Target.Power.Legacy[1]=19,19,15,14
+set i=$5gr;5GHz.Target.Power.Legacy[2]=19,19,15,14;
+set i=$5gr;5GHz.Target.Power.Legacy[3]=19,19,15,14
+set i=$5gr;5GHz.Target.Power.Legacy[4]=19,19,15,13
+set i=$5gr;5GHz.Target.Power.Legacy[5]=19,19,15,13
+set i=$5gr;5GHz.Target.Power.Legacy[6]=19,19,15,12
+set i=$5gr;5GHz.Target.Power.Legacy[7]=19,19,15,12
+
+
+# Target power freq piers for HT20 5G, Max 11 piers, in order of f0, f1, ...f7
+set i=$5gr;caltgtfreqht205g=5180,5220,5320,5500,5600,5700,5745,5825;
+
+# Target power for each pier defined in caltgtfreqht205g
+# 15 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set i=$5gr;5GHz.Target.Power.Ht20[0]=19,19,17,16,15,14,19,15,11,11,11,11,11,10;
+set i=$5gr;5GHz.Target.Power.Ht20[1]=19,19,17,16,15,14,19,15,11,11,11,11,11,10;
+set i=$5gr;5GHz.Target.Power.Ht20[2]=19,19,17,16,15,14,19,13,11,11,10,10,11,10;
+set i=$5gr;5GHz.Target.Power.Ht20[3]=19,19,17,16,15,14,19,13,11,11,10,10,11,10;
+set i=$5gr;5GHz.Target.Power.Ht20[4]=19,19,16,15,14,12,19,12,11,11,12,12,10,9;
+set i=$5gr;5GHz.Target.Power.Ht20[5]=19,19,16,15,14,12,19,12,11,11,12,12,10,9;
+set i=$5gr;5GHz.Target.Power.Ht20[6]=19,19,15,14,13,11,19,11,11,11,11,11,9,8;
+set i=$5gr;5GHz.Target.Power.Ht20[7]=19,19,15,14,13,11,19,11,11,11,11,11,9,8;
+
+
+# Target power freq piers for HT40 5G, Max 11 piers, in order of f0, f1, ...f7
+set i=$5gr;caltgtfreqht405g=5190,5230,5310,5510,5550,5670,5755,5795;
+
+# Target power for each pier defined in caltgtfreqht405g
+# 15 values represent the target power in dBm for the following data rate
+# MCS0_8_16,MCS1_3_9_11_17_19,MCS4,MCS5,MCS6,MCS7,MCS12,MCS13,MCS14,MCS15,MCS20,MCS21,MCS22,MCS23
+set i=$5gr;5GHz.Target.Power.Ht40[0]=18,18,16,15,15,14,18,13,11,11,12,11,10,9;
+set i=$5gr;5GHz.Target.Power.Ht40[1]=18,18,16,15,15,14,18,13,11,11,12,11,10,9;
+set i=$5gr;5GHz.Target.Power.Ht40[2]=18,18,16,15,14,14,18,13,11,11,12,11,10,9;
+set i=$5gr;5GHz.Target.Power.Ht40[3]=18,18,16,15,14,14,18,13,11,11,12,11,9,8;
+set i=$5gr;5GHz.Target.Power.Ht40[4]=18,18,16,14,13,12,18,14,11,11,12,11,9,8;
+set i=$5gr;5GHz.Target.Power.Ht40[5]=18,18,16,14,13,11,18,14,11,11,12,11,9,8;
+set i=$5gr;5GHz.Target.Power.Ht40[6]=18,18,16,13,12,10,18,11,11,11,11,10,8,7;
+set i=$5gr;5GHz.Target.Power.Ht40[7]=18,18,16,13,12,10,18,11,11,11,11,10,8,7;

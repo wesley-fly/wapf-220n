@@ -1,0 +1,9 @@
+sw a=BB_per_chain_csd.csd_chn2_3chains; v=0;
+sw a=BB_per_chain_csd.csd_chn1_3chains; v=0;
+sw a=BB_per_chain_csd.csd_chn1_2chains; v=0;
+sl
+
+     
+
+ 
+

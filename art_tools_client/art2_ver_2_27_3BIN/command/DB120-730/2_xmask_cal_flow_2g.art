@@ -1,0 +1,14 @@
+assign 2_FailMask2gGood=0;
+assign 2_FailPrecentLimit=5;
+
+
+branch name=DBDC_PERCENT_MASK; action=goto; condition='$LitepointDisable=0'
+tx tx=$5gr; mask=2; att=0; ch=1,2; pc=1000000; pl=4000; f=2437; r=t0,f0; ir=2; tp=target; tx99=1; average=2;stop='$Test.Error';
+report r='col f=mask.frequency;w=6;d=0;l=frequency; f=mask.rate;w=6;l=rate; f=mask.txchain;w=6;l=chain; f=mask.power;w=6;l=power; f=mask.fail;w=12;d=0;l=above; f=test(fail<=20,$passtext,$FailText,0,@2_FailMask2gGood);l=20pt;type=s;width=8;d=0;title=2GHz SPECTRAL MASK: Radio2;'
+branch name=DBDC_MASK_DONE; action=goto;
+
+branch name=DBDC_PERCENT_MASK; action=start;
+
+tx tx=$5gr; mask=2; att=0; ch=1,2; pc=1000000; pl=4000; f=2437; r=t0,f0; ir=2; tp=target; tx99=1; average=2;stop='$Test.Error';
+report r='col f=mask.frequency;w=6;d=0;l=frequency; f=mask.rate;w=6;l=rate; f=mask.txchain;w=6;l=chain; f=mask.power;w=6;l=power; f=mask.failPrecent;w=12;l=Fail(%); f=$2_FailPrecentLimit+0;w=12;l=Mask_Limit(%); f=test(failPrecent<=5,$PText,$FText,0,@2_FailMask2gGood);l=mask_P/F;type=s;width=12;title=2GHz SPECTRAL MASK: Radio2;'
+branch name=DBDC_MASK_DONE; action=start;

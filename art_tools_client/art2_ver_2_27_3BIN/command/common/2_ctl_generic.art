@@ -1,0 +1,57 @@
+#Note: CTL shown as 30dbm means not regulatory tested
+
+##5GHz CTL List
+
+# Test Group 0x10: US and CANADA (FCC) 802.11a mode CTL
+set i=$5gr;5GHz.ctl.Index[0]=0x10;
+set i=$5gr;5GHz.ctl.Frequency[0]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[0]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[0]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x16: US and CANADA (FCC) 802.11n HT20 5GHz mode CTL
+set i=$5gr;5GHz.ctl.Index[1]=0x16;
+set i=$5gr;5GHz.ctl.Frequency[1]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[1]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[1]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x18: US and CANADA (FCC) 802.11n HT40 5GHz mode CTL
+set i=$5gr;5GHz.ctl.Index[2]=0x18;
+set i=$5gr;5GHz.ctl.Frequency[2]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[2]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[2]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x40: Japan (MKK) 802.11a mode CTL
+set i=$5gr;5GHz.ctl.Index[3]=0x40;
+set i=$5gr;5GHz.ctl.Frequency[3]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[3]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[3]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x46: Japan (MKK) 802.11n HT20 5GHz mode CTL
+set i=$5gr;5GHz.ctl.Index[4]=0x46;
+set i=$5gr;5GHz.ctl.Frequency[4]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[4]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[4]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x48: Japan (MKK) 802.11n HT40 5GHz mode CTL
+set i=$5gr;5GHz.ctl.Index[5]=0x48;
+set i=$5gr;5GHz.ctl.Frequency[5]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[5]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[5]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x30: Europe (ETSI) 802.11a mode CTL
+set i=$5gr;5GHz.ctl.Index[6]=0x30;
+set i=$5gr;5GHz.ctl.Frequency[6]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[6]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[6]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x36: Europe (ETSI) 802.11n HT20 5GHz mode CTL
+set i=$5gr;5GHz.ctl.Index[7]=0x36;
+set i=$5gr;5GHz.ctl.Frequency[7]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[7]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[7]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;
+
+# Test Group 0x38: Europe (ETSI) 802.11n HT40 5GHz mode CTL
+set i=$5gr;5GHz.ctl.Index[8]=0x38;
+set i=$5gr;5GHz.ctl.Frequency[8]=5180,5220,5320,5400,5500,5600,5725,5825;
+set i=$5gr;5GHz.ctl.Power[8]=    30  ,30  ,30  ,30  ,30  ,30  ,30  ,30;
+set i=$5gr;5GHz.ctl.BandEdge[8]= 0   ,1   ,0   ,1   ,0   ,1   ,0   ,1;

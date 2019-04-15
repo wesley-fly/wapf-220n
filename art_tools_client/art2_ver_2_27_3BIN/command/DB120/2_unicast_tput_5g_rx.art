@@ -1,0 +1,36 @@
+
+assign rate=54,t7,t15,t23,f7,f15,f23
+assign tputlimit=30,50,100,150,100,200,300
+assign freqlist[0]=5180
+assign freqlist[1]=5500
+assign freqlist[2]=5820
+assign numfreq=3
+
+assign 2_FailRxTput5gGood=0
+assign 2_FailRxTput5gBetter=0
+assign 2_FailRxTput5gBest=0
+
+assign passtext=.
+assign failtext=FAIL
+
+assign it=0;
+label name=top;
+test freqtemp=$freqlist[$it];
+show $freqtemp;
+
+#run rxIQ Cal if its enabled.
+branch name=5GTP_TEST; action=goto; condition='$2_rxiqcal5gDisable<>0'
+link rx=$5gr;tx=$golden;att=40; pl=1500; pc=500; ch=7; r=f0; f=$freqtemp; bc=1; retry=0; rxiqcal=1;ht40=1;stop='$Test.Error';
+branch name=end;action=goto;test='$test.Error<>0';
+
+
+branch name=5GTP_TEST; action=start;
+link rx=$5gr;tx=$golden;att=40; pl=1500; ir=2; pc=256; ch=7; r=t23,f23; agg=32; f=$freqtemp; bc=0; retry=0; ht40=1;sgi=0;stop='$Test.Error';
+report r='column title=5GHz RX THROUGHPUT: Radio2;f=rx.frequency;l=frequency;f=rate;f=agg;l=agg;f=rx.rssi;f=rx.psr;f=duration,byte;f=0.001*rx.throughput;l=rx tput;f=lookup(rate,@rate,@tputlimit);label=limit;w=8;f=0.001*rx.throughput-lookup(rate,@rate,@tputlimit);label=delta;w=8;f=test(0.001*rx.throughput-lookup(rate,@rate,@tputlimit)>0,$passtext,$failtext,0,@2_FailRxTput5gGood);label=100%;type=s,w=8;'
+report r='column title=5GHz RX RSSI/EVM REPORT: Radio2;f=rx.frequency;l=frequency;f=rate,rssi,rssi00,rssi01,rssi02,rssi10,rssi11,rssi12,evm0,evm1,evm2;'
+branch name=end;action=goto;test='$test.Error<>0';
+
+test it=$it+1;
+branch name=top;  test='$it<$numfreq';
+
+branch name=end; action=start;

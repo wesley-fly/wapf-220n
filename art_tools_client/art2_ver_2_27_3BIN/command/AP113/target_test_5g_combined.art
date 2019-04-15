@@ -1,0 +1,17 @@
+
+assign FailPwrAll5gGood=0
+assign FailPwrAll5gBetter=0
+assign FailPwrAll5gBest=0
+assign pwrComb=4.8
+
+tx att=0; f=5180; pc=10; pl=4000; r=t0;ch=7;tx99=1;ht40=1;
+tx pl=4000;pc=1000000;f=5180;r=t0,t4,t7,f16,f20,f23;ir=2;txch=7;pm=1;tx99=1;ht40=1;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=(tx.tp+$pwrComb);l=target;f=temp;l=temp;f=pm.power;l=meas pwr;f=pm.power-(tx.tp+$pwrComb);l=delta;f=test(((pm.power-(tx.tp+$pwrComb))<=2.5 & (pm.power-(tx.tp+$pwrComb))>=-2.5),$passtext,$FailText,0,@FailPwrAll5gGood);l=2.5dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb))<=2.0 & (pm.power-(tx.tp+$pwrComb))>=-2.0),$passtext,$FailText,0,@FailPwrAll5gBetter);l=2.0dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb))<=1.5 & (pm.power-(tx.tp+$pwrComb))>=-1.5),$passtext,$FailText,0,@FailPwrAll5gBest);l=1.5dB;type=s;width=8;d=0;screen=1;title=5GHz Power Accuracy;'
+
+tx f=5500; pc=10; pl=4000; r=t0;ch=7;tx99=1;ht40=1;
+tx pl=4000;pc=1000000;f=5500;r=t0,t4,t7,f16,f20,f23;ir=2;txch=7;pm=1;tx99=1;ht40=1;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=(tx.tp+$pwrComb);l=target;f=temp;l=temp;f=pm.power;l=meas pwr;f=pm.power-(tx.tp+$pwrComb);l=delta;f=test(((pm.power-(tx.tp+$pwrComb))<=2.5 & (pm.power-(tx.tp+$pwrComb))>=-2.5),$passtext,$FailText,0,@FailPwrAll5gGood);l=2.5dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb))<=2.0 & (pm.power-(tx.tp+$pwrComb))>=-2.0),$passtext,$FailText,0,@FailPwrAll5gBetter);l=2.0dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb))<=1.5 & (pm.power-(tx.tp+$pwrComb))>=-1.5),$passtext,$FailText,0,@FailPwrAll5gBest);l=1.5dB;type=s;width=8;d=0;screen=1;title=5GHz Power Accuracy;'
+
+tx f=5785; pc=10; pl=4000; r=t0;ch=7;tx99=1;ht40=1;
+tx pl=4000;pc=1000000;f=5785;r=t0,t4,t7,f16,f20,f23;ir=2;txch=7;pm=1;tx99=1;ht40=1;
+report r='c f=pm.frequency;l=frequency;f=rate,txchain;f=(tx.tp+$pwrComb);l=target;f=temp;l=temp;f=pm.power;l=meas pwr;f=pm.power-(tx.tp+$pwrComb);l=delta;f=test(((pm.power-(tx.tp+$pwrComb))<=2.5 & (pm.power-(tx.tp+$pwrComb))>=-2.5),$passtext,$FailText,0,@FailPwrAll5gGood);l=2.5dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb))<=2.0 & (pm.power-(tx.tp+$pwrComb))>=-2.0),$passtext,$FailText,0,@FailPwrAll5gBetter);l=2.0dB;type=s;width=8;f=test(((pm.power-(tx.tp+$pwrComb))<=1.5 & (pm.power-(tx.tp+$pwrComb))>=-1.5),$passtext,$FailText,0,@FailPwrAll5gBest);l=1.5dB;type=s;width=8;d=0;screen=1;title=5GHz Power Accuracy;'

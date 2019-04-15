@@ -1,0 +1,3 @@
+set FeatureEnable.SwitchingRegulator=0x01;
+set SwitchingRegulator=0x709142fe;
+
