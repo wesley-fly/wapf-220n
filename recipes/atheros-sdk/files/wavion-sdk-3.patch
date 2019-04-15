@@ -1,0 +1,847 @@
+--- a/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-03-04 11:29:12.877546686 +0800
++++ b/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-03-04 11:45:34.293578090 +0800
+@@ -26,25 +26,6 @@
+ ##
+ ###################################################################################
+ 
+-cfg -a AP_IPADDR=${AP_IPADDR:="192.168.1.2"}
+-cfg -a AP_NETMASK=${AP_NETMASK:="255.255.255.0"}
+-cfg -a WAN_MODE=${WAN_MODE:="bridged"}
+-cfg -a WAN_IPADDR=${WAN_IPADDR:="192.168.2.1"}
+-cfg -a WAN_NETMASK=${WAN_NETMASK:="255.255.255.0"}
+-
+-##
+-## Map the proper ethernet port to WAN/LAN interface
+-##
+-
+-cfg -a WAN_IF=${WAN_IF:=eth0}
+-cfg -a LAN_IF=${LAN_IF:=eth1}
+-
+-#
+-# Indicate if you want the WLAN to be activated on boot up.
+-#
+-
+-cfg -a WLAN_ON_BOOT=${WLAN_ON_BOOT:="n"}
+-
+ #
+ # AP Start Mode
+ # This can be overridded by environmental variables
+@@ -58,22 +39,10 @@
+ #       adhoc := IBSS start mode
+ #
+ #
+-
+-cfg -a AP_STARTMODE=${AP_STARTMODE:="standard"}
++cfg -a AP_IPADDR=${AP_IPADDR:="192.168.1.1"}
++cfg -a AP_STARTMODE=${AP_STARTMODE:="multi"}
+ 
+ #################################################################################
+-## Default Parameters
+-## If these are not set explictly by exporting environmental variables, the following
+-## Defaults will be applied
+-#################################################################################
+-#
+-# AP_PRIMARY_CH could be
+-#                a number or
+-#                11ng (which means auto-scan in 11ng mode)
+-
+-cfg -a AP_PRIMARY_CH=${AP_PRIMARY_CH:=6}
+-cfg -a AP_CHMODE=${AP_CHMODE:="11NGHT20"}
+-
+ ##
+ ## This is for pure G or pure N operations.  Hmmmm...
+ ##
+@@ -87,22 +56,26 @@
+ 
+ cfg -a TXQUEUELEN=${TXQUEUELEN:=1000}
+ cfg -a SHORTGI=${SHORTGI:=1}
+-
++cfg -a SHORTGI_2=${SHORTGI_2:=1}
+ #
+ # Aggregation.  First parameter enables/disables,
+ # second parameter sets the size limit
+ #
+-
+ cfg -a AMPDUENABLE=${AMPDUENABLE:=1}
++cfg -a AMPDUENABLE_2=${AMPDUENABLE_2:=1}
+ cfg -a AMPDUFRAMES=${AMPDUFRAMES:=32}
++cfg -a AMPDUFRAMES_2=${AMPDUFRAMES_2:=32}
+ cfg -a AMPDULIMIT=${AMPDULIMIT:=50000}
++cfg -a AMPDULIMIT_2=${AMPDULIMIT_2:=50000}
+ cfg -a AMPDUMIN=${AMPDUMIN:=32768}
+ cfg -a CWMMODE=${CWMMODE:=1}
+ cfg -a RATECTL=${RATECTL:="auto"}
+ cfg -a MANRATE=${MANRATE:=0x8c8c8c8c}
+ cfg -a MANRETRIES=${MANRETRIES:=0x04040404}
+ cfg -a RX_CHAINMASK=${RX_CHAINMASK:=0}
++cfg -a RX_CHAINMASK_2=${RX_CHAINMASK_2:=0}
+ cfg -a TX_CHAINMASK=${TX_CHAINMASK:=0}
++cfg -a TX_CHAINMASK_2=${TX_CHAINMASK_2:=0}
+ cfg -a SWAP_LED=${SWAP_LED:=1}
+ cfg -a LED_CUSTOM=${LED_CUSTOM:=3}
+ 
+@@ -110,9 +83,11 @@
+ ## AP Identification Section
+ ##
+ 
+-cfg -a AP_SSID="${AP_SSID:=Atheros_XSpan_2G}"
+-cfg -a IBSS_SSID="${IBSS_SSID:=Atheros_Adhoc}"
++cfg -a AP_SSID="${AP_SSID:=Atheros_XSpan_5G}"
++cfg -a AP_SSID_2="${AP_SSID_2:=Atheros_XSpan_2G}"
+ 
++cfg -a AP_RADIO_ID="${AP_RADIO_ID:=0}"
++cfg -a AP_RADIO_ID_2="${AP_RADIO_ID_2:=1}"
+ ##
+ ## Set the default modes for multi configuration
+ ##
+@@ -125,7 +100,14 @@
+ cfg -a AP_MODE_6=${AP_MODE_6:="ap"}
+ cfg -a AP_MODE_7=${AP_MODE_7:="ap"}
+ cfg -a AP_MODE_8=${AP_MODE_8:="ap"}
+-
++cfg -a AP_MODE_9=${AP_MODE_9:="ap"}
++cfg -a AP_MODE_10=${AP_MODE_10:="ap"}
++cfg -a AP_MODE_11=${AP_MODE_11:="ap"}
++cfg -a AP_MODE_12=${AP_MODE_12:="ap"}
++cfg -a AP_MODE_13=${AP_MODE_13:="ap"}
++cfg -a AP_MODE_14=${AP_MODE_14:="ap"}
++cfg -a AP_MODE_15=${AP_MODE_15:="ap"}
++cfg -a AP_MODE_16=${AP_MODE_16:="ap"}
+ ##
+ ## Set default security modes
+ ##
+@@ -138,7 +120,14 @@
+ cfg -a AP_SECMODE_6=${AP_SECMODE_6:="None"}
+ cfg -a AP_SECMODE_7=${AP_SECMODE_7:="None"}
+ cfg -a AP_SECMODE_8=${AP_SECMODE_8:="None"}
+-
++cfg -a AP_SECMODE_9=${AP_SECMODE_9:="None"}
++cfg -a AP_SECMODE_10=${AP_SECMODE_10:="None"}
++cfg -a AP_SECMODE_11=${AP_SECMODE_11:="None"}
++cfg -a AP_SECMODE_12=${AP_SECMODE_12:="None"}
++cfg -a AP_SECMODE_13=${AP_SECMODE_13:="None"}
++cfg -a AP_SECMODE_14=${AP_SECMODE_14:="None"}
++cfg -a AP_SECMODE_15=${AP_SECMODE_15:="None"}
++cfg -a AP_SECMODE_16=${AP_SECMODE_16:="None"}
+ ##
+ ## Set default secfile to PSK, only valid in WPA mode
+ ##
+@@ -151,7 +140,14 @@
+ cfg -a AP_SECFILE_6=${AP_SECFILE_6:="PSK"}
+ cfg -a AP_SECFILE_7=${AP_SECFILE_7:="PSK"}
+ cfg -a AP_SECFILE_8=${AP_SECFILE_8:="PSK"}
+-
++cfg -a AP_SECFILE_9=${AP_SECFILE_9:="PSK"}
++cfg -a AP_SECFILE_10=${AP_SECFILE_10:="PSK"}
++cfg -a AP_SECFILE_11=${AP_SECFILE_11:="PSK"}
++cfg -a AP_SECFILE_12=${AP_SECFILE_12:="PSK"}
++cfg -a AP_SECFILE_13=${AP_SECFILE_13:="PSK"}
++cfg -a AP_SECFILE_14=${AP_SECFILE_14:="PSK"}
++cfg -a AP_SECFILE_15=${AP_SECFILE_15:="PSK"}
++cfg -a AP_SECFILE_16=${AP_SECFILE_16:="PSK"}
+ 
+ cfg -a WPS_ENABLE=${WPS_ENABLE:="0"}
+ cfg -a WPS_ENABLE_2=${WPS_ENABLE_2:="0"}
+@@ -161,9 +157,34 @@
+ cfg -a WPS_ENABLE_6=${WPS_ENABLE_6:="0"}
+ cfg -a WPS_ENABLE_7=${WPS_ENABLE_7:="0"}
+ cfg -a WPS_ENABLE_8=${WPS_ENABLE_8:="0"}
+-
++cfg -a WPS_ENABLE_9=${WPS_ENABLE_9:="0"}
++cfg -a WPS_ENABLE_10=${WPS_ENABLE_10:="0"}
++cfg -a WPS_ENABLE_11=${WPS_ENABLE_11:="0"}
++cfg -a WPS_ENABLE_12=${WPS_ENABLE_12:="0"}
++cfg -a WPS_ENABLE_13=${WPS_ENABLE_13:="0"}
++cfg -a WPS_ENABLE_14=${WPS_ENABLE_14:="0"}
++cfg -a WPS_ENABLE_15=${WPS_ENABLE_15:="0"}
++cfg -a WPS_ENABLE_16=${WPS_ENABLE_16:="0"}
++
++cfg -a AP_RFPARAM=${AP_RFPARAM:="0"}
++cfg -a AP_RFPARAM_2=${AP_RFPARAM_2:="0"}
++cfg -a AP_RFPARAM_3=${AP_RFPARAM_3:="0"}
++cfg -a AP_RFPARAM_4=${AP_RFPARAM_4:="0"}
++cfg -a AP_RFPARAM_5=${AP_RFPARAM_5:="0"}
++cfg -a AP_RFPARAM_6=${AP_RFPARAM_6:="0"}
++cfg -a AP_RFPARAM_7=${AP_RFPARAM_7:="0"}
++cfg -a AP_RFPARAM_8=${AP_RFPARAM_8:="0"}
++cfg -a AP_RFPARAM_9=${AP_RFPARAM_9:="0"}
++cfg -a AP_RFPARAM_10=${AP_RFPARAM_10:="0"}
++cfg -a AP_RFPARAM_11=${AP_RFPARAM_11:="0"}
++cfg -a AP_RFPARAM_12=${AP_RFPARAM_12:="0"}
++cfg -a AP_RFPARAM_13=${AP_RFPARAM_13:="0"}
++cfg -a AP_RFPARAM_14=${AP_RFPARAM_14:="0"}
++cfg -a AP_RFPARAM_15=${AP_RFPARAM_15:="0"}
++cfg -a AP_RFPARAM_16=${AP_RFPARAM_16:="0"}
+ ## VoW defaults
+ cfg -a VOW_ENABLE=${VOW_ENABLE:="1"}
++cfg -a VOW_ENABLE_2=${VOW_ENABLE_2:="1"}
+ cfg -a VOW_DEBUG=${VOW_DEBUG:="0"}
+ 
+ cfg -a ETH_FLOW_CONTROL0=${ETH_FLOW_CONTROL0:="0"}
+
+--- a/rootfs/cgiCommon/etc/ath.dual/apup	2013-03-04 11:29:12.881546686 +0800
++++ b/rootfs/cgiCommon/etc/ath.dual/apup	2013-03-04 11:41:06.005569504 +0800
+@@ -61,17 +61,6 @@
+ } 
+ #end configure_vlanvap
+ 
+-#####################################################################################
+-##
+-## "main" procedure
+-##
+-
+-MODLIST=`lsmod | cut -f1,0 -d" " | grep ath_hal `
+-
+-if [ "${MODLIST}" = "ath_hal" ]; then
+-    echo "AP is already up"
+-    exit
+-fi
+ 
+ ##
+ ## Bring in the default environmental variables
+@@ -281,7 +270,8 @@
+ ## This is brute force, but effective.  Note that we set the becon interval
+ ## to 400
+ ##
+-
++MAX_VAPS_PER_RADIO=8
++my_vaps="'' _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16"
+ WEP_INTERFACE=0
+ if [ "${AP_STARTMODE}" = "multi" ]; then
+     NUM_VAP=0
+@@ -313,15 +303,15 @@
+                 echo "Exceeded max VAPs per Radio($MAX_VAPS_PER_RADIO)"
+                 exit 255
+             fi
+-            if [ "${ITER_SECMODE}" = "WEP" ]; then
+-                echo $WEP_INTERFACE | grep "R${ITER_RADIO_ID}" > /dev/null
+-                if [ $? -eq 0 ]; then
+-                    echo "Unable to create additional WEP VAP"
+-                    exit 255
+-                else
+-                    WEP_INTERFACE="R${ITER_RADIO_ID}"
+-                fi
+-            fi
++            #if [ "${ITER_SECMODE}" = "WEP" ]; then
++            #    echo $WEP_INTERFACE | grep "R${ITER_RADIO_ID}" > /dev/null
++            #    if [ $? -eq 0 ]; then
++            #        echo "Unable to create additional WEP VAP"
++            #        exit 255
++            #    else
++            #        WEP_INTERFACE="R${ITER_RADIO_ID}"
++            #    fi
++            #fi
+             BEACON_INTVAL=$(($BEACON_INT * $ITER_VAP_COUNT))
+             if [ "${ITER_MODE}" = "sta-wds" -o "${ITER_MODE}" = "sta" ]; then
+                if [ "${ITER_RADIO_ID}" = 0 -a "${STA_VAP_COUNT_RADIO_0}" != 1 ]; then
+@@ -382,7 +372,7 @@
+          if [ "${ITER_RADIO_ID}" = 0 ]; then
+            if [ "${STA_VAP_COUNT_RADIO_0}" != 1 ]; then
+              if [ "_${ITER_SSID}" != "_" ]; then
+-               activateVAP ath$VAP_NUM:$ITER_RADIO_ID br0 $ITER_SECMODE $ITER_SECFILE $ITER_WPS_ENABLE $ITER_WPS_VAP_TIE
++               activateVAP ath$VAP_NUM:$ITER_RADIO_ID br-lan $ITER_SECMODE $ITER_SECFILE $ITER_WPS_ENABLE $ITER_WPS_VAP_TIE
+                VAP_NUM=$(($VAP_NUM+1))
+                STA_VAP_COUNT_RADIO_0=1
+              fi
+@@ -390,7 +380,7 @@
+          else
+            if [ "${STA_VAP_COUNT_RADIO_1}" != 1 ]; then
+ 	     if [ "_${ITER_SSID}" != "_" ]; then
+-	       activateVAP ath$VAP_NUM:$ITER_RADIO_ID br0 $ITER_SECMODE $ITER_SECFILE $ITER_WPS_ENABLE $ITER_WPS_VAP_TIE
++	       activateVAP ath$VAP_NUM:$ITER_RADIO_ID br-lan $ITER_SECMODE $ITER_SECFILE $ITER_WPS_ENABLE $ITER_WPS_VAP_TIE
+ 	       VAP_NUM=$(($VAP_NUM+1))
+ 	       STA_VAP_COUNT_RADIO_1=1
+ 	      fi
+@@ -398,7 +388,7 @@
+           fi
+          else
+            if [ "_${ITER_SSID}" != "_" ]; then
+-                 activateVAP ath$VAP_NUM:$ITER_RADIO_ID br0 $ITER_SECMODE $ITER_SECFILE $ITER_WPS_ENABLE $ITER_WPS_VAP_TIE
++                 activateVAP ath$VAP_NUM:$ITER_RADIO_ID br-lan $ITER_SECMODE $ITER_SECFILE $ITER_WPS_ENABLE $ITER_WPS_VAP_TIE
+                  VAP_NUM=$(($VAP_NUM+1))
+             fi
+          fi
+@@ -601,12 +591,12 @@
+     if [ "${HOSTAPD_VER}" = "v0.5.9" ]; then
+     echo "Making Topology File . . ."
+     # for vlan case we should not be adding br0 
+-    if [ -f /tmp/br0 ] && [ "${AP_STARTMODE}" != "multivlan" ]; then
+-        echo -e "bridge br0" > /tmp/topology.conf
++    if [ -f /tmp/br-lan ] && [ "${AP_STARTMODE}" != "multivlan" ]; then
++        echo -e "bridge br-lan" > /tmp/topology.conf
+         echo -e "{" >> /tmp/topology.conf
+         echo -e "\tipaddress ${AP_IPADDR}" >> /tmp/topology.conf
+         echo -e "\tipmask ${AP_NETMASK}" >> /tmp/topology.conf
+-        cat /tmp/br0 >> /tmp/topology.conf
++        cat /tmp/br-lan >> /tmp/topology.conf
+         echo -e "\tinterface eth0" >> /tmp/topology.conf
+         echo -e "\tinterface eth1" >> /tmp/topology.conf
+         echo -e "}" >> /tmp/topology.conf
+
+--- a/rootfs/cgiCommon/etc/ath.dual/makeVAP	2013-03-04 11:29:12.881546686 +0800
++++ b/rootfs/cgiCommon/etc/ath.dual/makeVAP	2013-03-04 11:43:29.629574101 +0800
+@@ -91,20 +91,18 @@
+ 
+ if [ "${IFNUM}" = "1" ]; then
+     R_SHORTGI=$SHORTGI_2
+-	R_CWMMODE=$CWMMODE_2
+     R_AMPDUENABLE=$AMPDUENABLE_2
+-	R_AMPDUFRAMES=$AMPDUFRAMES_2
+-	R_AMPDULIMIT=$AMPDULIMIT_2
+-	R_TXCHAIN=$TX_CHAINMASK_2
+-	R_RXCHAIN=$RX_CHAINMASK_2
++    R_AMPDUFRAMES=$AMPDUFRAMES_2
++    R_AMPDULIMIT=$AMPDULIMIT_2
++    R_TXCHAIN=$TX_CHAINMASK_2
++    R_RXCHAIN=$RX_CHAINMASK_2
+ else
+     R_SHORTGI=$SHORTGI
+-	R_CWMMODE=$CWMMODE
+     R_AMPDUENABLE=$AMPDUENABLE
+-	R_AMPDUFRAMES=$AMPDUFRAMES
+-	R_AMPDULIMIT=$AMPDULIMIT
+-	R_TXCHAIN=$TX_CHAINMASK
+-	R_RXCHAIN=$RX_CHAINMASK
++    R_AMPDUFRAMES=$AMPDUFRAMES
++    R_AMPDULIMIT=$AMPDULIMIT
++    R_TXCHAIN=$TX_CHAINMASK
++    R_RXCHAIN=$RX_CHAINMASK
+ fi
+ 
+ ESSID=$2
+@@ -119,14 +117,12 @@
+ 
+ if [ "${MODLIST}" = "" ]; then
+     /etc/rc.d/rc.wlan up
+-
+     ##
+-	## Check for bad return value.  If so, exit
+-	##
+-
+-	if [ $? != 0 ]; then
+-	    exit 255
+-	fi
++    ## Check for bad return value.  If so, exit
++    ##
++    if [ $? != 0 ]; then
++        exit 255
++    fi
+ else
+     echo "Modules already loaded"
+ fi
+@@ -166,7 +162,7 @@
+ ## AP_STARTMODE = extap
+ ## This will come for the station vap of repeater
+ if [ "${SUB_MODE}" = "ext" ]; then
+-	iwpriv ${APNAME} extap 1
++    iwpriv ${APNAME} extap 1
+ fi
+ 
+ 
+@@ -200,12 +196,6 @@
+ fi
+ 
+ ##
+-## Disable Background Scan
+-##
+-
+-iwpriv ${APNAME} bgscan 0
+-
+-##
+ # set various debug modes
+ ##
+ 
+@@ -270,7 +260,7 @@
+     # turn on halfgi
+     iwpriv ${APNAME} shortgi $R_SHORTGI
+ 
+-    iwpriv ${APNAME} noedgech $NO_EDGE_CH
++#    iwpriv ${APNAME} noedgech $NO_EDGE_CH
+ 
+     iwpriv ${APNAME} mode $CH_MODE
+ 
+@@ -361,7 +351,7 @@
+ 
+     if [ "${R_TXCHAIN}" != "" -a "${R_TXCHAIN}" != "0" ]; then
+         iwpriv wifi$IFNUM txchainmask $R_TXCHAIN
+-	fi
++    fi
+ 
+     if [ "${R_RXCHAIN}" != ""  -a "${R_RXCHAIN}" != "0" ]; then
+         iwpriv wifi$IFNUM rxchainmask $R_RXCHAIN
+@@ -371,12 +361,11 @@
+     # An extra IE is provided for Intel interop
+     #
+ 
+-    echo 1 > /proc/sys/dev/ath/htdupieenable
++    test -f /proc/sys/dev/ath/htdupieenable && echo 1 > /proc/sys/dev/ath/htdupieenable
+ 
+     #
+     # This is where extra commands are executed.
+     #
+-
+     if [ "${AP_EXTRA}" != "" ]; then
+         echo $AP_EXTRA | grep ';'
+         #There is at least one command that ends with ';'
+@@ -415,7 +404,6 @@
+ ## Check for multiple VAPs.  If the VAP name is ath2 we assume we want the
+ ## beacon interval to be 400 ms
+ ##
+-
+ if [ "${BEACONINT}" != "" ]; then
+     #
+     # Beacon interval was specified
+@@ -423,7 +411,6 @@
+ 
+     iwpriv ${APNAME} bintval ${BEACONINT}
+ fi
+-
+ #VOW related configurations
+ if [ "${IFNUM}" = "0" ]; then
+     if [ "${VOW_ENABLE}" = "1" ]; then
+@@ -431,7 +418,7 @@
+     #All video options are enabled by default and no dynamic configuration
+         ifconfig ${APNAME} allmulti
+         iwpriv ${APNAME} mcastenhance 2
+-        iwpriv $(APNAME) acparams 1 0 1 0
++        iwpriv ${APNAME} acparams 1 0 1 0
+         iwpriv wifi0 setKeySrchAlways 1
+         iwpriv wifi0 setPhyRestartWar 1
+     else
+@@ -439,7 +426,7 @@
+         ifconfig ${APNAME} -allmulti
+         iwpriv wifi0 setKeySrchAlways 0
+         iwpriv ${APNAME} mcastenhance 0
+-        iwpriv $(APNAME) acparams 1 0 0 0
++        iwpriv ${APNAME} acparams 1 0 0 0
+         iwpriv wifi0 set_vsp_enable 0
+         iwpriv wifi0 setPhyRestartWar 0
+     fi
+@@ -457,7 +444,7 @@
+     #All video options are enabled by default and no dynamic configuration
+         ifconfig ${APNAME} allmulti
+         iwpriv ${APNAME} mcastenhance 2
+-        iwpriv $(APNAME) acparams 1 0 1 0
++        iwpriv ${APNAME} acparams 1 0 1 0
+         iwpriv wifi1 setKeySrchAlways 1
+         iwpriv wifi1 setPhyRestartWar 1
+     else
+@@ -465,7 +452,7 @@
+         ifconfig ${APNAME} -allmulti
+         iwpriv wifi1 setKeySrchAlways 0
+         iwpriv ${APNAME} mcastenhance 0
+-        iwpriv $(APNAME) acparams 1 0 0 0
++        iwpriv ${APNAME} acparams 1 0 0 0
+         iwpriv wifi1 set_vsp_enable 0
+         iwpriv wifi1 setPhyRestartWar 0
+     fi
+@@ -480,7 +467,6 @@
+ if [ "${AP_HIDESSID}" = "1" ]; then
+      iwpriv ${APNAME} hide_ssid 1
+ fi
+-
+ ##
+ ## Script Complete
+ ##
+
+--- a/rootfs/cgiCommon/etc/ath.dual/activateVAP	2013-03-04 11:29:12.881546686 +0800
++++ b/rootfs/cgiCommon/etc/ath.dual/activateVAP	2013-03-04 11:39:30.581566453 +0800
+@@ -267,6 +267,7 @@
+     fi
+ 
+     if [ "${SECMODE}" = "WEP" ]; then
++        VAPNO=`echo ${APNAME}| cut -b 4-4`
+         NUM_KEY=1
+         #
+         # Insert the keys as required
+@@ -276,46 +277,63 @@
+         do
+             ITER_AP_WEP_RADIO_NUM0_KEY="WEP_RADIO_NUM0_KEY$i"
+             ITER_AP_WEP_RADIO_NUM1_KEY="WEP_RADIO_NUM1_KEY$i"
++	    ITER_AP_WEP_RADIO_NUM2_KEY="WEP_RADIO_NUM2_KEY$i"
++            ITER_AP_WEP_RADIO_NUM3_KEY="WEP_RADIO_NUM3_KEY$i"
++	    ITER_AP_WEP_RADIO_NUM4_KEY="WEP_RADIO_NUM4_KEY$i"
++            ITER_AP_WEP_RADIO_NUM5_KEY="WEP_RADIO_NUM5_KEY$i"
++            ITER_AP_WEP_RADIO_NUM6_KEY="WEP_RADIO_NUM6_KEY$i"
++            ITER_AP_WEP_RADIO_NUM7_KEY="WEP_RADIO_NUM7_KEY$i"
++            ITER_AP_WEP_RADIO_NUM8_KEY="WEP_RADIO_NUM8_KEY$i"
++            ITER_AP_WEP_RADIO_NUM9_KEY="WEP_RADIO_NUM9_KEY$i"
++            ITER_AP_WEP_RADIO_NUM10_KEY="WEP_RADIO_NUM10_KEY$i"
++            ITER_AP_WEP_RADIO_NUM11_KEY="WEP_RADIO_NUM11_KEY$i"
++	    ITER_AP_WEP_RADIO_NUM12_KEY="WEP_RADIO_NUM12_KEY$i"
++            ITER_AP_WEP_RADIO_NUM13_KEY="WEP_RADIO_NUM13_KEY$i"
++            ITER_AP_WEP_RADIO_NUM14_KEY="WEP_RADIO_NUM14_KEY$i"
++            ITER_AP_WEP_RADIO_NUM15_KEY="WEP_RADIO_NUM15_KEY$i"
++
+             eval ITER_AP_WEP_RADIO_NUM0_KEY=\$$ITER_AP_WEP_RADIO_NUM0_KEY
+             eval ITER_AP_WEP_RADIO_NUM1_KEY=\$$ITER_AP_WEP_RADIO_NUM1_KEY
+-
+-            if [ "${RADIO}" = "0" ]; then
+-                if [ "${ITER_AP_WEP_RADIO_NUM0_KEY}" != "" ]; then
+-					cfg -h ${ITER_AP_WEP_RADIO_NUM0_KEY} 1
+-                    if [ $? = 1 ]; then
+-                        iwconfig ${APNAME} enc ${ITER_AP_WEP_RADIO_NUM0_KEY} [$NUM_KEY]
+-                    else
+-                        iwconfig ${APNAME} enc s:${ITER_AP_WEP_RADIO_NUM0_KEY} [$NUM_KEY]
+-                    fi
+-                fi
+-            fi
+-            if [ "${RADIO}" = "1" ]; then
+-                if [ "${ITER_AP_WEP_RADIO_NUM1_KEY}" != "" ]; then
+-					cfg -h ${ITER_AP_WEP_RADIO_NUM1_KEY} 1
+-                    if [ $? = 1 ]; then
+-                        iwconfig ${APNAME} enc ${ITER_AP_WEP_RADIO_NUM1_KEY} [$NUM_KEY]
+-                    else
+-                        iwconfig ${APNAME} enc s:${ITER_AP_WEP_RADIO_NUM1_KEY} [$NUM_KEY]
+-                    fi
++            eval ITER_AP_WEP_RADIO_NUM2_KEY=\$$ITER_AP_WEP_RADIO_NUM2_KEY
++            eval ITER_AP_WEP_RADIO_NUM3_KEY=\$$ITER_AP_WEP_RADIO_NUM3_KEY
++            eval ITER_AP_WEP_RADIO_NUM4_KEY=\$$ITER_AP_WEP_RADIO_NUM4_KEY
++            eval ITER_AP_WEP_RADIO_NUM5_KEY=\$$ITER_AP_WEP_RADIO_NUM5_KEY
++            eval ITER_AP_WEP_RADIO_NUM6_KEY=\$$ITER_AP_WEP_RADIO_NUM6_KEY
++            eval ITER_AP_WEP_RADIO_NUM7_KEY=\$$ITER_AP_WEP_RADIO_NUM7_KEY
++            eval ITER_AP_WEP_RADIO_NUM8_KEY=\$$ITER_AP_WEP_RADIO_NUM8_KEY
++            eval ITER_AP_WEP_RADIO_NUM9_KEY=\$$ITER_AP_WEP_RADIO_NUM9_KEY
++            eval ITER_AP_WEP_RADIO_NUM10_KEY=\$$ITER_AP_WEP_RADIO_NUM10_KEY
++            eval ITER_AP_WEP_RADIO_NUM11_KEY=\$$ITER_AP_WEP_RADIO_NUM11_KEY
++	    eval ITER_AP_WEP_RADIO_NUM12_KEY=\$$ITER_AP_WEP_RADIO_NUM12_KEY
++            eval ITER_AP_WEP_RADIO_NUM13_KEY=\$$ITER_AP_WEP_RADIO_NUM13_KEY
++            eval ITER_AP_WEP_RADIO_NUM14_KEY=\$$ITER_AP_WEP_RADIO_NUM14_KEY
++            eval ITER_AP_WEP_RADIO_NUM15_KEY=\$$ITER_AP_WEP_RADIO_NUM15_KEY
++	
++ 	    ITER_AP_WEP_VAP_KEY="ITER_AP_WEP_RADIO_NUM${VAPNO}_KEY"
++	    eval ITER_AP_WEP_VAP_KEY=\$$ITER_AP_WEP_VAP_KEY
++  	      
++	    if [ "${ITER_AP_WEP_VAP_KEY}" != "" ]; then
++                cfg -h ${ITER_AP_WEP_VAP_KEY} 1
++                if [ $? = 1 ]; then
++                    iwconfig ${APNAME} enc ${ITER_AP_WEP_VAP_KEY} [$NUM_KEY]
++                else
++                    iwconfig ${APNAME} enc s:${ITER_AP_WEP_VAP_KEY} [$NUM_KEY]
+                 fi
+             fi
+-            NUM_KEY=$(($NUM_KEY+1))
+-        done
+-        if [ "${RADIO}" = "0" ]; then
+-            if [ "${AP_WEP_MODE_0}" != "" -a "${AP_WEP_MODE_0}" != "1" ]; then
+-                iwpriv ${APNAME} authmode ${AP_WEP_MODE_0}
+-            fi
+-            if [ "${AP_PRIMARY_KEY_0}" != "" ]; then
+-                iwconfig ${APNAME} enc [${AP_PRIMARY_KEY_0}]
+-            fi
++	    NUM_KEY=$(($NUM_KEY+1))
++	done
++
++	ITEM_AP_WEP_MODE="AP_WEP_MODE_$VAPNO"
++	ITEM_AP_PRIMARY_KEY="AP_PRIMARY_KEY_$VAPNO"
++	eval ITEM_AP_WEP_MODE=\$$ITEM_AP_WEP_MODE
++	eval ITEM_AP_PRIMARY_KEY=\$$ITEM_AP_PRIMARY_KEY
++
++        if [ "${ITEM_AP_WEP_MODE}" != "" -a "${ITEM_AP_WEP_MODE}" != "1" ]; then
++            iwpriv ${APNAME} authmode ${ITEM_AP_WEP_MODE}
+         fi
+-        if [ "${RADIO}" = "1" ]; then
+-            if [ "${AP_WEP_MODE_1}" != "" -a "${AP_WEP_MODE_1}" != "1" ]; then
+-                iwpriv ${APNAME} authmode ${AP_WEP_MODE_1}
+-            fi
+-            if [ "${AP_PRIMARY_KEY_1}" != "" ]; then
+-                iwconfig ${APNAME} enc [${AP_PRIMARY_KEY_1}]
+-            fi
++        if [ "${ITEM_AP_PRIMARY_KEY}" != "" ]; then
++            iwconfig ${APNAME} enc [${ITEM_AP_PRIMARY_KEY}]
+         fi
+     fi
+ fi
++
+
+--- a/drivers/wlan/hal/ah_regdomain_common.h	2011-12-01 03:09:29.000000000 +0800
++++ b/drivers/wlan/hal/ah_regdomain_common.h	2013-05-07 15:28:02.049315955 +0800
+@@ -1038,10 +1038,10 @@
+ };
+ 
+ static const REG_DMN_FREQ_BAND regDmn2GhzFreq[] = {
+-	{ 2312, 2372, 5,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2312_2372 */
++	{ 2312, 2372, 34,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2312_2372 */
+ 	{ 2312, 2372, 20, 0, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F2_2312_2372 */
+ 
+-	{ 2412, 2472, 5,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2412_2472 */
++	{ 2412, 2472, 34,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2412_2472 */
+ 	{ 2412, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA, 30},/* F2_2412_2472 */
+ 	{ 2412, 2472, 30, 0, 20, 5, NO_DFS, NO_PSCAN, 4},	/* F3_2412_2472 */
+ 	{ 2412, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA, 0},	/* F4_2412_2472 */
+@@ -1055,10 +1055,10 @@
+ 
+ 	{ 2467, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA2 | PSCAN_MKKA, 30}, /* F1_2467_2472 */
+ 
+-	{ 2484, 2484, 5,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2484_2484 */
++	{ 2484, 2484, 34,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2484_2484 */
+ 	{ 2484, 2484, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA | PSCAN_MKKA1 | PSCAN_MKKA2, 31},	/* F2_2484_2484 */
+ 
+-	{ 2512, 2732, 5,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2512_2732 */
++	{ 2512, 2732, 34,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2512_2732 */
+ 
+ 	/*
+ 	 * WWR have powers opened up to 20dBm.  Limits should often come from CTL/Max powers
+@@ -1134,7 +1134,7 @@
+ 	{ 2467, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA2 | PSCAN_MKKA, 30 }, /* G1_2467_2472 */
+ 	{ 2467, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA_G | PSCAN_MKKA2, 0 }, /* G2_2467_2472 */
+ 
+-	{ 2484, 2484, 5,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* G1_2484_2484 */
++	{ 2484, 2484, 34,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* G1_2484_2484 */
+ 	/*
+ 	 * WWR open up the power to 20dBm
+ 	 */
+@@ -1143,7 +1143,7 @@
+ 	{ 2412, 2462, 20, 0, 20, 5, NO_DFS, NO_PSCAN, 0},	/* WG1_2412_2462 */
+ 	{ 2412, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_WWR | IS_ECM_CHAN | PSCAN_EXT_CHAN, 0}, /* WG1_2412_2472 */
+ 	{ 2412, 2472, 20, 0, 20, 5, NO_DFS, NO_PSCAN | IS_ECM_CHAN, 0}, /* WG2_2412_2472 */
+-	{ 2312, 2532, 27, 6, 20, 5, NO_DFS, NO_PSCAN, 0}, 		/* G_DEMO_ALMOST_ALL_CHANNELS */
++	{ 2312, 2532, 34, 6, 20, 5, NO_DFS, NO_PSCAN, 0}, 		/* G_DEMO_ALMOST_ALL_CHANNELS */
+ 	{ 2312, 2732, 27, 6, 20, 5, NO_DFS, NO_PSCAN, 0}, 		/* G_DEMO_ALL_CHANNELS */
+ };
+ 
+
+--- a/drivers/wlan/umac/acl/ieee80211_acl.c	2013-05-10 18:04:45.999427687 +0800
++++ b/drivers/wlan/umac/acl/ieee80211_acl.c	2013-05-10 18:04:20.167426860 +0800
+@@ -170,11 +170,11 @@
+      * Display the message.
+      * return 1 to report success
+      */
+-    if(vap->iv_wps_mode){
++/*    if(vap->iv_wps_mode){
+         printk("\n WPS Enabled : Ignoring MAC Filtering\n");
+         return 1;
+     }
+-
++*/
+     switch (acl->acl_policy) {
+         struct ieee80211_acl_entry *entry;
+         case ACL_POLICY_OPEN:
+--- a/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-05-10 18:15:04.831447489 +0800
++++ b/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-05-10 18:30:10.335476465 +0800
+@@ -68,6 +68,7 @@
+ cfg -a AMPDULIMIT=${AMPDULIMIT:=50000}
+ cfg -a AMPDULIMIT_2=${AMPDULIMIT_2:=50000}
+ cfg -a AMPDUMIN=${AMPDUMIN:=32768}
++cfg -a AMPDUMIN_2=${AMPDUMIN_2:=32768}
+ cfg -a CWMMODE=${CWMMODE:=1}
+ cfg -a RATECTL=${RATECTL:="auto"}
+ cfg -a MANRATE=${MANRATE:=0x8c8c8c8c}
+@@ -76,8 +77,6 @@
+ cfg -a RX_CHAINMASK_2=${RX_CHAINMASK_2:=0}
+ cfg -a TX_CHAINMASK=${TX_CHAINMASK:=0}
+ cfg -a TX_CHAINMASK_2=${TX_CHAINMASK_2:=0}
+-cfg -a SWAP_LED=${SWAP_LED:=1}
+-cfg -a LED_CUSTOM=${LED_CUSTOM:=3}
+ 
+ ##
+ ## AP Identification Section
+@@ -149,23 +148,6 @@
+ cfg -a AP_SECFILE_15=${AP_SECFILE_15:="PSK"}
+ cfg -a AP_SECFILE_16=${AP_SECFILE_16:="PSK"}
+ 
+-cfg -a WPS_ENABLE=${WPS_ENABLE:="0"}
+-cfg -a WPS_ENABLE_2=${WPS_ENABLE_2:="0"}
+-cfg -a WPS_ENABLE_3=${WPS_ENABLE_3:="0"}
+-cfg -a WPS_ENABLE_4=${WPS_ENABLE_4:="0"}
+-cfg -a WPS_ENABLE_5=${WPS_ENABLE_5:="0"}
+-cfg -a WPS_ENABLE_6=${WPS_ENABLE_6:="0"}
+-cfg -a WPS_ENABLE_7=${WPS_ENABLE_7:="0"}
+-cfg -a WPS_ENABLE_8=${WPS_ENABLE_8:="0"}
+-cfg -a WPS_ENABLE_9=${WPS_ENABLE_9:="0"}
+-cfg -a WPS_ENABLE_10=${WPS_ENABLE_10:="0"}
+-cfg -a WPS_ENABLE_11=${WPS_ENABLE_11:="0"}
+-cfg -a WPS_ENABLE_12=${WPS_ENABLE_12:="0"}
+-cfg -a WPS_ENABLE_13=${WPS_ENABLE_13:="0"}
+-cfg -a WPS_ENABLE_14=${WPS_ENABLE_14:="0"}
+-cfg -a WPS_ENABLE_15=${WPS_ENABLE_15:="0"}
+-cfg -a WPS_ENABLE_16=${WPS_ENABLE_16:="0"}
+-
+ cfg -a AP_RFPARAM=${AP_RFPARAM:="0"}
+ cfg -a AP_RFPARAM_2=${AP_RFPARAM_2:="0"}
+ cfg -a AP_RFPARAM_3=${AP_RFPARAM_3:="0"}
+
+--- a/drivers/wlan/os/linux/src/ieee80211_wireless.c	2011-12-01 03:09:32.000000000 +0800
++++ b/drivers/wlan/os/linux/src/ieee80211_wireless.c	2013-05-14 09:38:12.240497332 +0800
+@@ -3683,7 +3683,9 @@
+     */
+ 
+     case IEEE80211_PARAM_11N_RATE:
++	value = (value << 24) | (value << 16) | (value << 8) | value;
+         retv = wlan_set_param(vap, IEEE80211_FIXED_RATE, value);
++	//printk("value = %d\n",value);
+         break;
+ 
+     case IEEE80211_PARAM_11N_RETRIES:
+
+--- a/rootfs/cgiCommon/etc/ath.dual/apup	2013-05-20 13:22:11.818681239 +0800
++++ b/rootfs/cgiCommon/etc/ath.dual/apup	2013-05-20 14:02:24.738648912 +0800
+@@ -681,7 +681,12 @@
+     fi
+     else
+         if [ -f /tmp/conf_filename ]; then
+-            hostapd  -B `cat /tmp/conf_filename` -e /etc/wpa2/entropy
++	    myconf=`cat /tmp/conf_filename`                                 
++            for i in $myconf;                                                
++            do                                                             
++            hostapd  -B $i -e /etc/wpa2/entropy
++            done
++            #hostapd  -B `cat /tmp/conf_filename` -e /etc/wpa2/entropy
+         fi
+         if [ -f /tmp/sta_conf_filename ]; then
+             wpa_supplicant `cat /tmp/sta_conf_filename` &
+--- aaa/drivers/wlan/hal/ah_regdomain_common.h	2013-05-21 18:11:06.913132743 +0800
++++ bbb/drivers/wlan/hal/ah_regdomain_common.h	2013-05-21 18:06:40.488285313 +0800
+@@ -1044,7 +1044,7 @@
+ 	{ 2412, 2472, 34,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* F1_2412_2472 */
+ 	{ 2412, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA, 30},/* F2_2412_2472 */
+ 	{ 2412, 2472, 30, 0, 20, 5, NO_DFS, NO_PSCAN, 4},	/* F3_2412_2472 */
+-	{ 2412, 2472, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA, 0},	/* F4_2412_2472 */
++	{ 2412, 2472, 34, 0, 20, 5, NO_DFS, PSCAN_MKKA, 0},	/* F4_2412_2472 */
+ 
+ 	{ 2412, 2462, 30, 6, 20, 5, NO_DFS, NO_PSCAN, 12},	/* F1_2412_2462 */
+ 	{ 2412, 2462, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA, 30},	/* F2_2412_2462 */
+@@ -1120,7 +1120,7 @@
+ 	{ 2412, 2472, 5,  6, 20, 5, NO_DFS, NO_PSCAN, 0},	/* G1_2412_2472 */
+ 	{ 2412, 2472, 20, 0, 20, 5,  NO_DFS, PSCAN_MKKA_G | PSCAN_MKKA2 | PSCAN_MKKA | PSCAN_EXT_CHAN, 30},	/* G2_2412_2472 */
+ 	{ 2412, 2472, 30, 0, 20, 5, NO_DFS, NO_PSCAN, 4},	/* G3_2412_2472 */
+-	{ 2412, 2472, 20, 0, 20, 5,  NO_DFS, PSCAN_MKKA_G | PSCAN_MKKA2 | PSCAN_MKKA | PSCAN_EXT_CHAN, 0},	/* G4_2412_2472 */
++	{ 2412, 2472, 34, 0, 20, 5,  NO_DFS, PSCAN_MKKA_G | PSCAN_MKKA2 | PSCAN_MKKA | PSCAN_EXT_CHAN, 0},	/* G4_2412_2472 */
+ 
+ 	{ 2412, 2462, 30, 6, 20, 5, NO_DFS, NO_PSCAN, 12},	/* G1_2412_2462 */
+ 	{ 2412, 2462, 20, 0, 20, 5, NO_DFS, PSCAN_MKKA_G, 30},	/* G2_2412_2462 */
+--- aaa/rootfs/cgiCommon/etc/rc.d/rc.wlan	2013-05-21 18:32:17.881897715 +0800
++++ bbb/rootfs/cgiCommon/etc/rc.d/rc.wlan	2013-05-27 18:16:28.690459520 +0800
+@@ -26,18 +26,12 @@
+ 
+ _ath_unload()
+ {
+-#    rmmod wlan_scan_ap
+-#    rmmod wlan_scan_sta
+     rmmod ath_pktlog
+     sleep 2
+-#    rmmod wlan_me
+-#    sleep 2
+     rmmod umac
+     sleep 2
+     rmmod ath_dev
+-#    rmmod hst_tx99
+     rmmod ath_dfs
+-#    rmmod ath_spectral
+     rmmod ath_rate_atheros
+     rmmod ath_hal
+     rmmod asf
+@@ -65,9 +59,9 @@
+     if [ "${MODLIST}" != "" ]; then
+ 	rm -f /tmp/.apup
+         exit 0
+-	fi
++    fi
+ 
+-	#
++    #
+     # Calculate the parameter values required.  Add the appropriate settings
+     # to the strings
+     #
+@@ -83,69 +77,45 @@
+     SPECTRAL_ARGS="maxholdintvl=5000 nfrssi=1 nobeacons=0"
+ 
+ 
+-#
+-# Finally, insert the modules
+-#
++    #
++    # Finally, insert the modules
++    #
+     insmod $MODULE_PATH/adf.ko
+     insmod $MODULE_PATH/asf.ko
+     insmod $MODULE_PATH/ath_hal.ko
+     insmod $MODULE_PATH/ath_rate_atheros.ko
+-#    insmod $MODULE_PATH/ath_spectral.ko $SPECTRAL_ARGS
+     if [ "${AP_NO_A_BAND}" != "1" ]; then
+-        #load DFS if A band is supported,default is supported and set AP_NO_A_BAND=1 if not supported
+         insmod $MODULE_PATH/ath_dfs.ko $DFS_ARGS
+     fi
+-#    insmod $MODULE_PATH/hst_tx99.ko
+     insmod $MODULE_PATH/ath_dev.ko
+     insmod $MODULE_PATH/umac.ko flowmac_on=${LAN_WLAN_FLOWCONTROL:=0}
+-#    insmod $MODULE_PATH/wlan_me.ko
+     insmod $MODULE_PATH/ath_pktlog.ko
+ 
+-# Remove the temporary file to notify VAP creation  is successful
+-   rm -f /tmp/.apup
++    # Remove the temporary file to notify VAP creation  is successful
++    rm -f /tmp/.apup
+ 
+-#
+-# If Country Code has been specified, it needs to be set here using
+-# the iwpriv command.  This will be common for all VAPs
+-#
++    #
++    # If Country Code has been specified, it needs to be set here using
++    # the iwpriv command.  This will be common for all VAPs
++    #
+ 
+-    if [ $ATH_isoutdoor = "1" ]; then
+-        iwpriv wifi0 setCountry $ATH_country\O
++    if [ $WIFI_OUTDOOR = "1" ]; then
++        iwpriv wifi0 setCountry $WIFI_COUNTRY\O
+     else
+-        iwpriv wifi0 setCountry $ATH_country\I
++        iwpriv wifi0 setCountry $WIFI_COUNTRY\I
+     fi
+-    if [ $ATH_isoutdoor_2 = "1" ]; then
+-        iwpriv wifi1 setCountry $ATH_country_2\O
++    if [ $WIFI_OUTDOOR_2 = "1" ]; then
++        iwpriv wifi1 setCountry $WIFI_COUNTRY_2\O
+     else
+-        iwpriv wifi1 setCountry $ATH_country_2\I
++        iwpriv wifi1 setCountry $WIFI_COUNTRY_2\I
+     fi
+ 
+-    if [ "$ATH_countrycode" != "" ]; then
+-        iwpriv wifi0 setCountryID $ATH_countrycode
+-		
+-	##
+-	## Check the result of this command.  If the country code
+-	## is invalid, it will return a non-zero result.  We should
+-	## die a horrible death in this case
+-	##
+-
+-	if [ $? != 0 ]; then
+-		_ath_unload
+-		exit 255
+-	fi
+-
+-        iwpriv wifi1 setCountryID $ATH_countrycode
+-
+-	##
+-	## Don't check this one.  If the second module is not installed, we will
+-	## get an error code.  If the country code is invalid, it was invalid for
+-	## the previous call, so we won't get here anyway
+-	##
+-
+-	exit 0
++    if [ "$WIFI_REGDOMAIN" != "" ]; then
++        iwpriv wifi0 setCountryID $WIFI_REGDOMAIN
++    fi
++    if [ "$WIFI_REGDOMAIN_2" != "" ]; then
++        iwpriv wifi1 setCountryID $WIFI_REGDOMAIN_2
+     fi
+-
+ else
+-	_ath_unload
+-
++    _ath_unload
+ fi
+
+--- a/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-06-14 13:27:52.056944448 +0800
++++ b/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-06-14 16:16:12.365076565 +0800
+@@ -71,7 +71,6 @@
+ cfg -a AMPDUMIN_2=${AMPDUMIN_2:=32768}
+ cfg -a CWMMODE=${CWMMODE:=1}
+ cfg -a RATECTL=${RATECTL:="auto"}
+-cfg -a MANRATE=${MANRATE:=0x8c8c8c8c}
+ cfg -a MANRETRIES=${MANRETRIES:=0x04040404}
+ cfg -a RX_CHAINMASK=${RX_CHAINMASK:=0}
+ cfg -a RX_CHAINMASK_2=${RX_CHAINMASK_2:=0}

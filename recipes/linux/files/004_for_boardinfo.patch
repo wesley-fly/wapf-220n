@@ -1,0 +1,24 @@
+--- aaa/arch/powerpc/boot/dts/p1010rdb.dts	2013-06-26 10:46:17.142648933 +0800
++++ bbb/arch/powerpc/boot/dts/p1010rdb.dts	2013-06-26 10:53:46.922634841 +0800
+@@ -249,13 +249,16 @@
+                                         reg = <0x00100000 0x00400000>;
+                                         label = "SPI (RW) Linux Kernel Image";
+                                 };
+-
+                                 partition@500000 {
+-                                        /* 11MB - 64k*2 for JFFS2 based RFS */
+-                                        reg = <0x00500000 0x00ae0000>;
++                                        /* 11MB - 64k*3 for JFFS2 based RFS */
++                                        reg = <0x00500000 0x00ad0000>;
+                                         label = "SPI (RW) JFFS2 RFS";
+                                 };
+-
++				partition@fd0000 {
++                                        /*64K Board Info*/
++                                        reg = <0x00fd0000 0x00010000>;
++                                        label = "SPI (RW) Board Info";
++                                };
+                                 partition@fe0000 {
+                                         /*64K NVRAM*/
+                                         reg = <0x00fe0000 0x00010000>;
+

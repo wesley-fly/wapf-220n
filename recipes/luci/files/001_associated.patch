@@ -1,0 +1,1462 @@
+--- a/modules/admin-full/luasrc/controller/admin/network.lua	2012-01-07 00:30:29.000000000 +0800
++++ b/modules/admin-full/luasrc/controller/admin/network.lua	2013-05-13 09:37:53.566748917 +0800
+@@ -142,8 +142,76 @@
+ 
+ 	page = entry({"admin", "network", "diag_traceroute"}, call("diag_traceroute"), nil)
+ 	page.leaf = true
++	
++	
++	--Bing add:for wps button function--
++	
++	page = entry({"admin","network","wps_generatepin"},call("wps_generatepin"),nil)
++	page.leaf = true
++	
++	page = entry({"admin","network","wps_startpinmethod"},call("wps_startpinmethod"),nil)
++	page.leaf = true
++	
++	page = entry({"admin","network","wps_startpbc"},call("wps_startpbc"),nil)
++	page.leaf = true
++	
++end
++
++function wps_generatepin()
++    local conf = luci.http.formvalue("conf")
++    local sect = luci.http.formvalue("sect")
++    local devicename = getDevName(conf,sect) 
++    local cmd = "/sbin/hostapd_cli -i "..devicename.." wps_ap_pin random" 
++    wps_command(cmd)
++end
++function wps_command(cmd)    
++    local util = io.popen(cmd)
++    luci.http.prepare_content("text/plan")
++    if util then
++       while true do
++           local ln = util:read("*l")
++           if not ln then break end
++           luci.http.write(ln)
++           luci.http.write("\n")
++       end 
++       util:close()
++       wps_showsuccess()
++    else
++      luci.http.write("No message show")
++    end
++    return 
++end
++function wps_startpinmethod()
++    local conf = luci.http.formvalue("conf")
++    local sect = luci.http.formvalue("sect")
++    local pin = luci.http.formvalue("pin")
++    local devicename = getDevName(conf,sect) 
++    local cmd = "/sbin/hostapd_cli -i "..devicename.." wps_pin any " .. pin 
++    wps_command(cmd)  
++end
++function getDevName(conf,sect)
++    local uci = require "luci.model.uci".cursor()                                            
++    local ntm = require "luci.model.network"                                                 
++    ntm.init(uci)                                                                            
++    local devicename = uci:get(conf,sect,"device")  
++    if devicename then
++       return devicename
++    end
++    return nil
++end
++function wps_startpbc()
++    local conf = luci.http.formvalue("conf")
++    local sect = luci.http.formvalue("sect")
++    local devicename = getDevName(conf,sect) 
++    local cmd = "/sbin/hostapd_cli -i "..devicename.." wps_pbc" 
++    wps_command(cmd)  
++end
++--if wps_* run success,the led lights three times
++function wps_showsuccess()
++    local cmd = "/sbin/"
+ end
+ 
++
+ function wifi_join()
+ 	local function param(x)
+ 		return luci.http.formvalue(x)
+@@ -344,7 +412,38 @@
+ 
+ 	luci.http.status(404, "No such interface")
+ end
+-
++--[[vking]]--
++function reget_assoclist(dev)
++	-- dev:ath0.network1
++	local mac,network = dev:match('([^\.]+)\.(.*)')
++	local res=luci.util.execi('wlanconfig '..mac..' list sta')
++	--luci.http.write_json(res)
++	local assoclist={}
++	local k=0
++	if not res then
++		return assoclist
++	end
++	for line in res do
++		if k>0 then
++			local signal,bssid
++	
++			line = luci.util.trim(line)
++			for i, value in ipairs(luci.util.split(line, "%s+", nil, true)) do
++				if i==1 then bssid=value end
++				if i==5 then 
++					signal=value
++					break
++				end
++			end
++			bssid=bssid:upper()
++			assoclist[bssid]={signal=signal,noise=0}
++		end
++		k=1
++	end
++	--luci.http.write_json(assoclist)
++	return assoclist
++end
++--[[vking]]--
+ function wifi_status()
+ 	local path = luci.dispatcher.context.requestpath
+ 	local s    = require "luci.tools.status"
+@@ -353,6 +452,8 @@
+ 	local dev
+ 	for dev in path[#path]:gmatch("[%w%.%-]+") do
+ 		rv[#rv+1] = s.wifi_network(dev)
++		--[[vking]]--
++--		if not rv[#rv].assoclist[0] then rv[#rv].assoclist=reget_assoclist(dev) end
+ 	end
+ 
+ 	if #rv > 0 then
+
+--- a/modules/admin-core/luasrc/tools/status.lua	2011-12-06 03:44:20.000000000 +0800
++++ b/modules/admin-core/luasrc/tools/status.lua	2013-03-06 13:09:18.889150087 +0800
+@@ -52,7 +52,39 @@
+ 
+ 	return rv
+ end
+-
++--[[vking]]--
++function reget_assoclist(dev)
++	-- dev:ath0.network1
++	-- local mac,network = dev:match('([^\.]+)\.(.*)')
++	local mac=dev.sid
++	local res=luci.util.execi('wlanconfig '..mac..' list sta')
++	--luci.http.write_json(res)
++	local assoclist={}
++	local k=0
++	if not res then
++		return assoclist
++	end
++	for line in res do
++		if k>0 then
++			local signal,bssid
++	
++			line = luci.util.trim(line)
++			for i, value in ipairs(luci.util.split(line, "%s+", nil, true)) do
++				if i==1 then bssid=value end
++				if i==5 then 
++					signal=value
++					break
++				end
++			end
++			bssid=bssid:upper()
++			assoclist[bssid]={signal=signal,noise=0}
++		end
++		k=1
++	end
++	--luci.http.write_json(assoclist)
++	return assoclist
++end
++--[[vking]]--
+ function wifi_networks()
+ 	local rv = { }
+ 	local ntm = require "luci.model.network".init()
+@@ -88,6 +120,8 @@
+ 				txpower    = net:txpower(),
+ 				txpoweroff = net:txpower_offset()
+ 			}
++			--[[vking]]--
++			if not rd.networks[#rd.networks].assoclist[0] then rd.networks[#rd.networks].assoclist=reget_assoclist(dev) end
+ 		end
+ 
+ 		rv[#rv+1] = rd
+
+
+--- a/modules/admin-full/luasrc/view/admin_network/wifi_status.htm	2011-10-28 23:15:27.000000000 +0800
++++ b/modules/admin-full/luasrc/view/admin_network/wifi_status.htm	2013-03-19 13:31:14.666522908 +0800
+@@ -1,6 +1,27 @@
+ <%+cbi/valueheader%>
+ 
+ <script type="text/javascript">//<![CDATA[
++/* 添加相关屏蔽F5功能代码 */
++function resetf5(event) {
++	event = event ? event : window.event;
++	keycode = event.keyCode ? event.keyCode : event.charCode;
++	if(keycode == 116 || (event.ctrlKey && keycode==82)) {
++		if(document.all) {
++			event.keyCode = 0;
++			event.returnValue = false;
++		} else {
++			event.cancelBubble = true;
++			event.preventDefault();
++		}
++	}
++}
++
++if(document.documentElement.addEventListener) {
++	document.documentElement.addEventListener('keydown', resetf5, false);
++} else if(document.documentElement.attachEvent) {
++	document.documentElement.attachEvent("onkeydown", resetf5);
++}
++
+ 	XHR.poll(5, '<%=luci.dispatcher.build_url("admin", "network", "wireless_status", self.ifname)%>', null,
+ 		function(x, iw)
+ 		{
+
+--- a/modules/admin-core/luasrc/tools/status.lua	2013-04-03 12:24:40.201085557 +0800
++++ b/modules/admin-core/luasrc/tools/status.lua	2013-04-03 12:52:32.409139068 +0800
+@@ -58,7 +58,7 @@
+ 	-- local mac,network = dev:match('([^\.]+)\.(.*)')
+ 	local mac=dev.sid
+ 	local res=luci.util.execi('wlanconfig '..mac..' list sta')
+-	--luci.http.write_json(res)
++	--luci.http.write_json(dev)
+ 	local assoclist={}
+ 	local k=0
+ 	if not res then
+@@ -121,7 +121,7 @@
+ 				txpoweroff = net:txpower_offset()
+ 			}
+ 			--[[vking]]--
+-			if not rd.networks[#rd.networks].assoclist[0] then rd.networks[#rd.networks].assoclist=reget_assoclist(dev) end
++			--if not rd.networks[#rd.networks].assoclist[0] then rd.networks[#rd.networks].assoclist=reget_assoclist(dev) end
+ 		end
+ 
+ 		rv[#rv+1] = rd
+
+--- a/libs/web/luasrc/cbi.lua	2011-10-28 23:15:27.000000000 +0800
++++ b/libs/web/luasrc/cbi.lua	2013-05-08 10:46:19.079539869 +0800
+@@ -1187,6 +1187,8 @@
+ 	size:		The size of the input fields
+ 	rmempty:	Unset value if empty
+ 	optional:	This value is optional (see AbstractSection.optionals)
++	gray:           Bing add,use for gray a html toolkit if gray=true
++	
+ ]]--
+ AbstractValue = class(Node)
+ 
+@@ -1209,6 +1211,9 @@
+ 	self.default   = nil
+ 	self.size      = nil
+ 	self.optional  = false
++	
++	self.gray = false 
++	
+ end
+ 
+ function AbstractValue.prepare(self)
+@@ -1465,6 +1470,7 @@
+ 	AbstractValue.__init__(self, ...)
+ 	self.template  = "cbi/fvalue"
+ 
++        self.readonly = false
+ 	self.enabled  = "1"
+ 	self.disabled = "0"
+ 	self.default  = self.disabled
+
+--- a/libs/web/luasrc/view/cbi/fvalue.htm	2011-05-10 07:04:26.000000000 +0800
++++ b/libs/web/luasrc/view/cbi/fvalue.htm	2013-05-09 09:39:56.246612598 +0800
+@@ -2,8 +2,17 @@
+ 	<input type="hidden" value="1"<%=
+ 		attr("name", "cbi.cbe." .. self.config .. "." .. section .. "." .. self.option)
+ 	%> />
++        <% if self.gray == true then
++        %>
++	<input class="cbi-input-checkbox" onclick="return false" onchange="return false" type="checkbox"<%=
++		attr("id", cbid) .. attr("name", cbid) .. attr("value", self.enabled or 1) ..
++		ifattr((self:cfgvalue(section) or self.default) == self.enabled, "checked", "checked") .. ifattr(self.gray,"style","display:none")
++	%> />
++	<%
++	end
++	%>
+ 	<input class="cbi-input-checkbox" onclick="cbi_d_update(this.id)" onchange="cbi_d_update(this.id)" type="checkbox"<%=
+ 		attr("id", cbid) .. attr("name", cbid) .. attr("value", self.enabled or 1) ..
+-		ifattr((self:cfgvalue(section) or self.default) == self.enabled, "checked", "checked")
++		ifattr((self:cfgvalue(section) or self.default) == self.enabled, "checked", "checked") .. ifattr(self.gray,"disabled",true)
+ 	%> />
+ <%+cbi/valuefooter%>
+
+--- a/modules/admin-full/luasrc/view/admin_status/index.htm	2011-10-28 23:15:27.000000000 +0800
++++ b/modules/admin-full/luasrc/view/admin_status/index.htm	2013-05-08 10:52:31.495551786 +0800
+@@ -313,7 +313,7 @@
+ 							'</td><td style="text-align:left; padding:3px"><small>' +
+ 								'<strong><%:SSID%>:</strong> <a href="%s">%h</a><br />' +
+ 								'<strong><%:Mode%>:</strong> %s<br />' +
+-								'<strong><%:Channel%>:</strong> %d (%.2f GHz)<br />' +
++								'<strong><%:Channel%>:</strong> %d (%.3f GHz)<br />' +
+ 								'<strong><%:Bitrate%>:</strong> %s Mb/s<br />',
+ 								icon, net.signal, net.noise,
+ 								net.quality,
+
+--- a/protocols/ppp/luasrc/model/network/proto_ppp.lua	2011-10-28 23:15:27.000000000 +0800
++++ b/protocols/ppp/luasrc/model/network/proto_ppp.lua	2013-05-08 10:54:11.603554989 +0800
+@@ -20,7 +20,9 @@
+ local netmod = luci.model.network
+ 
+ local _, p
+-for _, p in ipairs({"ppp", "pptp", "pppoe", "pppoa", "3g"}) do
++--Bing:this array is use for register capability of protocol.within our project,only pppoe is supported.
++--for _, p in ipairs({"ppp", "pptp", "pppoe", "pppoa", "3g"}) do
++  for _, p in ipairs({"pppoe"}) do
+ 
+ 	local proto = netmod:register_protocol(p)
+ 
+
+--- a/libs/web/luasrc/view/cbi/value.htm	2011-05-10 07:04:26.000000000 +0800
++++ b/libs/web/luasrc/view/cbi/value.htm	2013-05-09 09:41:16.818615176 +0800
+@@ -1,7 +1,8 @@
+ <%+cbi/valueheader%>
+ 	<input type="<%=self.password and 'password" class="cbi-input-password' or 'text" class="cbi-input-text' %>" onchange="cbi_d_update(this.id)"<%=
+ 		attr("name", cbid) .. attr("id", cbid) .. attr("value", self:cfgvalue(section) or self.default) ..
+-		ifattr(self.size, "size") .. ifattr(self.placeholder, "placeholder")
++		ifattr(self.size, "size") .. ifattr(self.placeholder, "placeholder") .. ifattr(self.gray,"readonly",true) .. ifattr(self.gray,"style","background-color:#F4F4F4;border-color:#F4F4F4;")
++		.. ifattr(self.gray,"onfocus","this.blur()")
+ 	%> />
+ 	<% if self.password then %><img src="<%=resource%>/cbi/reload.gif" style="vertical-align:middle" title="<%:Reveal/hide password%>" onclick="var e = document.getElementById('<%=cbid%>'); e.type = (e.type=='password') ? 'text' : 'password';" /><% end %>
+ 	<% if #self.keylist > 0 or self.datatype then -%>
+
+--- a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2012-01-25 05:01:16.000000000 +0800
++++ b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-10 18:49:40.755513919 +0800
+@@ -222,9 +222,10 @@
+ 	else
+ 		s:taboption("advanced", Value, "country", translate("Country Code"), translate("Use ISO/IEC 3166 alpha2 country codes."))
+ 	end
+-
++        ---Bing modified:gray this toolkit
+ 	s:taboption("advanced", Value, "distance", translate("Distance Optimization"),
+-		translate("Distance to farthest network member in meters."))
++		translate("Distance to farthest network member in meters.")).gray = true
++
+ 
+ 	s:taboption("advanced", Value, "frag", translate("Fragmentation Threshold"))
+ 	s:taboption("advanced", Value, "rts", translate("RTS/CTS Threshold"))
+@@ -252,32 +253,54 @@
+ 
+ 	mode = s:taboption("advanced", ListValue, "hwmode", translate("Mode"))
+ 	mode:value("", translate("auto"))
+-	if hw_modes.b then mode:value("11b", "802.11b") end
+-	if hw_modes.g then mode:value("11g", "802.11g") end
+-	if hw_modes.a then mode:value("11a", "802.11a") end
+-	if hw_modes.g then mode:value("11bg", "802.11b+g") end
+-	if hw_modes.g then mode:value("11gst", "802.11g + Turbo") end
+-	if hw_modes.a then mode:value("11ast", "802.11a + Turbo") end
+-	mode:value("fh", translate("Frequency Hopping"))
+-
+-	s:taboption("advanced", Flag, "diversity", translate("Diversity")).rmempty = false
++        ----obsolete code-----	
++	--if hw_modes.b then mode:value("11b", "802.11b") end
++	--if hw_modes.g then mode:value("11g", "802.11g") end
++	--if hw_modes.a then mode:value("11a", "802.11a") end
++	--if hw_modes.g then mode:value("11bg", "802.11b+g") end
++	--if hw_modes.g then mode:value("11gst", "802.11g + Turbo") end
++	--if hw_modes.a then mode:value("11ast", "802.11a + Turbo") end
++	--mode:value("fh", translate("Frequency Hopping"))
++	----Bing modified code-----
++	
++	if wdev:name() == "ath0" then
++	   mode:value("","auto")
++	   mode:value("11a","802.11a")
++	   mode:value("11naht20","802.11na+HT20")
++	   mode:value("11naht40","802.11na+HT40")
++	elseif wdev:name() == "ath1" then
++	   mode:value("","auto")
++	   mode:value("11b","802.11b")
++	   mode:value("11g","802.11g")
++	   mode:value("11gnht20","802.11gn+HT20")
++	   mode:value("11gnht40","802.11gn+HT40")
++	else
++	   mode:value("","auto")
++	end
+ 
++        ---Bing modified start --
++	diverflag = s:taboption("advanced", Flag, "diversity", translate("Diversity"))
++	diverflag.rmempty = false
++	diverflag.gray = true
++        ---end -----------
+ 	if not nsantenna then
+ 		ant1 = s:taboption("advanced", ListValue, "txantenna", translate("Transmitter Antenna"))
+ 		ant1.widget = "radio"
+ 		ant1.orientation = "horizontal"
+-		ant1:depends("diversity", "")
++		--ant1:depends("diversity", "")  //Bing modified: tx antenna display without the dependence of diversity
+ 		ant1:value("0", translate("auto"))
+ 		ant1:value("1", translate("Antenna 1"))
+ 		ant1:value("2", translate("Antenna 2"))
++		ant1:value("4", translate("Antenna 3"))
+ 
+ 		ant2 = s:taboption("advanced", ListValue, "rxantenna", translate("Receiver Antenna"))
+ 		ant2.widget = "radio"
+ 		ant2.orientation = "horizontal"
+-		ant2:depends("diversity", "")
++		--ant2:depends("diversity", "") //Bing modified: rx antenna display without the dependence of diversity
+ 		ant2:value("0", translate("auto"))
+ 		ant2:value("1", translate("Antenna 1"))
+ 		ant2:value("2", translate("Antenna 2"))
++		ant2:value("4", translate("Antenna 3"))
+ 
+ 	else -- NanoFoo
+ 		local ant = s:taboption("advanced", ListValue, "antenna", translate("Transmitter Antenna"))
+@@ -287,13 +310,38 @@
+ 		ant:value("external")
+ 	end
+ 
++        ----Bing modified:gray this value toolkit
+ 	s:taboption("advanced", Value, "distance", translate("Distance Optimization"),
+-		translate("Distance to farthest network member in meters."))
++		translate("Distance to farthest network member in meters.")).gray = true
+ 	s:taboption("advanced", Value, "regdomain", translate("Regulatory Domain"))
+ 	s:taboption("advanced", Value, "country", translate("Country Code"))
++	
+ 	s:taboption("advanced", Flag, "outdoor", translate("Outdoor Channels"))
+ 
+ 	--s:option(Flag, "nosbeacon", translate("Disable HW-Beacon timer"))
++
++	local aggre = s:taboption("advanced", Flag, "aggregation", translate("Aggregation"))
++        aggre.rmempty = false 
++        aggre.enabled = "1"
++        aggre.disabled = "0"
++               
++        local aggfra = s:taboption("advanced", Value, "aggframes", translate("Agg Frames")) 
++        aggfra.rmempty = true
++        aggfra:depends("aggregation","1")
++        aggfra.datatype = "uinteger" 
++       
++        local aggsize = s:taboption("advanced", Value, "aggsize", translate("Agg Size")) 
++        aggsize.rmempty = true
++        aggsize:depends("aggregation","1")
++        aggsize.datatype = "uinteger"
++       
++        local aggmin = s:taboption("advanced", Value, "aggminsize", translate("Agg Min Size")) 
++        aggmin.rmempty = true
++        aggmin:depends("aggregation","1")
++        aggmin.datatype = "uinteger"
++
++
++
+ end
+ 
+ 
+@@ -325,21 +373,21 @@
+ 
+ 	ant1 = s:taboption("advanced", ListValue, "txantenna", translate("Transmitter Antenna"))
+ 	ant1.widget = "radio"
+-	ant1:depends("diversity", "")
++	--ant1:depends("diversity", "")
+ 	ant1:value("3", translate("auto"))
+ 	ant1:value("0", translate("Antenna 1"))
+ 	ant1:value("1", translate("Antenna 2"))
+ 
+ 	ant2 = s:taboption("advanced", ListValue, "rxantenna", translate("Receiver Antenna"))
+ 	ant2.widget = "radio"
+-	ant2:depends("diversity", "")
++	--ant2:depends("diversity", "")
+ 	ant2:value("3", translate("auto"))
+ 	ant2:value("0", translate("Antenna 1"))
+ 	ant2:value("1", translate("Antenna 2"))
+ 
+-	s:taboption("advanced", Flag, "frameburst", translate("Frame Bursting"))
+-
+-	s:taboption("advanced", Value, "distance", translate("Distance Optimization"))
++        --Bing modified:gray this value toolkit
++	s:taboption("advanced", Flag, "frameburst", translate("Frame Bursting")).gray = true
++	s:taboption("advanced", Value, "distance", translate("Distance Optimization")).gray = true
+ 	--s:option(Value, "slottime", translate("Slot time"))
+ 
+ 	s:taboption("advanced", Value, "country", translate("Country Code"))
+@@ -352,8 +400,11 @@
+ if hwtype == "prism2" then
+ 	s:taboption("advanced", Value, "txpower", translate("Transmit Power"), "att units").rmempty = true
+ 
+-	s:taboption("advanced", Flag, "diversity", translate("Diversity")).rmempty = false
+-
++        --Bing modified:gray the falg
++	hosdiv = s:taboption("advanced", Flag, "diversity", translate("Diversity"))
++	hosdiv.rmempty = false
++	hosdiv.gray = true
++        --end----
+ 	s:taboption("advanced", Value, "txantenna", translate("Transmitter Antenna"))
+ 	s:taboption("advanced", Value, "rxantenna", translate("Receiver Antenna"))
+ end
+@@ -377,8 +428,8 @@
+ mode = s:taboption("general", ListValue, "mode", translate("Mode"))
+ mode.override_values = true
+ mode:value("ap", translate("Access Point"))
+-mode:value("sta", translate("Client"))
+-mode:value("adhoc", translate("Ad-Hoc"))
++--mode:value("sta", translate("Client")) //Bing modified:unavailable within this edition
++--mode:value("adhoc", translate("Ad-Hoc"))
+ 
+ bssid = s:taboption("general", Value, "bssid", translate("<abbr title=\"Basic Service Set Identifier\">BSSID</abbr>"))
+ 
+@@ -420,8 +471,8 @@
+ 		mode:value("mesh", "802.11s")
+ 	end
+ 
+-	mode:value("ahdemo", translate("Pseudo Ad-Hoc (ahdemo)"))
+-	mode:value("monitor", translate("Monitor"))
++	--mode:value("ahdemo", translate("Pseudo Ad-Hoc (ahdemo)")) //Bing modified: unavailable within this edition
++	--mode:value("monitor", translate("Monitor"))
+ 	bssid:depends({mode="adhoc"})
+ 	bssid:depends({mode="sta"})
+ 	bssid:depends({mode="sta-wds"})
+@@ -439,7 +490,7 @@
+ 	ml:depends({macfilter="deny"})
+ 
+ 	mode:value("ap-wds", "%s (%s)" % {translate("Access Point"), translate("WDS")})
+-	mode:value("sta-wds", "%s (%s)" % {translate("Client"), translate("WDS")})
++	--mode:value("sta-wds", "%s (%s)" % {translate("Client"), translate("WDS")})
+ 
+ 	function mode.write(self, section, value)
+ 		if value == "ap-wds" then
+@@ -477,11 +528,11 @@
+ -------------------- Madwifi Interface ----------------------
+ 
+ if hwtype == "atheros" then
+-	mode:value("ahdemo", translate("Pseudo Ad-Hoc (ahdemo)"))
+-	mode:value("monitor", translate("Monitor"))
++	--mode:value("ahdemo", translate("Pseudo Ad-Hoc (ahdemo)"))  //Bing modified:unavailable within this edition
++	--mode:value("monitor", translate("Monitor"))
+ 	mode:value("ap-wds", "%s (%s)" % {translate("Access Point"), translate("WDS")})
+-	mode:value("sta-wds", "%s (%s)" % {translate("Client"), translate("WDS")})
+-	mode:value("wds", translate("Static WDS"))
++	--mode:value("sta-wds", "%s (%s)" % {translate("Client"), translate("WDS")})
++	--mode:value("wds", translate("Static WDS"))
+ 
+ 	function mode.write(self, section, value)
+ 		if value == "ap-wds" then
+@@ -525,7 +576,9 @@
+ 	isolate = s:taboption("advanced", Flag, "isolate", translate("Separate Clients"),
+ 	 translate("Prevents client-to-client communication"))
+ 	isolate:depends({mode="ap"})
+-	s:taboption("advanced", Flag, "bgscan", translate("Background Scan"))
++	
++	--Bing modified to gray this html toolkit
++	s:taboption("advanced", Flag, "bgscan", translate("Background Scan")).gray = true
+ 
+ 	mp = s:taboption("macfilter", ListValue, "macpolicy", translate("MAC-Address Filter"))
+ 	mp:value("", translate("disable"))
+@@ -541,17 +594,25 @@
+ 	s:taboption("advanced", Value, "mcast_rate", translate("Multicast Rate"))
+ 	s:taboption("advanced", Value, "frag", translate("Fragmentation Threshold"))
+ 	s:taboption("advanced", Value, "rts", translate("RTS/CTS Threshold"))
+-	s:taboption("advanced", Value, "minrate", translate("Minimum Rate"))
+-	s:taboption("advanced", Value, "maxrate", translate("Maximum Rate"))
+-	s:taboption("advanced", Flag, "compression", translate("Compression"))
+-
+-	s:taboption("advanced", Flag, "bursting", translate("Frame Bursting"))
+-	s:taboption("advanced", Flag, "turbo", translate("Turbo Mode"))
+-	s:taboption("advanced", Flag, "ff", translate("Fast Frames"))
++	
++	--Bing modified:disable those toolkits.start---
++
++	s:taboption("advanced", Value, "minrate", translate("Minimum Rate")).gray = true
++	s:taboption("advanced", Value, "maxrate", translate("Maximum Rate")).gray = true
++	s:taboption("advanced", Flag, "compression", translate("Compression")).gray = true
++
++	burs = s:taboption("advanced", Flag, "bursting", translate("Frame Bursting"))
++	burs.rmempty = true
++	burs.enabled = "1"
++	burs.disabled = "0"
++	burs.gray = true
++	s:taboption("advanced", Flag, "turbo", translate("Turbo Mode")).gray = true
++
++	s:taboption("advanced", Flag, "ff", translate("Fast Frames")).gray = true
+ 
+ 	s:taboption("advanced", Flag, "wmm", translate("WMM Mode"))
+-	s:taboption("advanced", Flag, "xr", translate("XR Support"))
+-	s:taboption("advanced", Flag, "ar", translate("AR Support"))
++	s:taboption("advanced", Flag, "xr", translate("XR Support")).gray = true
++	s:taboption("advanced", Flag, "ar", translate("AR Support")).gray = true
+ 
+ 	local swm = s:taboption("advanced", Flag, "sw_merge", translate("Disable HW-Beacon timer"))
+ 	swm:depends({mode="adhoc"})
+@@ -561,16 +622,25 @@
+ 	nos:depends({mode="sta-wds"})
+ 
+ 	local probereq = s:taboption("advanced", Flag, "probereq", translate("Do not send probe responses"))
+-	probereq.enabled  = "0"
+-	probereq.disabled = "1"
++	probereq.enabled  = "1"
++	probereq.disabled = "0"
++        probereq.gray = true
++
++
++       local shortgi = s:taboption("advanced", Flag, "shortgi", translate("Short GI"))
++       shortgi.rmempty = true 
++       shortgi.enabled = "1" 
++       shortgi.disabled = "0"
++
++	---modified end----
+ end
+ 
+ 
+ -------------------- Broadcom Interface ----------------------
+ 
+ if hwtype == "broadcom" then
+-	mode:value("wds", translate("WDS"))
+-	mode:value("monitor", translate("Monitor"))
++	--mode:value("wds", translate("WDS"))
++	--mode:value("monitor", translate("Monitor"))
+ 
+ 	hidden = s:taboption("general", Flag, "hidden", translate("Hide <abbr title=\"Extended Service Set Identifier\">ESSID</abbr>"))
+ 	hidden:depends({mode="ap"})
+@@ -592,8 +662,8 @@
+ ----------------------- HostAP Interface ---------------------
+ 
+ if hwtype == "prism2" then
+-	mode:value("wds", translate("WDS"))
+-	mode:value("monitor", translate("Monitor"))
++	--mode:value("wds", translate("WDS"))
++	--mode:value("monitor", translate("Monitor"))
+ 
+ 	hidden = s:taboption("general", Flag, "hidden", translate("Hide <abbr title=\"Extended Service Set Identifier\">ESSID</abbr>"))
+ 	hidden:depends({mode="ap"})
+@@ -690,8 +760,10 @@
+ 	local hostapd = fs.access("/usr/sbin/hostapd")
+ 
+ 	-- Probe EAP support                                                                                                
+-	local has_ap_eap  = (os.execute("hostapd -veap >/dev/null 2>/dev/null") == 0)                                                        
+-	local has_sta_eap = (os.execute("wpa_supplicant -veap >/dev/null 2>/dev/null") == 0)
++	-- local has_ap_eap  = (os.execute("hostapd -veap >/dev/null 2>/dev/null") == 0)                                                        
++	-- local has_sta_eap = (os.execute("wpa_supplicant -veap >/dev/null 2>/dev/null") == 0)
++	local has_ap_eap  = fs.access("/usr/sbin/hostapd")
++	local has_sta_eap = fs.access("/usr/sbin/wpa_supplicant")
+ 
+ 	if hostapd and supplicant then
+ 		encr:value("psk", "WPA-PSK", {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"})
+@@ -922,6 +994,41 @@
+ 	password:depends({mode="sta-wds", eap_type="peap", encryption="wpa"})
+ 	password:depends({mode="sta-wds", eap_type="ttls", encryption="wpa2"})
+ 	password:depends({mode="sta-wds", eap_type="ttls", encryption="wpa"})
++	
++	
++	wps = s:taboption("encryption",Flag,"wps",translate("WIFI Portected Setup"))
++	wps:depends({encryption="psk" , cipher="auto"})
++	wps:depends({encryption="psk" , cipher="ccmp"})
++	wps:depends({encryption="psk" , cipher="tkip+ccmp"})
++	wps:depends({encryption="psk2" , cipher="auto" })
++	wps:depends({encryption="psk2" , cipher="ccmp" })
++	wps:depends({encryption="psk2" , cipher="tkip+ccmp" })
++	wps:depends({encryption="psk-mixed",cipher="auto"})
++	wps:depends({encryption="psk-mixed",cipher="ccmp"})
++	wps:depends({encryption="psk-mixed",cipher="tkip+ccmp"})
++	wps.rmempty = true
++	
++	
++	regispin = s:taboption("encryption",Value,"rpinnumber",translate("Registerar's PIN"))
++	regispin.rmempty = true
++	regispin.template = "cbi/wps_value_button_2"
++	regispin:depends("wps","1")
++	regispin.gray = true
++	
++	
++	enrollpin = s:taboption("encryption",Value,"epinnumber",translate("Enrollee's PIN"))
++	enrollpin.rmempty = true
++	enrollpin.template = "cbi/wps_value_button"
++	enrollpin:depends("wps","1")
++	enrollpin.datatype = "range(10000000,99999999)"
++	
++	
++	softpushbtn = s:taboption("encryption",Button,"_soft_push",translate("Soft Push Button"))
++	softpushbtn:depends("wps","1")
++	softpushbtn.template="cbi/wps_button"
++	
++	
++	
+ end
+ 
+ return m
+
+--- a/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm	2011-12-06 19:04:35.000000000 +0800
++++ b/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm	2013-05-08 11:02:42.479571338 +0800
+@@ -121,7 +121,9 @@
+ <script type="text/javascript">//<![CDATA[
+ 	var wifidevs = <%=luci.http.write_json(netdevs)%>;
+ 	var arptable = <%=luci.http.write_json(arpcache)%>;
+-
++        console.log(wifidevs);
++        var devs = <%=luci.http.write_json(devices)%>;
++        console.log(devs[0]);
+ 	var is_reconnecting = false;
+ 
+ 	function wifi_shutdown(id, toggle) {
+@@ -358,7 +360,10 @@
+ 				</td>
+ 				<td style="width:310px;text-align:right">
+ 					<input type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/find.gif)" onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wireless_join")%>?device=<%=dev:name()%>'" title="<%:Find and join network%>" value="<%:Scan%>" />
++				<% if #nets < 8 then %>
++
+ 					<input type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/add.gif)" onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wireless_add")%>?device=<%=dev:name()%>'" title="<%:Provide new network%>" value="<%:Add%>" />
++				<% end %>	
+ 				</td>
+ 			</tr>
+ 			<!-- /physical device -->
+@@ -378,7 +383,7 @@
+ 					<td class="cbi-value-field" style="width:310px;text-align:right">
+ 						<input id="<%=net:id()%>-iw-toggle" type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/reload.gif)" onclick="wifi_shutdown('<%=net:id()%>', this)" title="<%:Delete this network%>" value="<%:Enable%>" />
+ 						<input type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/edit.gif)" onclick="location.href='<%=net:adminlink()%>'" title="<%:Edit this network%>" value="<%:Edit%>" />
+-						<input type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/remove.gif)" onclick="if (confirm('<%:Really delete this wireless network? The deletion cannot be undone!\nYou might lose access to this router if you are connected via this network.%>')) location.href='<%=luci.dispatcher.build_url("admin/network/wireless_delete", net:ifname())%>'" title="<%:Delete this network%>" value="<%:Remove%>" />
++						<input type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/remove.gif)" onclick="if (confirm('<%:Really delete this wireless network? The deletion cannot be undone!\nYou might lose access to this router if you are connected via this network.%>')) location.href='<%=luci.dispatcher.build_url("admin/network/wireless_delete", net:id())%>'" title="<%:Delete this network%>" value="<%:Remove%>" />
+ 					</td>
+ 				</tr>
+ 				<% end %>
+
+
+--- a/modules/admin-full/luasrc/view/admin_network/wifi_join.htm	2011-10-28 23:15:27.000000000 +0800
++++ b/modules/admin-full/luasrc/view/admin_network/wifi_join.htm	2013-05-10 18:52:22.003519079 +0800
+@@ -114,7 +114,7 @@
+ 
+ 						<input type="hidden" name="clbridge" value="<%=iw.type == "wl" and 1 or 0%>" />
+ 
+-						<input class="cbi-button cbi-button-apply" type="submit" value="<%:Join Network%>" />
++						<!--input class="cbi-button cbi-button-apply" type="submit" value="<%:Join Network%>" /> -->
+ 					</form>
+ 				</td>
+ 			</tr>
+
+--- /dev/null	2013-05-03 14:00:18.072256262 +0800
++++ b/libs/web/luasrc/view/cbi/wps_value_button.htm	2013-05-10 18:56:30.371527027 +0800
+@@ -0,0 +1,88 @@
++<%+cbi/valueheader%>
++<script type="text/javascript">//<![CDATA[
++	var stxhr = new XHR();
++
++	function update_status_b_2(act,conf,section)
++	{
++	  var txt = document.getElementById('<%=cbid%>');
++	  var clstxts = txt.className.split(" ");
++	  var i = 0;
++	  var a = true; 
++	  for(i=0;i<clstxts.length;i++){
++	     if(clstxts[i] == "cbi-input-invalid"){
++	         a = false; 
++	         break;
++	     }
++	  } 
++	  if(txt.value.length ==0){
++	     a = false; 
++	  }
++	  if(a){
++            var data = "conf="+conf+"&sect="+section;
++	    if(act == "gp"){
++	        url = '<%=luci.dispatcher.build_url("admin", "network","wps_generatepin")%>'; 
++	        
++	    }else if(act == "spm"){
++	        url = '<%=luci.dispatcher.build_url("admin", "network","wps_startpinmethod")%>'; 
++	        data=data+"&pin=" + document.getElementById('<%=cbid%>').value; 
++
++	    }
++		stxhr.get(url,data,
++				function(x)
++				{
++					if (x.responseText)
++					{
++					  if(isNaN(x.responseText)){
++					     alert(x.responseText); 
++					   }else{
++					   
++					     var txtid = "<%=cbid%>";
++					     var txt =document.getElementById('<%=cbid%>');
++					     txt.value=x.responseText
++					   }
++					}
++				}
++			);
++		
++	    }
++	
++	}
++//]]></script>
++	<input type="<%=self.password and 'password" class="cbi-input-password' or 'text" class="cbi-input-text' %>" onchange="cbi_d_update(this.id)"<%=
++		attr("name", cbid) .. attr("id", cbid) .. attr("value", self:cfgvalue(section) or self.default) ..
++		ifattr(self.size, "size") .. ifattr(self.placeholder, "placeholder") .. ifattr(self.gray,"readonly",true) .. ifattr(self.gray,"style","background-color:#F4F4F4;border-color:#F4F4F4;")
++		.. ifattr(self.gray,"onfocus","this.blur()")
++	%> />
++	<input type="button" class="cbi-button cbi-button-apply" <%=
++	
++	attr("value",translate("StartPINMethod")) .. attr("onclick","update_status_b_2(\"".."spm".."\",\""..self.config.."\",\""..section.."\")") 
++	%> />
++	<% if self.password then %><img src="<%=resource%>/cbi/reload.gif" style="vertical-align:middle" title="<%:Reveal/hide password%>" onclick="var e = document.getElementById('<%=cbid%>'); e.type = (e.type=='password') ? 'text' : 'password';" /><% end %>
++	<% if #self.keylist > 0 or self.datatype then -%>
++	<script type="text/javascript">
++		<% if #self.keylist > 0 then -%>
++		cbi_combobox_init('<%=cbid%>', {
++		<%-
++			for i, k in ipairs(self.keylist) do
++		-%>
++			<%-=string.format("%q", k) .. ":" .. string.format("%q", self.vallist[i])-%>
++			<%-if i<#self.keylist then-%>,<%-end-%>
++		<%-
++			end
++		-%>
++		}, '<%- if not self.rmempty and not self.optional then -%>
++			<%-: -- Please choose -- -%>
++		<%- end -%>', '
++		<%- if self.combobox_manual then -%>
++			<%-=self.combobox_manual-%>
++		<%- else -%>
++			<%-: -- custom -- -%>
++		<%- end -%>');
++		<%- end %>
++		<% if self.datatype then -%>
++		cbi_validate_field('<%=cbid%>', <%=tostring((self.optional or self.rmempty) == true)%>, '<%=self.datatype%>');
++		<%- end %>
++	</script>
++	<% end -%>
++<%+cbi/valuefooter%>
++
+
+--- /dev/null	2013-05-03 14:00:18.072256262 +0800
++++ b/libs/web/luasrc/view/cbi/wps_value_button_2.htm	2013-05-10 18:56:30.371527027 +0800
+@@ -0,0 +1,76 @@
++<%+cbi/valueheader%>
++<script type="text/javascript">//<![CDATA[
++	var stxhr = new XHR();
++
++	function update_status(act,conf,section)
++	{
++	    var url = "";
++            var data = "conf="+conf+"&sect="+section;
++	    if(act == "gp"){
++	        url = '<%=luci.dispatcher.build_url("admin", "network","wps_generatepin")%>'; 
++	    }else if(act == "spm"){
++	        url = '<%=luci.dispatcher.build_url("admin", "network","wps_startpinmethod")%>'; 
++	        data=data+"&pin=" + document.getElementById('<%=cbid%>').value; 
++	    }
++		stxhr.get(url,data,
++				function(x)
++				{
++					if (x.responseText)
++					{
++					   if(isNaN(x.responseText)){
++					     alert(x.responseText); 
++					   }else{
++					   
++					     var txtid = "<%=cbid%>";
++					     var txt =document.getElementById('<%=cbid%>');
++					     txt.value=x.responseText
++					   }
++					}
++				}
++			);
++	
++	}
++//]]></script>
++	<input type="<%=self.password and 'password" class="cbi-input-password' or 'text" class="cbi-input-text' %>" onchange="cbi_d_update(this.id)"<%=
++		attr("name", cbid) .. attr("id", cbid) .. attr("value", self:cfgvalue(section) or self.default) ..
++		ifattr(self.size, "size") .. ifattr(self.placeholder, "placeholder") .. ifattr(self.gray,"readonly",true) .. ifattr(self.gray,"style","background-color:#F4F4F4;border-color:#F4F4F4;")
++		.. ifattr(self.gray,"onfocus","this.blur()")
++	%> />
++        
++        <input type="button" ddd="<%=devname%>" class="cbi-button cbi-button-apply" <%=
++        attr("value",translate("GeneratePIN")) .. attr("onclick","update_status(\"".."gp".."\",\""..self.config.."\",\""..section.."\")")
++        
++        %> />
++	<input type="button" class="cbi-button cbi-button-apply" <%=
++	
++	attr("value",translate("StartPINMethod")) .. attr("onclick","update_status(\"".."spm".."\",\""..self.config.."\",\""..section.."\")") 
++	%> />
++	<% if self.password then %><img src="<%=resource%>/cbi/reload.gif" style="vertical-align:middle" title="<%:Reveal/hide password%>" onclick="var e = document.getElementById('<%=cbid%>'); e.type = (e.type=='password') ? 'text' : 'password';" /><% end %>
++	<% if #self.keylist > 0 or self.datatype then -%>
++	<script type="text/javascript">
++		<% if #self.keylist > 0 then -%>
++		cbi_combobox_init('<%=cbid%>', {
++		<%-
++			for i, k in ipairs(self.keylist) do
++		-%>
++			<%-=string.format("%q", k) .. ":" .. string.format("%q", self.vallist[i])-%>
++			<%-if i<#self.keylist then-%>,<%-end-%>
++		<%-
++			end
++		-%>
++		}, '<%- if not self.rmempty and not self.optional then -%>
++			<%-: -- Please choose -- -%>
++		<%- end -%>', '
++		<%- if self.combobox_manual then -%>
++			<%-=self.combobox_manual-%>
++		<%- else -%>
++			<%-: -- custom -- -%>
++		<%- end -%>');
++		<%- end %>
++		<% if self.datatype then -%>
++		cbi_validate_field('<%=cbid%>', <%=tostring((self.optional or self.rmempty) == true)%>, '<%=self.datatype%>');
++		<%- end %>
++	</script>
++	<% end -%>
++<%+cbi/valuefooter%>
++
+
+--- a/libs/core/luasrc/model/network.lua	2011-12-06 03:44:20.000000000 +0800
++++ b/libs/core/luasrc/model/network.lua	2013-05-13 09:44:38.914761888 +0800
+@@ -1231,6 +1231,7 @@
+ 		function(s)
+ 			if s.device then
+ 				num[s.device] = num[s.device] and num[s.device] + 1 or 1
++				self.ath = "ath%d" %{ s[".index"] - 2 }
+ 				if s['.name'] == self.sid then
+ 					netid = "%s.network%d" %{ s.device, num[s.device] }
+ 					return false
+@@ -1314,21 +1315,54 @@
+ 	return i18n.translate(self:active_mode())
+ end
+ 
++-- 修改只取得内存里的信息
+ function wifinet.active_ssid(self)
+-	return _stror(self.iwinfo.ssid, self.iwdata.ssid)
++	--return _stror(self.iwinfo.ssid, self.iwdata.ssid)
++	return self.iwdata.ssid
+ end
+ 
+ function wifinet.active_bssid(self)
+ 	return _stror(self.iwinfo.bssid, self.iwdata.bssid) or "00:00:00:00:00:00"
+ end
+ 
++-- 修改只取得内存里的加密信息
+ function wifinet.active_encryption(self)
+-	local enc = self.iwinfo and self.iwinfo.encryption
+-	return enc and enc.description or "-"
++	--local enc = self.iwinfo and self.iwinfo.encryption
++	--return enc and enc.description or "-"
++	return self.iwdata.encryption
+ end
+ 
++-- 修改直接通过命令获得信息
+ function wifinet.assoclist(self)
+-	return self.iwinfo.assoclist or { }
++	--return self.iwinfo.assoclist or { }
++	local mac = self.ath                                      
++        local res = require "luci.util".execi('wlanconfig '..mac..' list sta')               
++        local assoclist={}                                             
++        local k=0                                                      
++        if not res then    
++	
++                return assoclist                                                              
++        end           
++	
++        for line in res do                           
++                if k>0 then                                                                          
++                        local signal,bssid                     
++                                                              
++                        line = require "luci.util".trim(line)
++			
++                        for i, value in ipairs(require "luci.util".split(line, "%s+", nil, true)) do
++                                if i==1 then bssid=value end
++                                if i==5 then              
++                                        signal=value                                          
++                                        break                                                 
++                                end                                                           
++                        end                                                                          
++                        bssid=bssid:upper()                                                          
++                        assoclist[bssid]={signal=signal,noise=0}                                     
++                end                                                              
++                k=1                                                              
++        end                                          
++        return assoclist              
+ end
+ 
+ function wifinet.frequency(self)
+@@ -1357,9 +1391,11 @@
+ function wifinet.noise(self)
+ 	return self.iwinfo.noise or 0
+ end
+-
++--Bing modified-- 
+ function wifinet.country(self)
+-	return self.iwinfo.country or "00"
++        local cont = _uci_real:get("wireless",self.iwdata.device,"country") 
++        
++	return self.iwdata.country or cont 
+ end
+ 
+ function wifinet.txpower(self)
+@@ -1433,7 +1469,10 @@
+ -- setup base protocols
+ _M:register_protocol("static")
+ _M:register_protocol("dhcp")
+-_M:register_protocol("none")
++--Bing--
++--protocol "none" is needed no more
++--_M:register_protocol("none")
++
+ 
+ -- load protocol extensions
+ local exts = nfs.dir(utl.libpath() .. "/model/network")
+
+--- /dev/null	2013-05-03 14:00:18.072256262 +0800
++++ b/libs/web/luasrc/view/cbi/wps_button.htm	2013-05-10 18:56:30.371527027 +0800
+@@ -0,0 +1,33 @@
++<%+cbi/valueheader%>
++<script type="text/javascript">//<![CDATA[
++	var stxhr = new XHR();
++
++	function update_status_b(conf,section)
++	{
++	    var url = "";
++            var data = "conf="+conf+"&sect="+section;
++	    url = '<%=luci.dispatcher.build_url("admin", "network","wps_startpbc")%>'; 
++	    stxhr.get(url,data,
++				function(x)
++				{
++					if (x.responseText)
++					{
++					   if(isNaN(x.responseText)){
++					     alert(x.responseText); 
++					   }else{
++					   
++					     var txtid = "<%=cbid%>";
++					     var txt =document.getElementById('<%=cbid%>');
++					     txt.value=x.responseText
++					   }
++					}
++				}
++			);
++	
++	}
++//]]></script>
++	<input type="button" class="cbi-button cbi-button-apply" <%=	
++	attr("value",translate("StartPBC")) .. attr("onclick","update_status_b(\""..self.config.."\",\""..section.."\")") 
++	%> />
++<%+cbi/valuefooter%>
++
+--- a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-13 11:05:27.102917031 +0800
++++ b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-14 13:22:34.936928140 +0800
+@@ -235,6 +235,7 @@
+ ------------------- Madwifi Device ------------------
+ 
+ if hwtype == "atheros" then
++        --[[
+ 	tp = s:taboption("general",
+ 		(#tx_power_list > 0) and ListValue or Value,
+ 		"txpower", translate("Transmit Power"), "dBm")
+@@ -250,6 +251,9 @@
+ 		tp:value(p.driver_dbm, "%i dBm (%i mW)"
+ 			%{ p.display_dbm, p.display_mw })
+ 	end
++	]]--
++	tp = s:taboption("general",Value,"txpower",translate("Transmit Power"),"dBm")
++	tp.datatype = "range(1,99)"
+ 
+ 	mode = s:taboption("advanced", ListValue, "hwmode", translate("Mode"))
+ 	mode:value("", translate("auto"))
+@@ -261,7 +265,7 @@
+ 	--if hw_modes.g then mode:value("11gst", "802.11g + Turbo") end
+ 	--if hw_modes.a then mode:value("11ast", "802.11a + Turbo") end
+ 	--mode:value("fh", translate("Frequency Hopping"))
+-	----Bing modified code-----
++	----Bing added code-----
+ 	
+ 	if wdev:name() == "ath0" then
+ 	   mode:value("","auto")
+@@ -590,10 +594,11 @@
+ 	ml:depends({macpolicy="allow"})
+ 	ml:depends({macpolicy="deny"})
+ 
+-	s:taboption("advanced", Value, "rate", translate("Transmission Rate"))
+-	s:taboption("advanced", Value, "mcast_rate", translate("Multicast Rate"))
+-	s:taboption("advanced", Value, "frag", translate("Fragmentation Threshold"))
+-	s:taboption("advanced", Value, "rts", translate("RTS/CTS Threshold"))
++	txra = s:taboption("advanced", Value, "rate", translate("Transmission Rate"))
++	txra.datatype = "uinteger"
++	s:taboption("advanced", Value, "mcast_rate", translate("Multicast Rate")).datatype = "uinteger"
++	s:taboption("advanced", Value, "frag", translate("Fragmentation Threshold")).datatype = "uinteger"
++	s:taboption("advanced", Value, "rts", translate("RTS/CTS Threshold")).datatype = "uinteger"
+ 	
+ 	--Bing modified:disable those toolkits.start---
+ 
+@@ -1021,6 +1026,7 @@
+ 	enrollpin.template = "cbi/wps_value_button"
+ 	enrollpin:depends("wps","1")
+ 	enrollpin.datatype = "range(10000000,99999999)"
++	enrollpin.description = "Only 8 numbers PIN is valided!"
+ 	
+ 	
+ 	softpushbtn = s:taboption("encryption",Button,"_soft_push",translate("Soft Push Button"))
+--- aaa/modules/admin-full/luasrc/controller/admin/status.lua	2011-10-28 23:15:27.000000000 +0800
++++ bbb/modules/admin-full/luasrc/controller/admin/status.lua	2013-05-21 16:03:13.671052242 +0800
+@@ -96,7 +96,7 @@
+ 
+ 	luci.http.prepare_content("application/json")
+ 
+-	local bwc = io.popen("luci-bwc -r %q 2>/dev/null" % iface)
++	local bwc = io.popen("luci-bwc -i %q 2>/dev/null" % iface)
+ 	if bwc then
+ 		luci.http.write("[")
+ 
+ 
+--- aaa/modules/admin-full/luasrc/model/cbi/admin_network/ifaces.lua	2011-10-28 23:15:27.000000000 +0800
++++ bbb/modules/admin-full/luasrc/model/cbi/admin_network/ifaces.lua	2013-05-21 15:39:35.731071239 +0800
+@@ -216,7 +216,13 @@
+ 
+ local _, pr
+ for _, pr in ipairs(nw:get_protocols()) do
++     if arg[1]:upper() == "LAN" then
++         if pr:proto() == "static" then
++            p:value(pr:proto(),pr:get_i18n())
++         end
++     else 
+ 	p:value(pr:proto(), pr:get_i18n())
++     end
+ 	if pr:proto() ~= net:proto() then
+ 		p_switch:depends("proto", pr:proto())
+ 	end
+--- aaa/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-14 17:47:42.803643192 +0800
++++ bbb/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-21 15:42:04.327069248 +0800
+@@ -324,6 +324,9 @@
+ 
+ 	--s:option(Flag, "nosbeacon", translate("Disable HW-Beacon timer"))
+ 
++        local shortgi = s:taboption("advanced", Flag, "shortgi", translate("Short GI"))
++        shortgi.rmempty = true
++        
+ 	local aggre = s:taboption("advanced", Flag, "aggregation", translate("Aggregation"))
+         aggre.rmempty = false 
+         aggre.enabled = "1"
+@@ -343,8 +346,7 @@
+         aggmin.rmempty = true
+         aggmin:depends("aggregation","1")
+         aggmin.datatype = "uinteger"
+-
+-
++       
+ 
+ end
+ 
+@@ -630,17 +632,11 @@
+ 	probereq.enabled  = "1"
+ 	probereq.disabled = "0"
+         probereq.gray = true
++        
++        ---modify end----
+ 
+-
+-       local shortgi = s:taboption("advanced", Flag, "shortgi", translate("Short GI"))
+-       shortgi.rmempty = true 
+-       shortgi.enabled = "1" 
+-       shortgi.disabled = "0"
+-
+-	---modified end----
+ end
+ 
+-
+ -------------------- Broadcom Interface ----------------------
+ 
+ if hwtype == "broadcom" then
+@@ -1012,6 +1008,7 @@
+ 	wps:depends({encryption="psk-mixed",cipher="ccmp"})
+ 	wps:depends({encryption="psk-mixed",cipher="tkip+ccmp"})
+ 	wps.rmempty = true
++	wps.description = translate("Checked and do Save and Apply to activate the following functions ")
+ 	
+ 	
+ 	regispin = s:taboption("encryption",Value,"rpinnumber",translate("Registerar's PIN"))
+@@ -1025,7 +1022,7 @@
+ 	enrollpin.rmempty = true
+ 	enrollpin.template = "cbi/wps_value_button"
+ 	enrollpin:depends("wps","1")
+-	enrollpin.datatype = "range(10000000,99999999)"
++	--enrollpin.datatype = "range(10000000,99999999)"
+ 	enrollpin.description = "Only 8 numbers PIN is valided!"
+ 	
+ 	
+--- aaa/modules/admin-full/luasrc/controller/admin/network.lua	2013-05-14 17:47:42.739643190 +0800
++++ bbb/modules/admin-full/luasrc/controller/admin/network.lua	2013-05-21 15:45:53.687066175 +0800
+@@ -163,6 +163,8 @@
+     local devicename = getDevName(conf,sect) 
+     local cmd = "/sbin/hostapd_cli -i "..devicename.." wps_ap_pin random" 
+     wps_command(cmd)
++   --luci.http.prepare_content("text/plan")
++   --luci.http.write("025451254")
+ end
+ function wps_command(cmd)    
+     local util = io.popen(cmd)
+@@ -186,7 +188,15 @@
+     local sect = luci.http.formvalue("sect")
+     local pin = luci.http.formvalue("pin")
+     local devicename = getDevName(conf,sect) 
+-    local cmd = "/sbin/hostapd_cli -i "..devicename.." wps_pin any " .. pin 
++    local sgn = luci.http.formvalue("sgn")
++    local cmd;
++    if sgn == "vb" then
++        cmd = "/sbin/hostapd_cli -i "..devicename.." wps_pin any " .. pin 
++    elseif sgn == "vbb" then
++        cmd = "/sbin/hostapd_cli -i "..devicename.." wps_ap_pin set " .. pin 
++    end
++    --luci.http.prepare_content("text/plan")   
++    --luci.http.write(sgn.."--"..cmd)
+     wps_command(cmd)  
+ end
+ function getDevName(conf,sect)
+--- aaa/libs/web/luasrc/view/cbi/wps_value_button.htm	2013-05-14 17:47:42.795643192 +0800
++++ bbb/libs/web/luasrc/view/cbi/wps_value_button.htm	2013-05-21 15:48:01.223064466 +0800
+@@ -18,10 +18,9 @@
+ 	     a = false; 
+ 	  }
+ 	  if(a){
+-            var data = "conf="+conf+"&sect="+section;
++            var data = "sgn=vb&conf="+conf+"&sect="+section;
+ 	    if(act == "gp"){
+ 	        url = '<%=luci.dispatcher.build_url("admin", "network","wps_generatepin")%>'; 
+-	        
+ 	    }else if(act == "spm"){
+ 	        url = '<%=luci.dispatcher.build_url("admin", "network","wps_startpinmethod")%>'; 
+ 	        data=data+"&pin=" + document.getElementById('<%=cbid%>').value; 
+@@ -47,15 +46,42 @@
+ 	    }
+ 	
+ 	}
++	
++       function spm_onkeyup(id){	
++           var txt = document.getElementById(id);
++           if(txt.value!="" && isNaN(txt.value)){
++              add_invalid_css(id);
++           }else if(!txt.value.match(/^[0-9]{8}$/)){
++              add_invalid_css(id);
++           }else{
++              remove_invalid_css(id);
++           }
++           if(txt.value == "")
++           {
++             remove_invalid_css(id);
++           }
++       }
++       
++       function add_invalid_css(id){
++           var classnames = document.getElementById(id).className;
++           if(classnames.indexOf("cbi-input-invalid") == -1 )
++           document.getElementById(id).className = classnames + " cbi-input-invalid"
++          
++       }
++       function remove_invalid_css(id){
++          var classnames = document.getElementById(id).className;
++          var afterc = classnames.replace(/cbi-input-invalid/,"");
++          document.getElementById(id).className = afterc;
++       }
+ //]]></script>
+-	<input type="<%=self.password and 'password" class="cbi-input-password' or 'text" class="cbi-input-text' %>" onchange="cbi_d_update(this.id)"<%=
++	<input type="<%=self.password and 'password" class="cbi-input-password' or 'text" class="cbi-input-text' %>" onkeyup="spm_onkeyup(this.id)"<%=
+ 		attr("name", cbid) .. attr("id", cbid) .. attr("value", self:cfgvalue(section) or self.default) ..
+ 		ifattr(self.size, "size") .. ifattr(self.placeholder, "placeholder") .. ifattr(self.gray,"readonly",true) .. ifattr(self.gray,"style","background-color:#F4F4F4;border-color:#F4F4F4;")
+ 		.. ifattr(self.gray,"onfocus","this.blur()")
+ 	%> />
+ 	<input type="button" class="cbi-button cbi-button-apply" <%=
+ 	
+-	attr("value",translate("StartPINMethod")) .. attr("onclick","update_status_b_2(\"".."spm".."\",\""..self.config.."\",\""..section.."\")") 
++	attr("value",translate("StartPINMethod")) .. attr("onclick","update_status_b_2(\"".."spm".."\",\""..self.config.."\",\""..section.."\")")
+ 	%> />
+ 	<% if self.password then %><img src="<%=resource%>/cbi/reload.gif" style="vertical-align:middle" title="<%:Reveal/hide password%>" onclick="var e = document.getElementById('<%=cbid%>'); e.type = (e.type=='password') ? 'text' : 'password';" /><% end %>
+ 	<% if #self.keylist > 0 or self.datatype then -%>
+--- aaa/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm	2013-05-14 17:47:42.787643192 +0800
++++ bbb/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm	2013-05-21 15:49:47.375063044 +0800
+@@ -121,9 +121,7 @@
+ <script type="text/javascript">//<![CDATA[
+ 	var wifidevs = <%=luci.http.write_json(netdevs)%>;
+ 	var arptable = <%=luci.http.write_json(arpcache)%>;
+-        console.log(wifidevs);
+-        var devs = <%=luci.http.write_json(devices)%>;
+-        console.log(devs[0]);
++
+ 	var is_reconnecting = false;
+ 
+ 	function wifi_shutdown(id, toggle) {
+@@ -361,7 +359,6 @@
+ 				<td style="width:310px;text-align:right">
+ 					<input type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/find.gif)" onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wireless_join")%>?device=<%=dev:name()%>'" title="<%:Find and join network%>" value="<%:Scan%>" />
+ 				<% if #nets < 8 then %>
+-
+ 					<input type="button" class="cbi-button cbi-button-add" style="width:100px;background-image:url(<%=resource%>/cbi/add.gif)" onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wireless_add")%>?device=<%=dev:name()%>'" title="<%:Provide new network%>" value="<%:Add%>" />
+ 				<% end %>	
+ 				</td>
+--- aaa/modules/admin-full/luasrc/model/cbi/admin_network/ifaces.lua	2013-05-21 16:06:41.235049461 +0800
++++ bbb/modules/admin-full/luasrc/model/cbi/admin_network/ifaces.lua	2013-05-22 15:45:24.910677314 +0800
+@@ -315,7 +315,7 @@
+ if has_firewall then
+ 	fwzone = s:taboption("firewall", Value, "_fwzone",
+ 		translate("Create / Assign firewall-zone"),
+-		translate("Choose the firewall zone you want to assign to this interface. Select <em>unspecified</em> to remove the interface from the associated zone or fill out the <em>create</em> field to define a new zone and attach the interface to it."))
++		translate("Choose the firewall zone you want to assign to this interface."))
+ 
+ 	fwzone.template = "cbi/firewall_zonelist"
+ 	fwzone.network = arg[1]
+
+--- aaa/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-21 16:06:41.235049461 +0800
++++ bbb/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua	2013-05-22 15:46:55.326676103 +0800
+@@ -438,7 +438,8 @@
+ --mode:value("adhoc", translate("Ad-Hoc"))
+ 
+ bssid = s:taboption("general", Value, "bssid", translate("<abbr title=\"Basic Service Set Identifier\">BSSID</abbr>"))
+-
++--[[
++----Bing deleted
+ network = s:taboption("general", Value, "network", translate("Network"),
+ 	translate("Choose the network you want to attach to this wireless interface. " ..
+ 		"Select <em>unspecified</em> to not attach any network or fill out the " ..
+@@ -447,7 +448,6 @@
+ network.rmempty = true
+ network.template = "cbi/network_netlist"
+ network.widget = "radio"
+-
+ function network.write(self, section, value)
+ 	local i = nw:get_interface(section)
+ 	if i then
+@@ -469,7 +469,7 @@
+ 		end
+ 	end
+ end
+-
++]]--
+ -------------------- MAC80211 Interface ----------------------
+ 
+ if hwtype == "mac80211" then
+@@ -1007,19 +1007,19 @@
+ 	wps:depends({encryption="psk-mixed",cipher="auto"})
+ 	wps:depends({encryption="psk-mixed",cipher="ccmp"})
+ 	wps:depends({encryption="psk-mixed",cipher="tkip+ccmp"})
+-	wps.rmempty = true
++	wps.rmempty = true 
+ 	wps.description = translate("Checked and do Save and Apply to activate the following functions ")
+ 	
+ 	
+ 	regispin = s:taboption("encryption",Value,"rpinnumber",translate("Registerar's PIN"))
+-	regispin.rmempty = true
++	regispin.rmempty = true 
+ 	regispin.template = "cbi/wps_value_button_2"
+ 	regispin:depends("wps","1")
+ 	regispin.gray = true
+ 	
+ 	
+ 	enrollpin = s:taboption("encryption",Value,"epinnumber",translate("Enrollee's PIN"))
+-	enrollpin.rmempty = true
++	enrollpin.rmempty = true 
+ 	enrollpin.template = "cbi/wps_value_button"
+ 	enrollpin:depends("wps","1")
+ 	--enrollpin.datatype = "range(10000000,99999999)"
+--- aaa/libs/web/luasrc/view/cbi/firewall_zonelist.htm	2011-10-28 23:15:27.000000000 +0800
++++ bbb/libs/web/luasrc/view/cbi/firewall_zonelist.htm	2013-05-22 15:48:35.366674763 +0800
+@@ -69,8 +69,9 @@
+ 		</label>
+ 	</li>
+ 	<% end end %>
+-
++        
+ 	<% if self.widget ~= "checkbox" and not self.nocreate then %>
++	<!--
+ 	<li style="padding:0.5em">
+ 		<input class="cbi-input-radio" onclick="cbi_d_update(this.id)" onchange="cbi_d_update(this.id)" type="radio"<%=attr("id", cbid .. "_new") .. attr("name", cbid) .. attr("value", "-") .. ifattr(not selected, "checked", "checked")%> /> &#160;
+ 		<div style="background-color:<%=fwm.zone.get_color()%>; padding:0.5em; display:inline">
+@@ -78,7 +79,9 @@
+ 			<input style="width:6em" type="text"<%=attr("name", cbid .. ".newzone") .. ifattr(not selected, "value", luci.http.formvalue(cbid .. ".newzone") or self.default)%> onfocus="document.getElementById('<%=cbid%>_new').checked=true" />
+ 		</div>
+ 	</li>
++	-->
+ 	<% end %>
++	
+ </ul>
+ 
+ <%+cbi/valuefooter%>
+--- aaa/libs/web/luasrc/view/cbi/wps_value_button_2.htm	2013-05-21 16:06:41.235049461 +0800
++++ bbb/libs/web/luasrc/view/cbi/wps_value_button_2.htm	2013-05-22 15:50:13.346673450 +0800
+@@ -5,7 +5,7 @@
+ 	function update_status(act,conf,section)
+ 	{
+ 	    var url = "";
+-            var data = "conf="+conf+"&sect="+section;
++            var data = "sgn=vbb&conf="+conf+"&sect="+section;
+ 	    if(act == "gp"){
+ 	        url = '<%=luci.dispatcher.build_url("admin", "network","wps_generatepin")%>'; 
+ 	    }else if(act == "spm"){
+@@ -20,10 +20,13 @@
+ 					   if(isNaN(x.responseText)){
+ 					     alert(x.responseText); 
+ 					   }else{
+-					   
++					     if(act == "gp"){ 
+ 					     var txtid = "<%=cbid%>";
+ 					     var txt =document.getElementById('<%=cbid%>');
+-					     txt.value=x.responseText
++					     txt.value=x.responseText;
++					     }else{
++					     alert("OK");
++					     }
+ 					   }
+ 					}
+ 				}
+--- aaa/modules/admin-full/luasrc/controller/admin/network.lua	2013-05-22 16:01:41.538664230 +0800
++++ bbb/modules/admin-full/luasrc/controller/admin/network.lua	2013-05-22 18:07:47.582562863 +0800
+@@ -167,6 +167,7 @@
+    --luci.http.write("025451254")
+ end
+ function wps_command(cmd)    
++
+     local util = io.popen(cmd)
+     luci.http.prepare_content("text/plan")
+     if util then
+@@ -199,15 +200,34 @@
+     --luci.http.write(sgn.."--"..cmd)
+     wps_command(cmd)  
+ end
++function getConfType(conf,type,cname)
++    local uci = require "luci.model.uci".cursor()                                            
++    local ntm = require "luci.model.network"                                                 
++    ntm.init(uci)                                                                            
++    local curs = uci.cursor()
++    local i = 0
++    local ifindex = 0
++    local eq = "f"
++    curs:foreach(conf,type,
++         function(s)
++            if cname == s[".name"] then 
++               eq = "t"
++               ifindex = i
++            else 
++              i = i + 1
++            end
++         end)
++     
++    return ifindex 
++    --return nil
++end
++
+ function getDevName(conf,sect)
+     local uci = require "luci.model.uci".cursor()                                            
+     local ntm = require "luci.model.network"                                                 
+     ntm.init(uci)                                                                            
+-    local devicename = uci:get(conf,sect,"device")  
+-    if devicename then
+-       return devicename
+-    end
+-    return nil
++    local devicename = getConfType(conf,"wifi-iface",sect)  
++    return "ath"..devicename 
+ end
+ function wps_startpbc()
+     local conf = luci.http.formvalue("conf")
+--- aaa/libs/sys/luasrc/sys.lua	2012-07-18 19:25:37.000000000 +0800
++++ bbb/libs/sys/luasrc/sys.lua	2013-05-28 09:37:35.892228077 +0800
+@@ -668,7 +668,7 @@
+ 					if s.device == d then
+ 						c = c + 1
+ 						if c == n then
+-							ifname = s.ifname or s.device
++							ifname = s.ifname or "ath"..(s[".index"]-2) 
+ 							return false
+ 						end
+ 					end
+@@ -682,6 +682,8 @@
+ 					end
+ 				end)
+ 		end
++		
++		--ifname = "ath3"
+ 
+ 		local t = stat and iwinfo.type(ifname)
+ 		local x = t and iwinfo[t] or { }
+

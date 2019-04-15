@@ -1,0 +1,15 @@
+--- busybox-1.17.1/networking/udhcp/dhcpc.c	2013-02-04 12:45:40.000000000 +0800
++++ busybox-1.17.1new/networking/udhcp/dhcpc.c	2013-02-04 12:43:43.214834345 +0800
+@@ -978,6 +978,12 @@
+ 		/* silence "uninitialized!" warning */
+ 		unsigned timestamp_before_wait = timestamp_before_wait;
+ 
++        /* When running on a bridge, the ifindex may have changed (e.g. if
++         * member interfaces were added/removed or if the status of the
++         * bridge changed).
++         * Workaround: refresh it here before processing the next packet */
++        udhcp_read_interface(client_config.interface, &client_config.ifindex, NULL, client_config.client_mac);
++
+ 		//bb_error_msg("sockfd:%d, listen_mode:%d", sockfd, listen_mode);
+ 
+ 		/* Was opening raw or udp socket here

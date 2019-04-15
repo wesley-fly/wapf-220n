@@ -1,0 +1,14 @@
+--- aaa/libs/core/luasrc/version.lua	2009-01-18 00:35:02.000000000 +0800
++++ bbb/libs/core/luasrc/version.lua	2013-06-26 10:39:21.526661943 +0800
+@@ -5,8 +5,8 @@
+ 
+ module "luci.version"
+ 
+-distname    = "Host System"
+-distversion = "SDK"
++distname    = "WAPF-220N"
++distversion = "SDK_0.0.0.1"
+ 
+ luciname    = "LuCI"
+ luciversion = "SVN"
+

@@ -1,0 +1,287 @@
+--- aaa/common/cmd_sftest.c	1969-12-31 19:00:00.000000000 -0500
++++ bbb/common/cmd_sftest.c	2013-01-24 02:59:30.307722943 -0500
+@@ -0,0 +1,272 @@
++/*
++ * Command for accessing SPI flash and do the read/write test.
++ *
++ * Copyright (C) 2008 Gemetek Co., Ltd
++ * Licensed under the GPL-2 or later.
++ */
++
++#include <common.h>
++#include <spi_flash.h>
++
++#include <asm/io.h>
++
++#ifndef CONFIG_SF_DEFAULT_SPEED
++# define CONFIG_SF_DEFAULT_SPEED	133000000
++#endif
++#ifndef CONFIG_SF_DEFAULT_MODE
++# define CONFIG_SF_DEFAULT_MODE		SPI_MODE_3
++#endif
++
++static struct spi_flash *flash;
++
++static int do_spi_flash_probe(int argc, char * const argv[])
++{
++	unsigned int bus = 0;
++	unsigned int cs;
++	unsigned int speed = CONFIG_SF_DEFAULT_SPEED;
++	unsigned int mode = CONFIG_SF_DEFAULT_MODE;
++	char *endp;
++	struct spi_flash *new;
++
++	if (argc < 2)
++		goto usage;
++
++	cs = simple_strtoul(argv[1], &endp, 0);
++	if (*argv[1] == 0 || (*endp != 0 && *endp != ':'))
++		goto usage;
++	if (*endp == ':') {
++		if (endp[1] == 0)
++			goto usage;
++
++		bus = cs;
++		cs = simple_strtoul(endp + 1, &endp, 0);
++		if (*endp != 0)
++			goto usage;
++	}
++
++	if (argc >= 3) {
++		speed = simple_strtoul(argv[2], &endp, 0);
++		if (*argv[2] == 0 || *endp != 0)
++			goto usage;
++	}
++	if (argc >= 4) {
++		mode = simple_strtoul(argv[3], &endp, 16);
++		if (*argv[3] == 0 || *endp != 0)
++			goto usage;
++	}
++
++	new = spi_flash_probe(bus, cs, speed, mode);
++	if (!new) {
++		printf("Failed to initialize SPI flash at %u:%u\n", bus, cs);
++		return 1;
++	}
++
++	if (flash)
++		spi_flash_free(flash);
++	flash = new;
++
++	printf("%u KiB %s at %u:%u is now current device\n",
++			flash->size >> 10, flash->name, bus, cs);
++
++	return 0;
++
++usage:
++	puts("Usage: sf probe [bus:]cs [hz] [mode]\n");
++	return 1;
++}
++
++static int do_spi_flash_read_write(int argc, char * const argv[])
++{
++	unsigned long addr;
++	unsigned long offset;
++	unsigned long len=0x100;
++	void *buf, *buf1;
++	char *endp;
++	int ret, ret1, ret2;
++	unsigned patterns[256] = {0};	
++
++	if (argc < 4)
++		goto usage;
++
++	// backup u-boot from SPI flash to DDR3
++	printf("backup u-boot to DDR3 RAM...");	
++	buf = map_physmem(0x11100000, 0x100000, MAP_WRBACK);
++	ret = spi_flash_read(flash, 0x0, 0x100000, buf);
++	if (!buf) {
++		puts("Failed to map physical memory\n");
++		return 1;
++	}
++
++	printf("Starting test...");	
++	offset = 0;
++	
++	addr = simple_strtoul(argv[1], &endp, 16);
++	if (*argv[1] == 0 || *endp != 0)
++		goto usage;
++	//addr = &(patterns[0]);	
++	printf("pattern: addr=0x%x...\n", addr);
++		
++	offset = simple_strtoul(argv[2], &endp, 16);
++	if (*argv[2] == 0 || *endp != 0)
++		goto usage;
++
++	buf = map_physmem(addr, len, MAP_WRBACK);
++	if (!buf) {
++		puts("buf: Failed to map physical memory\n");
++		goto restore;
++	}
++	
++	buf1 = map_physmem((addr+256), len, MAP_WRBACK);
++	if (!buf1) {
++		puts("buf1: Failed to map physical memory\n");
++		goto restore;
++	}
++
++	printf("Erasing SPI flash...");
++	ret = spi_flash_erase(flash, 0, 0x1000000);
++	
++	while(offset < 0x1000000)
++	{			
++		//len = simple_strtoul(argv[3], &endp, 16);
++		//if (*argv[3] == 0 || *endp != 0)
++		//	break;
++		printf("offset=%d\n", offset);
++
++		//if (strcmp(argv[0], "read") == 0)
++		//	ret = spi_flash_read(flash, offset, len, buf);
++		//else
++		ret = spi_flash_write(flash, offset, len, buf);
++		ret1 = spi_flash_read(flash, offset, len, buf1);
++		
++		if((ret2 = memcmp(buf, buf1, len)) != 0)
++		{
++			printf("SPI flash compare failed at offset %d\n!!", offset);
++			int i;
++			for(i=0; i<len; i++)
++			{
++				printf("0x%x ", *((unsigned char*)(buf+i)));
++				if(i%10 == 0) puts("\n");
++			}
++			for(i=0; i<len; i++)
++			{
++				printf("0x%x ", *((unsigned char*)(buf1+i)));
++				if(i%10 == 0) puts("\n");
++			}
++		}
++	
++		unmap_physmem(buf, len);
++		unmap_physmem(buf1, len);
++
++		if (ret || ret1) {
++			printf("SPI flash %s failed\n", argv[0]);
++			goto restore;
++		}
++
++		if(ret2)
++		{
++			printf("compare failed!!\n");
++			goto restore;
++		}
++
++		offset+= 0x100; //one page
++	}// end of while
++
++restore:
++	//restore u-boot from DDR3 to SPI flash
++	printf("restore U-Boot back to SPI flash...\n");
++	addr = 0;
++	printf("Erasing SPI flash...\n");
++	ret = spi_flash_erase(flash, 0, 0x1000000);
++	if (ret) {
++		printf("SPI flash %s failed\n", argv[0]);
++		return 1;
++	}
++	printf("Programming SPI flash...\n");
++	buf = map_physmem(0x11100000, 0x100000, MAP_WRBACK);
++	ret = spi_flash_write(flash, 0, 0x100000, buf);
++	if(ret)
++	{
++		printf("restore u-boot back to SPI flash failed!!\n");
++	}
++	unmap_physmem(buf, 100000);
++	printf("Restore U-Boot finished!!\n");
++	return 0;
++
++usage:
++	printf("Usage: sf %s addr offset len\n", argv[0]);
++	return 1;
++}
++
++static int do_spi_flash_erase(int argc, char * const argv[])
++{
++	unsigned long offset;
++	unsigned long len;
++	char *endp;
++	int ret;
++
++	if (argc < 3)
++		goto usage;
++
++	offset = simple_strtoul(argv[1], &endp, 16);
++	if (*argv[1] == 0 || *endp != 0)
++		goto usage;
++	len = simple_strtoul(argv[2], &endp, 16);
++	if (*argv[2] == 0 || *endp != 0)
++		goto usage;
++
++	ret = spi_flash_erase(flash, offset, len);
++	if (ret) {
++		printf("SPI flash %s failed\n", argv[0]);
++		return 1;
++	}
++
++	return 0;
++
++usage:
++	puts("Usage: sftest erase offset len\n");
++	return 1;
++}
++
++static int do_spi_flash_test(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
++{
++	const char *cmd;
++
++	/* need at least two arguments */
++	if (argc < 2)
++		goto usage;
++
++	cmd = argv[1];
++
++	if (strcmp(cmd, "probe") == 0)
++		return do_spi_flash_probe(argc - 1, argv + 1);
++
++	/* The remaining commands require a selected device */
++	if (!flash) {
++		puts("No SPI flash selected. Please run `sftest probe'\n");
++		return 1;
++	}
++	
++	/*
++	if (strcmp(cmd, "read") == 0 || strcmp(cmd, "write") == 0)
++		return do_spi_flash_read_write(argc - 1, argv + 1);
++	if (strcmp(cmd, "erase") == 0)
++		return do_spi_flash_erase(argc - 1, argv + 1);
++	*/
++		
++	return do_spi_flash_read_write(argc-1, argv+1);
++	//do_spi_flash_read_erase(argc-1, argv+1);
++usage:
++	return cmd_usage(cmdtp);
++}
++
++U_BOOT_CMD(
++	sftest,	5,	1,	do_spi_flash_test,
++	"SPI flash test command ",
++	"probe [bus:]cs [hz] [mode]	- init flash device on given SPI bus\n"
++	"				  and chip select\n"
++	"sftest read addr offset len 	- read `len' bytes starting at\n"
++	"				  `offset' to memory at `addr'\n"
++	"sftest write addr offset len	- write `len' bytes from memory\n"
++	"				  at `addr' to flash at `offset'\n"
++	"sftest erase offset len		- erase `len' bytes from `offset'"
++);
+--- aaa/common/Makefile	2013-01-24 03:02:48.687735165 -0500
++++ bbb/common/Makefile	2013-01-24 02:59:30.307722943 -0500
+@@ -132,6 +132,7 @@
+ COBJS-$(CONFIG_CMD_REISER) += cmd_reiser.o
+ COBJS-$(CONFIG_CMD_SATA) += cmd_sata.o
+ COBJS-$(CONFIG_CMD_SF) += cmd_sf.o
++COBJS-$(CONFIG_CMD_SFTEST) += cmd_sftest.o
+ COBJS-$(CONFIG_CMD_SCSI) += cmd_scsi.o
+ COBJS-$(CONFIG_CMD_SETEXPR) += cmd_setexpr.o
+ COBJS-$(CONFIG_CMD_SPI) += cmd_spi.o
+--- aaa/include/configs/P1010RDB.h	2013-01-24 03:02:48.667443758 -0500
++++ bbb/include/configs/P1010RDB.h	2013-01-24 02:59:30.267454726 -0500

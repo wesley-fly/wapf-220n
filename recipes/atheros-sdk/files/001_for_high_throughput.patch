@@ -1,0 +1,450 @@
+--- aaa/build/scripts/pb9x-2.6.31/config.pb9x-2.6.31	2013-06-13 16:18:04.207947880 +0800
++++ bbb/build/scripts/pb9x-2.6.31/config.pb9x-2.6.31	2013-06-12 16:46:46.529137203 +0800
+@@ -64,21 +64,21 @@
+ # Environmental variables used to configure the HAL/ATH layers at compile time
+ #
+ 
+-export ATH_CAP_PHYERR_DIAG=1
++export ATH_CAP_PHYERR_DIAG=0
+ 
+ export AR5416_G_MODE=1
+ export AH_SUPPORT_HOWL=0
+ export AH_SUPPORT_OWL=1
+ export AH_DEBUG=0
+ export AR5416_INT_MITIGATION=0
+-export ATH_SUPPORT_DFS=1
++export ATH_SUPPORT_DFS=0
+ export ATH_SUPPORT_IQUE=1
+ export IEEE_MCAST_ENHANCEMENT=1
+ export ATH_SUPPORT_VOWEXT=1
+ export ATH_VOW_EXT_STATS=1
+ export ATH_SUPPORT_TxBF=1
+-export ATH_SUPPORT_5G_EACS=1
+-export ATH_SUPPORT_VOW_DCS=0 
++export ATH_SUPPORT_5G_EACS=0
++export ATH_SUPPORT_VOW_DCS=0
+ 
+ export ATH_WPS_IE=1
+ export ATH_SUPPORT_VLAN=1
+@@ -102,22 +102,29 @@
+ export BUILD_OPTIMIZED=y
+ export INSTALL_BLACKLIST="usr/bin/gdb* sbin/802* sbin/apst* sbin/ath* sbin/ifr* sbin/iwe* sbin/iwsp* sbin/iwli* sbin/radar* sbin/iwge* sbin/pktl* usr/local/bin/* usr/local/sbin/nmb*"
+ endif
+-export CONFIG_MIPS_24K_KERNEL_OPTIMIZATION=1
++export CONFIG_MIPS_24K_KERNEL_OPTIMIZATION=0
+ #Set the GPIO PIN for WPS LED                                  
+ export WPS_LED_GPIO_PIN=11
+ 
+ #enable Adhoc mode
+-export ATH_SUPPORT_IBSS_HT=1
+-export ATH_SUPPORT_IBSS_WMM=1
+-export ATH_SUPPORT_IBSS_NETLINK_NOTIFICATION=1
+-export ATH_SUPPORT_IBSS_PRIVATE_SECURITY=1
+-export ATH_SUPPORT_IBSS_ACS=1
++export ATH_SUPPORT_IBSS_HT=0
++export ATH_SUPPORT_IBSS_WMM=0
++export ATH_SUPPORT_IBSS_NETLINK_NOTIFICATION=0
++export ATH_SUPPORT_IBSS_PRIVATE_SECURITY=0
++export ATH_SUPPORT_IBSS_ACS=0
+ 
+ #Use athr-hostapd
+ export BUILD_ATHR_HOSTAP=1
+ 
+ #Increasing Tx Buffers for VOW - So, please make sure that ATH_SUPPORT_VOWEXT is enabled before this
+ ifeq ($(ATH_SUPPORT_VOWEXT), 1)
+-export ATH_TXBUF=1536
++export ATH_TXBUF=10240
+ endif
++export ATH_RXBUF=10240
++#export ATH_RXBUF_RECYCLE=1
++#export AP_MULTIPLE_BUFFER_RCV=1
++#export ATH_SUPPORT_IQUE=1
++#export ATH_SUPPORT_IQUE_EXT=1
++#export ATH_SUPPORT_TxBF=1
++#export ATH_SUPPORT_CFEND=1
+ 
+--- aaa/drivers/wlan/include/ath_dev.h	2011-12-01 03:09:31.000000000 +0800
++++ bbb/drivers/wlan/include/ath_dev.h	2013-06-08 09:46:57.402294227 +0800
+@@ -1318,6 +1318,7 @@
+     */
+    void         (*set_selected_smantennas) (ath_node_t node, int antenna, int rateset);
+ #endif   
++    int 	(*check_ip_frag_drop) (ath_dev_t, int ac);
+ };
+ 
+ /* Load-time configuration for ATH device */
+
+--- aaa/drivers/wlan/lmac/ath_dev/ath_main.c	2011-12-01 03:09:31.000000000 +0800
++++ bbb/drivers/wlan/lmac/ath_dev/ath_main.c	2013-06-08 09:52:47.226289812 +0800
+@@ -246,6 +246,7 @@
+ #if UMAC_SUPPORT_INTERNALANTENNA
+ static void ath_set_selected_smantennas(ath_node_t node, int antenna, int rtset);
+ #endif
++static int ath_check_ip_frag_drop(ath_dev_t dev, int ac);
+ 
+ /******************************************************************************/
+ /*!
+@@ -5972,6 +5973,7 @@
+ #if UMAC_SUPPORT_INTERNALANTENNA    
+     ath_set_selected_smantennas,        /* set_selected_smantennas */
+ #endif    
++    ath_check_ip_frag_drop,
+ };
+ 
+ int ath_dev_attach(u_int16_t            devid,
+@@ -9475,3 +9477,25 @@
+ }
+ 
+ #endif
++
++static int ath_check_ip_frag_drop(ath_dev_t dev, int ac)
++{
++/* Assume the Max Number of IP fragment is 20 (packet size 29200 Byte) */
++#define IP_FRAG_DROP_THRES 20
++    struct ath_softc *sc = ATH_DEV_TO_SC(dev);
++
++    //printk("%s: ac = %d\n, free %d, min_free %d",__func__,ac, sc->sc_txbuf_free, sc->sc_txq[ac].axq_minfree);
++
++    if((sc->sc_txq[ac].axq_num_buf_used + IP_FRAG_DROP_THRES) > (ATH_TXBUF-sc->sc_txq[ac].axq_minfree)) {
++        sc->sc_stats.ast_tx_ipfrag_drop[ac]++;
++        return 1;
++    }
++
++    if(sc->sc_txbuf_free < IP_FRAG_DROP_THRES) {
++        sc->sc_stats.ast_tx_ipfrag_drop[ac]++;
++        return 1;
++    } 
++    
++    return 0;
++#undef IP_FRAG_DROP_THRES
++}
+
+--- aaa/drivers/wlan/lmac/ath_dev/if_athioctl.h	2011-12-01 03:09:31.000000000 +0800
++++ bbb/drivers/wlan/lmac/ath_dev/if_athioctl.h	2013-06-08 09:53:50.230289017 +0800
+@@ -374,6 +374,7 @@
+     u_int32_t   ast_mcs_count[MCS_RATE+1];
+ #endif
+     struct ath_bb_panic_info ast_bb_panic[MAX_BB_PANICS];
++    u_int32_t   ast_tx_ipfrag_drop[4]; /* drop IP Fragment packets (by AC) */
+ };
+ 
+ /*
+
+--- aaa/drivers/wlan/lmac/ratectrl/ratectrl_11nViVo.c	2011-12-01 03:09:31.000000000 +0800
++++ bbb/drivers/wlan/lmac/ratectrl/ratectrl_11nViVo.c	2013-06-08 09:56:21.474287108 +0800
+@@ -1220,20 +1220,20 @@
+                 pRc->rateMaxPhy = pRc->probeRate;
+ 
+                 if (rcGetNextLowerValidTxRate(pRateTable, pRc, (A_UINT8)pRc->probeRate, &prevRate,0)) {
+-#if ATH_SUPPORT_VOWEXT /* RCA */
+-		            if ( ATH_IS_VOWEXT_RCA_ENABLED(sc)) { 
++//#if ATH_SUPPORT_VOWEXT /* RCA */
++//		            if ( ATH_IS_VOWEXT_RCA_ENABLED(sc)) { 
+                         if (pRc->state[pRc->probeRate].per < pRc->state[prevRate].per) {
+                             pRc->state[pRc->probeRate].per = pRc->state[prevRate].per;
+                         }
+                         else if (pRc->state[pRc->probeRate].per > 30) {
+                             pRc->state[pRc->probeRate].per = MAX (30, pRc->state[prevRate].per );
+                         }
+-                     }
+-                     else
+-#endif
+-                     {    
+-                         pRc->state[pRc->probeRate].per = MAX (30, pRc->state[prevRate].per );
+-                     }
++//                     }
++//                     else
++//#endif
++//                     {    
++//                         pRc->state[pRc->probeRate].per = MAX (30, pRc->state[prevRate].per );
++//                     }
+                 }
+ 
+                 /*
+
+--- aaa/drivers/wlan/os/linux/src/ath_linux.c	2011-12-01 03:09:32.000000000 +0800
++++ bbb/drivers/wlan/os/linux/src/ath_linux.c	2013-06-08 09:58:11.658285717 +0800
+@@ -337,6 +337,70 @@
+         return 0;
+     }
+ 
++    if (eh->ether_type == htons(ETHERTYPE_IP)) {
++        const struct ip_header *ip = (struct ip_header *) ((u_int8_t *)eh + sizeof (struct ether_header));
++        struct ieee80211vap *vap = ni->ni_vap;
++
++        //printk("%s: frag_off = 0x%x, priority %d\n",__func__,ip->frag_off, skb->priority);
++        /* first IP fragment: More Fragments bit on, zero Fragment Offset */
++        if (ip->frag_off == 0x2000) {
++            /* preview if any fragment with the same IP identifier */
++            /* might be dropped latter due to some reasons */
++            if (ic->ic_check_ip_frag_drop(ic, skb->priority)) {
++                /* turn on the IP fragment drop flag */
++		//printk("Dropd firest fragment\n");
++                vap->ip_frag_drop[skb->priority].id = ip->id;
++                vap->ip_frag_drop[skb->priority].saddr = ip->saddr;
++                vap->ip_frag_drop[skb->priority].activeflag = 1;
++                goto bad;
++            }
++#if 0	   
++	    else if ((vap->ip_frag_drop[skb->priority].activeflag == 1) && 
++			  (vap->ip_frag_drop[skb->priority].id == ip->id) && 
++			  (vap->ip_frag_drop[skb->priority].saddr == ip->saddr)) {
++
++                if (!(ip->frag_off & 0x2000)) {
++                  /* the end of IP fragment: More Fragments bit off */
++                  /* turn off the IP fragment drop flag */
++                  vap->ip_frag_drop[skb->priority].id = 0;
++                  vap->ip_frag_drop[skb->priority].saddr = 0;
++                  vap->ip_frag_drop[skb->priority].activeflag = 0;
++                }
++                goto bad;
++
++            }
++#endif
++ 
++        }
++
++	if(vap->ip_frag_drop[skb->priority].activeflag && (vap->ip_frag_drop[skb->priority].id == ip->id) && (vap->ip_frag_drop[skb->priority].saddr == ip->saddr)){
++		//printk("Dropd next\n");
++		if(!(ip->frag_off & 0x2000)){
++			//printk("Rest flag\n");
++			vap->ip_frag_drop[skb->priority].activeflag = 0;
++			vap->ip_frag_drop[skb->priority].id = 0;
++			vap->ip_frag_drop[skb->priority].saddr = 0;
++		}
++		goto bad;
++	}	
++	/*
++	else if ((vap->ip_frag_drop[skb->priority].activeflag == 1) && 
++			(vap->ip_frag_drop[skb->priority].id == ip->id) &&
++			(vap->ip_frag_drop[skb->priority].saddr == ip->saddr)){
++
++		if(!(ip->frag_off & 0x2000)){
++                  vap->ip_frag_drop[skb->priority].id = 0;
++                  vap->ip_frag_drop[skb->priority].saddr = 0;
++                  vap->ip_frag_drop[skb->priority].activeflag = 0;
++		  //printk("Ton off %d %d\n", ip->id, ip->saddr);
++		}
++		//printk("Drop %d %d\n", ip->id, ip->saddr);
++		goto bad;
++
++	}
++	*/
++    }
++
+ #ifdef ATH_SUPPORT_UAPSD
+     /* Limit UAPSD node queue depth to WME_UAPSD_NODE_MAXQDEPTH */
+     if ((ni->ni_flags & IEEE80211_NODE_UAPSD) &&
+
+--- aaa/drivers/wlan/os/linux/src/ath_osdep.c	2011-12-01 03:09:32.000000000 +0800
++++ bbb/drivers/wlan/os/linux/src/ath_osdep.c	2013-06-11 12:50:44.030406395 +0800
+@@ -35,9 +35,9 @@
+ #endif
+ 
+ #if ATH_DEBUG
+-int ACBKMinfree = 48;
+-int ACBEMinfree = 32;
+-int ACVIMinfree = 16;
++int ACBKMinfree = 150;
++int ACBEMinfree = 100;
++int ACVIMinfree = 32;
+ int ACVOMinfree = 0;
+ int CABMinfree = 48;
+ int UAPSDMinfree = 0;
+
+--- aaa/drivers/wlan/os/linux/src/if_ath_pci.c	2011-12-01 03:09:32.000000000 +0800
++++ bbb/drivers/wlan/os/linux/src/if_ath_pci.c	2013-06-08 09:59:54.394284421 +0800
+@@ -99,6 +99,7 @@
+     { 0x168c, 0xabcd, PCI_ANY_ID, PCI_ANY_ID }, /* Osprey PCIE Emulation   */
+     { 0x168c, 0x0030, PCI_ANY_ID, PCI_ANY_ID }, /* Osprey PCIE   */
+     { 0x168c, 0x0033, PCI_ANY_ID, PCI_ANY_ID }, /* Peacock PCIE  */
++    { 0x168c, 0x0032, PCI_ANY_ID, PCI_ANY_ID }, /* Poseidon PCIE */
+     { 0 }
+ };
+ 
+--- aaa/drivers/wlan/umac/if_lmac/if_ath.c	2011-12-01 03:09:33.000000000 +0800
++++ bbb/drivers/wlan/umac/if_lmac/if_ath.c	2013-06-08 10:03:08.750281968 +0800
+@@ -150,6 +150,7 @@
+ static void ath_net80211_set_default_antenna(struct ieee80211com *ic, u_int32_t antenna);
+ static void ath_net80211_set_selected_smantennas(struct ieee80211_node *ni, int antenna, int rateset);
+ #endif
++static int ath_check_ip_frag_drop(struct ieee80211com *ic, int ac);
+ 
+ #if ATH_SUPPORT_SPECTRAL
+ static int ath_net80211_get_control_duty_cycle(struct ieee80211com *ic)
+@@ -6660,6 +6661,7 @@
+     ic->ic_set_default_antenna = ath_net80211_set_default_antenna;
+     ic->ic_set_selected_smantennas = ath_net80211_set_selected_smantennas;
+ #endif    
++    ic->ic_check_ip_frag_drop = ath_check_ip_frag_drop;
+     /* Attach AoW module */
+     ath_aow_attach(ic, scn);
+ 
+@@ -7098,3 +7100,14 @@
+         ieee80211com_clear_htcap(ic, htcap_flag);
+     }
+ } 
++
++static int
++ath_check_ip_frag_drop(struct ieee80211com *ic, int ac)
++{
++    struct ath_softc_net80211 *scn = ATH_SOFTC_NET80211(ic);
++	        
++    if (scn->sc_ops->check_ip_frag_drop) {
++        return scn->sc_ops->check_ip_frag_drop(scn->sc_dev , scn->sc_ac2q[ac]);
++    }
++    return 0;
++} 
+
+--- aaa/drivers/wlan/umac/include/ieee80211_var.h	2011-12-01 03:09:33.000000000 +0800
++++ bbb/drivers/wlan/umac/include/ieee80211_var.h	2013-06-08 10:05:48.486279952 +0800
+@@ -892,6 +892,7 @@
+     int8_t      (*ic_get_smartatenna_enable) (struct ieee80211com *ic);
+     void        (*ic_get_smartantenna_ratestats) (struct ieee80211_node *ni, void *rate_stats);
+ #endif    
++    int (*ic_check_ip_frag_drop)(struct ieee80211com *ic, int ac);
+ 
+ } IEEE80211COM, *PIEEE80211COM;
+ 
+@@ -953,6 +954,12 @@
+ };
+ #endif
+ 
++struct ieee80211_ip_frag_drop {
++    u_int16_t   id;         /* IP Identifier */
++    u_int32_t   saddr;      /* Source IP Address */
++    u_int8_t    activeflag;
++};
++
+ typedef struct ieee80211vap {
+     TAILQ_ENTRY(ieee80211vap)         iv_next;    /* list of vap instances */
+ 
+@@ -1263,7 +1270,8 @@
+     u_int8_t iv_wep_keycache;/*forstatic wep keys are allocated in first four slots in keycahe */
+ #if ATH_SUPPORT_WPA_SUPPLICANT_CHECK_TIME
+ 	int 				iv_rejoint_attemp_time;
+-#endif	
++#endif
++    struct ieee80211_ip_frag_drop ip_frag_drop[WME_NUM_AC]; /* record of IP fragment dropping info per AC */	
+ } IEEE80211VAP, *PIEEE80211VAP;
+ 
+ #define IEEE80211_ADDR_EQ(a1,a2)        (OS_MEMCMP(a1, a2, IEEE80211_ADDR_LEN) == 0)
+
+--- aaa/drivers/wlan/umac/mlme/ieee80211_proto.c	2011-12-01 03:09:33.000000000 +0800
++++ bbb/drivers/wlan/umac/mlme/ieee80211_proto.c	2013-06-08 10:07:43.586278499 +0800
+@@ -1103,7 +1103,21 @@
+                 wme->wme_chanParams.cap_wmeParams[WME_AC_VI].wmep_logcwmin = 4;
+             }
+         }
++//        wme->wme_chanParams.cap_wmeParams[WME_AC_VI].wmep_txopLimit = 0;
++#if 0
+         wme->wme_chanParams.cap_wmeParams[WME_AC_VI].wmep_txopLimit = 0;
++#else
++        wme->wme_chanParams.cap_wmeParams[WME_AC_BE].wmep_logcwmin = (wme->wme_chanParams.cap_wmeParams[WME_AC_BE].wmep_logcwmin/2);
++        wme->wme_chanParams.cap_wmeParams[WME_AC_VI].wmep_txopLimit = (wme->wme_chanParams.cap_wmeParams[WME_AC_VI].wmep_txopLimit/4);
++        printk("%s: WME params updated\n",__func__);
++        for (i = 0; i < WME_NUM_AC; i++) {
++            printk("ac %d, cwmmin %d, cwmmax %d, txoplimit %d, aifs %d\n",i,
++                wme->wme_chanParams.cap_wmeParams[i].wmep_logcwmin,
++                wme->wme_chanParams.cap_wmeParams[i].wmep_logcwmax,
++                wme->wme_chanParams.cap_wmeParams[i].wmep_txopLimit,
++                wme->wme_chanParams.cap_wmeParams[i].wmep_aifsn);
++        }      
++#endif
+     }
+     
+ #if ATH_SUPPORT_IBSS_WMM  
+
+--- aaa/drivers/wlan/lmac/ath_dev/ath_xmit.c	2011-12-01 03:09:31.000000000 +0800
++++ bbb/drivers/wlan/lmac/ath_dev/ath_xmit.c	2013-06-11 10:37:34.738507227 +0800
+@@ -308,35 +308,46 @@
+         if (qtype == HAL_TX_QUEUE_DATA) {
+             switch (subtype) {
+                 case HAL_WME_AC_BK:
+-                    txq->axq_minfree = (sc->sc_reg_parm.ACBKMinfree > 0 && sc->sc_reg_parm.ACBKMinfree <= ATH_TXBUF) ? \
+-                                       sc->sc_reg_parm.ACBKMinfree : 16 * (HAL_WME_AC_VO - subtype);
++                    /*txq->axq_minfree = (sc->sc_reg_parm.ACBKMinfree > 0 && sc->sc_reg_parm.ACBKMinfree <= ATH_TXBUF) ? \
++                                       sc->sc_reg_parm.ACBKMinfree : 16 * (HAL_WME_AC_VO - subtype);*/
++		    txq->axq_minfree = 3600;
+                     break;
+                 case HAL_WME_AC_BE:
+-                    txq->axq_minfree = (sc->sc_reg_parm.ACBEMinfree > 0 && sc->sc_reg_parm.ACBEMinfree <= ATH_TXBUF) ? \
+-                                       sc->sc_reg_parm.ACBEMinfree : 16 * (HAL_WME_AC_VO - subtype);
++                    /*txq->axq_minfree = (sc->sc_reg_parm.ACBEMinfree > 0 && sc->sc_reg_parm.ACBEMinfree <= ATH_TXBUF) ? \
++                                       sc->sc_reg_parm.ACBEMinfree : 16 * (HAL_WME_AC_VO - subtype);*/
++		    txq->axq_minfree = 800;
+                     break;
+                 case HAL_WME_AC_VI:
+-                    txq->axq_minfree = (sc->sc_reg_parm.ACVIMinfree > 0 && sc->sc_reg_parm.ACVIMinfree <= ATH_TXBUF) ? \
+-                                       sc->sc_reg_parm.ACVIMinfree : 16 * (HAL_WME_AC_VO - subtype);
++                    /*txq->axq_minfree = (sc->sc_reg_parm.ACVIMinfree > 0 && sc->sc_reg_parm.ACVIMinfree <= ATH_TXBUF) ? \
++                                       sc->sc_reg_parm.ACVIMinfree : 16 * (HAL_WME_AC_VO - subtype);*/
++		    txq->axq_minfree = 400;
+                     break;
+                 case HAL_WME_AC_VO:
+-                    txq->axq_minfree = (sc->sc_reg_parm.ACVOMinfree > 0 && sc->sc_reg_parm.ACVOMinfree <= ATH_TXBUF) ? \
+-                                       sc->sc_reg_parm.ACVOMinfree : 16 * (HAL_WME_AC_VO - subtype);
++                    /*txq->axq_minfree = (sc->sc_reg_parm.ACVOMinfree > 0 && sc->sc_reg_parm.ACVOMinfree <= ATH_TXBUF) ? \
++                                       sc->sc_reg_parm.ACVOMinfree : 16 * (HAL_WME_AC_VO - subtype);*/
++		    txq->axq_minfree = 0;
++		    //printk("qtype == vo 0,txq->axq_minfree = %d\n",txq->axq_minfree);
+                     break;
+                 default:
+                     txq->axq_minfree = 0;
+             }
++	    //printk("qtype == HAL_TX_QUEUE_DATA,txq->axq_minfree = %d\n",txq->axq_minfree);
+         } else if (qtype == HAL_TX_QUEUE_CAB) {
+-            txq->axq_minfree = (sc->sc_reg_parm.CABMinfree > 0 && sc->sc_reg_parm.CABMinfree <= ATH_TXBUF) ? \
+-                               sc->sc_reg_parm.CABMinfree : MCAST_MIN_FREEBUF;
++            /*txq->axq_minfree = (sc->sc_reg_parm.CABMinfree > 0 && sc->sc_reg_parm.CABMinfree <= ATH_TXBUF) ? \
++                               sc->sc_reg_parm.CABMinfree : MCAST_MIN_FREEBUF;*/
++	    txq->axq_minfree = 3600;
++	    //printk("qtype == HAL_TX_QUEUE_CAB,txq->axq_minfree = %d\n",txq->axq_minfree);
+ #ifdef ATH_SUPPORT_UASPD
+         } else if (qtype == HAL_TX_QUEUE_UASPD) {
+             txq->axq_minfree = (sc->sc_reg_parm.UASPDMinfree > 0 && sc->sc_reg_parm.UASPDMinfree <= ATH_TXBUF) ? \
+                                sc->sc_reg_parm.UASPDMinfree : 0;
++	    //txq->axq_minfree = 1800;
++	    //printk("qtype == HAL_TX_QUEUE_uapsd,txq->axq_minfree = %d\n",txq->axq_minfree);
+ #endif
+         } else {
+             /* XXX: Do we need flow control for other queues? */
+             txq->axq_minfree = 0;
++	    //printk("qtype == others,txq->axq_minfree = %d\n",txq->axq_minfree);
+         }
+ #endif
+         txq->irq_shared = 0;
+--- aaa/rootfs/cgiCommon/etc/ath.dual/makeVAP	2013-06-13 16:18:04.263947880 +0800
++++ bbb/rootfs/cgiCommon/etc/ath.dual/makeVAP	2013-06-13 18:31:50.000052860 +0800
+@@ -96,6 +96,8 @@
+     R_AMPDULIMIT=$AMPDULIMIT_2
+     R_TXCHAIN=$TX_CHAINMASK_2
+     R_RXCHAIN=$RX_CHAINMASK_2
++    R_RATECTL=$RATECTL_2
++    R_MANRATE=$MANRATE_2
+ else
+     R_SHORTGI=$SHORTGI
+     R_AMPDUENABLE=$AMPDUENABLE
+@@ -103,6 +105,8 @@
+     R_AMPDULIMIT=$AMPDULIMIT
+     R_TXCHAIN=$TX_CHAINMASK
+     R_RXCHAIN=$RX_CHAINMASK
++    R_RATECTL=$RATECTL
++    R_MANRATE=$MANRATE
+ fi
+ 
+ ESSID=$2
+@@ -340,9 +344,9 @@
+     # If rate control is not auto, set the manual settings
+     #
+     
+-    if [ "${RATECTL}" != "auto" ]; then
+-        iwpriv ${APNAME} set11NRates $MANRATE
+-        iwpriv ${APNAME} set11NRetries $MANRETRIES
++    if [ "${R_RATECTL}" != "auto" ]; then
++        iwpriv ${APNAME} set11NRates $R_MANRATE
++        iwpriv ${APNAME} set11NRetries $R_MANRETRIES
+     fi
+ 
+     #
+

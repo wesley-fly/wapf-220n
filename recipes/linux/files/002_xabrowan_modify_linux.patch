@@ -1,0 +1,474 @@
+--- a/arch/powerpc/boot/dts/p1010rdb.dts	2013-01-05 17:39:40.668662435 +0800
++++ b/arch/powerpc/boot/dts/p1010rdb.dts	2013-01-05 17:29:01.560641984 +0800
+@@ -20,8 +20,6 @@
+ 		serial0 = &serial0;
+ 		serial1 = &serial1;
+ 		ethernet0 = &enet0;
+-		ethernet1 = &enet1;
+-		ethernet2 = &enet2;
+ 		pci0 = &pci0;
+ 		pci1 = &pci1;
+ 	};
+@@ -239,55 +237,46 @@
+ 				modal = "s25sl128b";
+ 				spi-max-frequency = <50000000>;
+ 				mode = <0>;
+-
+ 				partition@0 {
+-					/* 512KB for u-boot Bootloader Image */
+-					reg = <0x0 0x00080000>;
+-					label = "SPI (RO) U-Boot Image";
+-					read-only;
+-				};
+-
+-				partition@80000 {
+-					/* 512KB for DTB Image */
+-					reg = <0x00080000 0x00080000>;
+-					label = "SPI (RO) DTB Image";
+-					read-only;
+-				};
+-
+-				partition@100000 {
+-					/* 4MB for Linux Kernel Image */
+-					reg = <0x00100000 0x00400000>;
+-					label = "SPI (RO) Linux Kernel Image";
+-					read-only;
+-				};
+-
+-				partition@500000 {
+-					/* 4MB for Compressed RFS Image */
+-					reg = <0x00500000 0x00400000>;
+-					label = "SPI (RO) Compressed RFS Image";
+-					read-only;
+-				};
+-
+-				partition@900000 {
+-					/* 7MB for JFFS2 based RFS */
+-					reg = <0x00900000 0x00700000>;
+-					label = "SPI (RW) JFFS2 RFS";
+-				};
+-			};
+-
+-// If SPI flash node exists legerity cannot be in device tree because both
+-// are sitting at same CS #0
+-// either legerity or SPI flash node will be deleted by u-boot fixup at runtime.
+-			legerity@0{
+-				compatible = "fsl,espi-slic","zarlink,le88266";
+-				reg = <0>;
+-				linux,modalias = "legerity";
+-				spi-max-frequency = <8000000>;
+-				ch1-rx-slot = <0>;
+-				ch1-tx-slot = <0>;
+-				ch2-rx-slot = <2>;
+-				ch2-tx-slot = <2>;
++                                        /* 512KB for u-boot Bootloader Image */
++                                        reg = <0x0 0x00080000>;
++                                        label = "SPI (RO) U-Boot Image";
++                                };
++
++                                partition@80000 {
++                                        /* 512KB for DTB Image */
++                                        reg = <0x00080000 0x00080000>;
++                                        label = "SPI (RO) DTB Image";
++                                };
++                                partition@100000 {
++                                        /* 1M for U-BOOT Env */
++                                        reg = <0x00100000 0x00100000>;
++                                        label = "SPI (RW) U-BOOT Env";
++                                };
++                                partition@200000 {
++                                        /* 4MB for Linux Kernel Image */
++                                        reg = <0x00200000 0x00400000>;
++                                        label = "SPI (RO) Linux Kernel Image";
++                                };
++
++                                partition@600000 {
++                                        /* 3MB + 7MB - 64k*2 for JFFS2 based RFS */
++                                        reg = <0x00600000 0x009e0000>;
++                                        label = "SPI (RW) JFFS2 RFS";
++                                };
++
++                                partition@fe0000 {
++                                        /*64K NVRAM*/
++                                        reg = <0x00fe0000 0x00010000>;
++                                        label = "SPI (RW) Nvram";
++                                };
++				partition@ff0000 {
++                                        /*64K art*/
++                                        reg = <0x00ff0000 0x00010000>;
++                                        label = "SPI (RW) Art";
++                                };
+ 			};
++
+ 		};
+ 
+ 		gpio: gpio-controller@f000 {
+@@ -400,41 +389,6 @@
+ 				reg = <0x1>;
+ 			};
+ 
+-			phy1: ethernet-phy@1 {
+-				interrupt-parent = <&mpic>;
+-				interrupts = <2 1>;
+-				reg = <0x0>;
+-			};
+-
+-			phy2: ethernet-phy@2 {
+-				interrupt-parent = <&mpic>;
+-				interrupts = <2 1>;
+-				reg = <0x2>;
+-			};
+-		};
+-
+-		mdio@25000 {
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-			compatible = "fsl,etsec2-tbi";
+-			reg = <0x25000 0x1000 0xb1030 0x4>;
+-
+-			tbi0: tbi-phy@11 {
+-				reg = <0x11>;
+-				device_type = "tbi-phy";
+-			};
+-		};
+-
+-		mdio@26000 {
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-			compatible = "fsl,etsec2-tbi";
+-			reg = <0x26000 0x1000 0xb1030 0x4>;
+-
+-			tbi1: tbi-phy@11 {
+-				reg = <0x11>;
+-				device_type = "tbi-phy";
+-			};
+ 		};
+ 
+ 		ptp_timer: ptimer@b0e00 {
+@@ -518,58 +472,6 @@
+ 			};
+ 
+ 		};
+-
+-		enet1: ethernet@b1000 {
+-			#address-cells = <1>;
+-			#size-cells = <1>;
+-			device_type = "network";
+-			model = "eTSEC";
+-			compatible = "fsl,etsec2";
+-			fsl,num_rx_queues = <0x8>;
+-			fsl,num_tx_queues = <0x8>;
+-			local-mac-address = [ 00 00 00 00 00 00 ];
+-			interrupt-parent = <&mpic>;
+-			phy-handle = <&phy1>;
+-			tbi-handle = <&tbi0>;
+-			phy-connection-type = "sgmii";
+-
+-			ptimer-handle = < &ptp_timer >;
+-			queue-group@0 {
+-				#address-cells = <1>;
+-				#size-cells = <1>;
+-				reg = <0xb1000 0x1000>;
+-				rx-bit-map = <0xff>;
+-				tx-bit-map = <0xff>;
+-				interrupts = <35 2 36 2 40 2>;
+-			};
+-
+-		};
+-
+-		enet2: ethernet@b2000 {
+-			#address-cells = <1>;
+-			#size-cells = <1>;
+-			device_type = "network";
+-			model = "eTSEC";
+-			compatible = "fsl,etsec2";
+-			fsl,num_rx_queues = <0x8>;
+-			fsl,num_tx_queues = <0x8>;
+-			local-mac-address = [ 00 00 00 00 00 00 ];
+-			interrupt-parent = <&mpic>;
+-			phy-handle = <&phy2>;
+-			tbi-handle = <&tbi1>;
+-			phy-connection-type = "sgmii";
+-
+-			ptimer-handle = < &ptp_timer >;
+-			queue-group@0 {
+-				#address-cells = <1>;
+-				#size-cells = <1>;
+-				reg = <0xb2000 0x1000>;
+-				rx-bit-map = <0xff>;
+-				tx-bit-map = <0xff>;
+-				interrupts = <31 2 32 2 33 2>;
+-			};
+-
+-		};
+ 
+ 		sdhci@2e000 {
+ 			compatible = "fsl,p1020-esdhc", "fsl,esdhc";
+
+--- a/drivers/mtd/devices/fsl_m25p80.c	2012-12-19 16:56:28.455350306 +0800
++++ b/drivers/mtd/devices/fsl_m25p80.c	2012-12-29 16:37:52.434330356 +0800
+@@ -548,6 +548,8 @@
+ 	{ "s25sl064a", 0x010216, 0, 256, 64 * 1024, 128, },
+ 	{ "s25sl128a", 0x012018, 0x0300, 256, 256 * 1024, 64, },
+ 	{ "s25sl128b", 0x012018, 0x0301, 256, 64 * 1024, 256, },
++	//{ "s25fl128s", 0x012018, 0x4d01, 256, 64 * 256, 1024, },
++	{ "s25fl128s", 0x012018, 0x4d01, 256, 64*1024, 256, },
+ 
+ 	/* SST -- large erase sizes are "overlays", "sectors" are 4K */
+ 	{ "sst25vf040b", 0xbf258d, 0, 256, 64 * 1024, 8, SECT_4K, },
+
+--- a/drivers/mtd/devices/fsl_m25p80.c	2013-06-14 09:44:03.388768796 +0800
++++ b/drivers/mtd/devices/fsl_m25p80.c	2013-06-14 09:40:46.844766225 +0800
+@@ -554,6 +554,9 @@
+ 	//{ "s25fl128s", 0x012018, 0x4d01, 256, 64 * 256, 1024, },
+ 	{ "s25fl128s", 0x012018, 0x4d01, 256, 64*1024, 256, },
+ 
++	/* MX25L12835F */
++	{ "mx25l12835f", 0xc22018, 0, 256, 64*1024, 256, },
++
+ 	/* SST -- large erase sizes are "overlays", "sectors" are 4K */
+ 	{ "sst25vf040b", 0xbf258d, 0, 256, 64 * 1024, 8, SECT_4K, },
+ 	{ "sst25vf080b", 0xbf258e, 0, 256, 64 * 1024, 16, SECT_4K, },
+
+--- a/arch/powerpc/kernel/setup-common.c	2013-02-21 14:44:55.590551283 +0800
++++ b/arch/powerpc/kernel/setup-common.c	2013-02-20 13:29:42.812119064 +0800
+@@ -61,7 +61,7 @@
+ #include <asm/xmon.h>
+ #include <asm/cputhreads.h>
+ #include <mm/mmu_decl.h>
+-
++#include <linux/gpio.h>
+ #include "setup.h"
+ 
+ #ifdef DEBUG
+@@ -103,8 +103,15 @@
+ /* also used by kexec */
+ void machine_shutdown(void)
+ {
+-	if (ppc_md.machine_shutdown)
+-		ppc_md.machine_shutdown();
++	/*if (ppc_md.machine_shutdown)
++		ppc_md.machine_shutdown();*/
++	int status;
++
++	printk(KERN_EMERG "GPIO5 control SW_RESET!\n");
++	status = gpio_request(229,"SW_RESET");
++	if (status < 0)
++                printk("Request error!\n");
++	gpio_direction_output(229,0);
+ }
+ 
+ void machine_restart(char *cmd)
+
+--- a/arch/powerpc/boot/dts/p1010rdb.dts	2013-03-13 15:52:13.048422025 +0800
++++ b/arch/powerpc/boot/dts/p1010rdb.dts	2013-03-13 17:38:42.596626489 +0800
+@@ -239,29 +239,29 @@
+ 				mode = <0>;
+ 				partition@0 {
+                                         /* 512KB for u-boot Bootloader Image */
+-                                        reg = <0x0 0x00080000>;
+-                                        label = "SPI (RO) U-Boot Image";
++                                        reg = <0x0 0x00090000>;
++                                        label = "SPI (RW) U-Boot Image";
+                                 };
+ 
+-                                partition@80000 {
+-                                        /* 512KB for DTB Image */
+-                                        reg = <0x00080000 0x00080000>;
+-                                        label = "SPI (RO) DTB Image";
++                                partition@90000 {
++                                        /* 64KB for U-boot Env */
++                                        reg = <0x00090000 0x00010000>;
++                                        label = "SPI (RW) U-boot Env";
+                                 };
+-                                partition@100000 {
+-                                        /* 1M for U-BOOT Env */
+-                                        reg = <0x00100000 0x00100000>;
+-                                        label = "SPI (RW) U-BOOT Env";
++                                partition@a0000 {
++                                        /* 64x6 KB for DTB Image */
++                                        reg = <0x000a0000 0x00060000>;
++                                        label = "SPI (RW) DTB Image";
+                                 };
+-                                partition@200000 {
++                                partition@100000 {
+                                         /* 4MB for Linux Kernel Image */
+-                                        reg = <0x00200000 0x00400000>;
+-                                        label = "SPI (RO) Linux Kernel Image";
++                                        reg = <0x00100000 0x00400000>;
++                                        label = "SPI (RW) Linux Kernel Image";
+                                 };
+ 
+-                                partition@600000 {
+-                                        /* 3MB + 7MB - 64k*2 for JFFS2 based RFS */
+-                                        reg = <0x00600000 0x009e0000>;
++                                partition@500000 {
++                                        /* 11MB - 64k*2 for JFFS2 based RFS */
++                                        reg = <0x00500000 0x00ae0000>;
+                                         label = "SPI (RW) JFFS2 RFS";
+                                 };
+ 
+--- a/arch/powerpc/platforms/85xx/p1010rdb.c	2013-03-18 11:41:08.806742668 +0800
++++ b/arch/powerpc/platforms/85xx/p1010rdb.c	2013-03-15 15:29:57.930887571 +0800
+@@ -132,6 +132,7 @@
+ 	struct device_node *np;
+ 	struct pci_controller *hose;
+ #endif
++	static __be32 __iomem *pmuxcr2;
+ 	dma_addr_t max = 0xffffffff;
+ 
+ 	if (ppc_md.progress)
+@@ -162,6 +163,27 @@
+ #endif
+ 
+ 	printk(KERN_INFO "P1010 RDB board from Freescale Semiconductor\n");
++	
++
++	np = of_find_node_by_name(NULL, "global-utilities");
++
++	if (np) {
++		pmuxcr2 = of_iomap(np, 0) + 0x64;//0x64 offset of pmuxcr2
++		//printk("pmuxcr2 = %x\n",(unsigned int)pmuxcr2);
++		if (!pmuxcr2)
++			printk(KERN_EMERG "Error: Alternate function"
++				" signal multiplex control register not"
++				" mapped!\n");
++		else {
++			//printk("before:pmuxcr2 = %x\n",(unsigned int)in_be32(pmuxcr2));
++			setbits32(pmuxcr2, 0x40000000);//set to gpio mode
++			//printk("after:pmuxcr2 = %x\n",(unsigned int)in_be32(pmuxcr2));
++		}
++	}
++	else
++		printk(KERN_EMERG "Error: of_find_node_by_name(NULL, global-utilities) is wrong\n");
++	of_node_put(np);
++	printk("configuration pmuxcr2\n");
+ }
+ 
+ static struct of_device_id __initdata p1010rdb_ids[] = {
+
+--- a/include/linux/miscdevice.h	2013-03-21 14:30:34.557109702 +0800
++++ b/include/linux/miscdevice.h	2013-03-20 20:35:30.012261252 +0800
+@@ -8,6 +8,8 @@
+  *	entry that is not in assigned your entry may well be moved and
+  *	reassigned, or set dynamic if a fixed value is not justified.
+  */
++ 
++#define FACTORY_RESET_MINOR     129     /* Factory reset minor */
+ 
+ #define PSMOUSE_MINOR		1
+ #define MS_BUSMOUSE_MINOR	2
+
+
+--- a/arch/powerpc/sysdev/mpc8xxx_gpio.c	2013-03-21 14:41:54.737131468 +0800
++++ b/arch/powerpc/sysdev/mpc8xxx_gpio.c	2013-03-21 14:42:32.085132666 +0800
+@@ -66,11 +66,12 @@
+ {
+ 	u32 val;
+ 	struct of_mm_gpio_chip *mm = to_of_mm_gpio_chip(gc);
+-	struct mpc8xxx_gpio_chip *mpc8xxx_gc = to_mpc8xxx_gpio_chip(mm);
++	//struct mpc8xxx_gpio_chip *mpc8xxx_gc = to_mpc8xxx_gpio_chip(mm);
+ 
+ 	val = in_be32(mm->regs + GPIO_DAT) & ~in_be32(mm->regs + GPIO_DIR);
+ 
+-	return (val | mpc8xxx_gc->data) & mpc8xxx_gpio2mask(gpio);
++	//return (val | mpc8xxx_gc->data) & mpc8xxx_gpio2mask(gpio);
++	return (val) & mpc8xxx_gpio2mask(gpio);
+ }
+ 
+ static int mpc8xxx_gpio_get(struct gpio_chip *gc, unsigned int gpio)
+
+--- a/drivers/mtd/devices/fsl_m25p80.c	2013-04-01 13:00:57.110789143 +0800
++++ b/drivers/mtd/devices/fsl_m25p80.c	2013-04-01 13:07:46.862802255 +0800
+@@ -460,12 +460,15 @@
+ 			if (page_size > flash->page_size)
+ 				page_size = flash->page_size;
+ 
+-			if (likely(i >= CMD_SIZE))
++			/*if (likely(i >= CMD_SIZE))
+ 				tmp = (u8 *)buf + i - CMD_SIZE;
+ 			else {
+ 				tmp = local_buf;
+ 				memcpy(tmp + CMD_SIZE, buf + i, page_size);
+-			}
++			}*/
++			tmp = local_buf;
++			memcpy(tmp + CMD_SIZE, buf + i, page_size);
++
+ 			tmp[0] = OPCODE_PP;
+ 			tmp[1] = ((to + i) >> 16) & 0xff;
+ 			tmp[2] = ((to + i) >> 8) & 0xff;
+
+
+--- a/arch/powerpc/boot/dts/p1010rdb.dts	2013-04-01 13:00:57.110789143 +0800
++++ b/arch/powerpc/boot/dts/p1010rdb.dts	2013-04-01 13:11:55.350810208 +0800
+@@ -49,8 +49,7 @@
+ 
+ 		/* NOR, NAND Flashes and CPLD on board */
+ 		ranges = <0x0 0x0 0x0 0xee000000 0x02000000
+-			  0x1 0x0 0x0 0xff800000 0x00010000
+-			  0x3 0x0 0x0 0xffb00000 0x00000020>;
++			  0x1 0x0 0x0 0xff800000 0x00010000>;
+ 
+ 		nor@0,0 {
+ 			#address-cells = <1>;
+@@ -133,14 +132,6 @@
+ 			};
+ 		};
+ 
+-		cpld@3,0 {
+-			#address-cells = <1>;
+-			#size-cells = <1>;
+-			compatible = "fsl,p1010rdb-cpld";
+-			reg = <0x3 0x0 0x0000020>;
+-			bank-width = <1>;
+-			device-width = <1>;
+-		};
+ 	};
+ 
+ 	soc@ffe00000 {
+
+--- aaa/arch/powerpc/sysdev/mpc8xxx_gpio.c	2013-06-20 18:21:12.378069443 +0800
++++ bbb/arch/powerpc/sysdev/mpc8xxx_gpio.c	2013-06-20 17:47:39.966132451 +0800
+@@ -125,7 +125,10 @@
+ 	spin_lock_irqsave(&mpc8xxx_gc->lock, flags);
+ 
+ 	setbits32(mm->regs + GPIO_DIR, mpc8xxx_gpio2mask(gpio));
+-
++	if ( gpio == 0 ) {
++		//printk("Feed dog,and to avoid 5G Wireless IRQ4 nobody care error!\n");
++		clrbits32(mm->regs + GPIO_DIR, mpc8xxx_gpio2mask(gpio));
++	}
+ 	spin_unlock_irqrestore(&mpc8xxx_gc->lock, flags);
+ 
+ 	return 0;
+
+--- aaa/net/wireless/lib80211.c	2011-01-26 18:54:10.000000000 +0800
++++ bbb/net/wireless/lib80211.c	2013-06-20 18:36:19.594041039 +0800
+@@ -22,6 +22,7 @@
+ #include <linux/string.h>
+ 
+ #include <net/lib80211.h>
++#include <linux/gpio.h>
+ 
+ #define DRV_NAME        "lib80211"
+ 
+@@ -270,7 +271,17 @@
+ 
+ static int __init lib80211_init(void)
+ {
++	int status;
+ 	printk(KERN_INFO DRV_NAME ": " DRV_DESCRIPTION "\n");
++	//printk(" Feed Dog first time at here !\n");
++	status = gpio_request(224,"FEED_DOG");
++	if (status < 0) {
++                printk("Request error!\n");
++        } else {
++		gpio_direction_output(224,1);
++        	gpio_direction_output(224,0);
++		gpio_free(224);
++        }
+ 	return lib80211_register_crypto_ops(&lib80211_crypt_null);
+ }
+ 
+

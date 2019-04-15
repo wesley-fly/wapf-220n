@@ -1,0 +1,22 @@
+[ "$DEVICE" == "lo" ] && exit 0
+
+[ -f /tmp/upwifi ] && exit 0
+
+[ ifup = "$ACTION" ] && [ "" = "${DEVICE##pppoe-*}" ] && {
+        sh -c "/etc/ath/killVAP all; /sbin/active_wifi" &
+}
+
+proto=`uci show network |grep pppoe`
+[ "" != $proto ] && exit 0
+
+[ ifup = "$ACTION" ] && {
+        cat /tmp/state/network >> /tmp/Tnetwork
+}
+
+[ ifup = "$ACTION" ] && [ lan = $INTERFACE ] && [ br-lan = $DEVICE  ] && {
+        /etc/ath/killVAP all
+        /sbin/active_wifi
+        mkdir /tmp/state
+        mv /tmp/Tnetwork /tmp/state/network
+}
+

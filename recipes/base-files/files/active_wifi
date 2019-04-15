@@ -1,0 +1,354 @@
+#!/bin/sh
+touch /tmp/upwifi
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/sbin:/tmp/tools:/etc/ath
+[ -b /dev/caldata ] ||  mknod /dev/caldata b 31 5
+[ -c /dev/dk0 ] ||  mknod /dev/dk0 c 63 0
+[ -c /dev/dk1 ] ||  mknod /dev/dk1 c 63 1
+
+sed -i "s/br0/br-lan/g" `grep br0 -rl /etc/ath`
+brctl addbr br-lan
+
+#rfmode=`cfg -v AP_RFPARAM | cut -f 3 -d ':'`
+#rfmode_2=`cfg -v AP_RFPARAM_2 | cut -f 3 -d ':'`
+b_country=`cfg -v WIFI_COUNTRY`
+b_country_2=`cfg -v WIFI_COUNTRY_2`
+
+cfg -x
+cfg -a AP_IPADDR=`uci get network.lan.ipaddr`
+n=0
+my_vaps="'' _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16"
+for m in $my_vaps;
+do
+    if [ $m = "''" ]; then
+        m=
+    fi
+    device=`uci get wireless.@wifi-iface[$n].device`
+    mode=`uci get wireless.@wifi-iface[$n].mode`
+    encryption=`uci get wireless.@wifi-iface[$n].encryption`
+    key=`uci get wireless.@wifi-iface[$n].key`
+    ssid=`uci get wireless.@wifi-iface[$n].ssid`
+    wds=`uci get wireless.@wifi-iface[$n].wds`
+    if [ "$device" = "" ]; then
+        break
+    elif [ "$device" = "ath0" ]; then
+	ifnum=0
+	cfg -a AP_RADIO_ID$m=0
+    else
+	ifnum=1
+	cfg -a AP_RADIO_ID$m=1
+    fi
+    if [ "$wds" = "1" ]; then
+	cfg -a AP_MODE$m=ap-wds
+    else
+	cfg -a AP_MODE$m=ap
+    fi
+    channel=`uci get wireless.ath$ifnum.channel`
+    hwmode=`uci get wireless.ath$ifnum.hwmode`
+    if [ "$encryption" = "none" ];then
+        cfg -a AP_SECMODE$m=None
+    else
+        if [ "$encryption" = "wep-open" ];then
+            cfg -a AP_SECMODE$m=WEP
+            cfg -a AP_WEP_MODE_$n=1
+            cfg -a AP_PRIMARY_KEY_$n=`uci get wireless.@wifi-iface[$n].key`
+
+            wepkey=`uci get wireless.@wifi-iface[$n].key1`
+            cfg -a WEP_RADIO_NUM${n}_KEY_1=${wepkey#*:}
+            wepkey=`uci get wireless.@wifi-iface[$n].key2`
+            cfg -a WEP_RADIO_NUM${n}_KEY_2=${wepkey#*:}
+            wepkey=`uci get wireless.@wifi-iface[$n].key3`
+            cfg -a WEP_RADIO_NUM${n}_KEY_3=${wepkey#*:}
+            wepkey=`uci get wireless.@wifi-iface[$n].key4`
+            cfg -a WEP_RADIO_NUM${n}_KEY_4=${wepkey#*:}
+
+            cfg -a AP_WEP_MODE_$n=2
+            cfg -a AP_PRIMARY_KEY_$n=`uci get wireless.@wifi-iface[$n].key`
+
+            wepkey=`uci get wireless.@wifi-iface[$n].key1`
+            cfg -a WEP_RADIO_NUM${n}_KEY_1=${wepkey#*:}
+            wepkey=`uci get wireless.@wifi-iface[$n].key2`
+            cfg -a WEP_RADIO_NUM${n}_KEY_2=${wepkey#*:}
+            wepkey=`uci get wireless.@wifi-iface[$n].key3`
+            cfg -a WEP_RADIO_NUM${n}_KEY_3=${wepkey#*:}
+            wepkey=`uci get wireless.@wifi-iface[$n].key4`
+            cfg -a WEP_RADIO_NUM${n}_KEY_4=${wepkey#*:}
+        else
+            #cipher=${encryption%%.*}
+	    cipher=`echo ${encryption} | cut -b 1-4`
+            case "$cipher" in
+                psk+) cfg -a AP_WPA$m=1;;
+                psk2) cfg -a AP_WPA$m=2;;
+                *) cfg -a AP_WPA$m=3;;
+            esac
+
+            cipher=${encryption#*+}
+            case "$cipher" in
+                ccmp) cfg -a AP_CYPHER$m='CCMP';;
+                tkip) cfg -a AP_CYPHER$m='TKIP';;
+                *) cfg -a AP_CYPHER$m='TKIP CCMP';;
+            esac
+	    wps=`uci get wireless.@wifi-iface[$n].wps`
+	    if [ $wps = "1" ]; then  
+                cfg -a WPS_ENABLE$m=2
+	    else
+	    	cfg -a WPS_ENABLE$m=0
+	    fi
+	    #cfg -a WPS_ENABLE$m=2
+            cfg -a AP_SECMODE$m=WPA
+            if eval "uci get wireless.@wifi-iface[$n].auth_server";then
+		cfg -a AP_AUTH_SERVER$m=`uci get wireless.@wifi-iface[$n].auth_server`	
+		cfg -a AP_AUTH_PORT$m=`uci get wireless.@wifi-iface[$n].auth_port`
+	    	cfg -a AP_AUTH_SECRET$m=`uci get wireless.@wifi-iface[$n].auth_secret`
+	    	
+		cfg -a AP_ACCT_SERVER$m=`uci get wireless.@wifi-iface[$n].acct_server`	
+		cfg -a AP_ACCT_PORT$m=`uci get wireless.@wifi-iface[$n].acct_port`
+	    	cfg -a AP_ACCT_SECRET$m=`uci get wireless.@wifi-iface[$n].acct_secret`
+	    	
+	    	cfg -a AP_NAS_ID$m=`uci get wireless.@wifi-iface[$n].nasid`
+            	cfg -a AP_SECFILE$m=EAP
+            else
+            	cfg -a PSK_KEY$m=$key
+            fi
+        fi
+    fi
+    
+    chmode=AUTO
+    case "$hwmode" in
+        11a) chmode=11A;;
+        11naht20) chmode=11NAHT20;;
+        11naht40) chmode=11NAHT40;;
+	11b) chmode=11B;;
+        11g) chmode=11G;;
+        11gnht20) chmode=11NGHT20;;
+        11gnht40) chmode=11NGHT40;;
+    esac
+    cfg -a AP_RFPARAM$m=RF:$channel:$chmode
+    cfg -a AP_SSID$m=$ssid
+    #cfg -a AP_CHMODE$m=$hwmode
+    n=$(($n+1))
+done
+
+for ifnum in 0 1;                                                                     
+do                                                  
+    aggregation=`uci get wireless.ath$ifnum.aggregation`
+    aggframes=`uci get wireless.ath$ifnum.aggframes`
+    aggsize=`uci get wireless.ath$ifnum.aggsize`
+    aggminsize=`uci get wireless.ath$ifnum.aggminsize`
+    txantenna=`uci get wireless.ath$ifnum.txantenna`
+    rxantenna=`uci get wireless.ath$ifnum.rxantenna`
+    if [ $ifnum = "0" ]; then
+	cfg -a AMPDUENABLE=$aggregation
+	cfg -a AMPDUFRAMES=$aggframes
+	cfg -a AMPDULIMIT=$aggsize
+	cfg -a AMPDUMIN=$aggminsize
+	cfg -a TX_CHAINMASK=$txantenna
+	cfg -a RX_CHAINMASK=$rxantenna
+    else
+	cfg -a AMPDUENABLE_2=$aggregation
+        cfg -a AMPDUFRAMES_2=$aggframes
+        cfg -a AMPDULIMIT_2=$aggsize
+        cfg -a AMPDUMIN_2=$aggminsize
+    	cfg -a TX_CHAINMASK_2=$txantenna
+        cfg -a RX_CHAINMASK_2=$rxantenna
+    fi
+    regdomain=`uci get wireless.ath$ifnum.regdomain`
+    country=`uci get wireless.ath$ifnum.country`
+    outdoor=`uci get wireless.ath$ifnum.outdoor`
+    if [ $regdomain != "" ]; then
+        if [ $ifnum = "0" ]; then
+            cfg -a WIFI_REGDOMAIN=$regdomain
+        else
+            cfg -a WIFI_REGDOMAIN_2=$regdomain
+        fi
+    fi
+    if [ $country != "" ]; then
+        if [ $ifnum = "0" ]; then
+            cfg -a WIFI_COUNTRY=$country
+        else
+            cfg -a WIFI_COUNTRY_2=$country
+        fi
+    else
+	if [ $ifnum = "0" ]; then
+            cfg -a WIFI_COUNTRY=DB
+        else
+            cfg -a WIFI_COUNTRY_2=DB
+        fi
+    fi
+    if [ $outdoor != "" ]; then
+        if [ $ifnum = "0" ]; then
+            cfg -a WIFI_OUTDOOR=$outdoor
+        else
+            cfg -a WIFI_OUTDOOR_2=$outdoor
+        fi
+    fi
+    rate=`uci get wireless.@wifi-iface[$ifnum].rate`
+    shortgi=`uci get wireless.ath$ifnum.shortgi`
+    ratemode=`uci get wireless.ath$ifnum.hwmode`
+    if [ "$rate" != "" ]; then
+        if [ "$ratemode" != "" ]; then
+            if [ "$shortgi" = "1" ]; then
+                /sbin/fixrate ath$ifnum $ratemode 1 $rate
+            else
+                /sbin/fixrate ath$ifnum $ratemode 0 $rate
+            fi
+        else
+            if [ "$shortgi" = "1" ]; then
+                /sbin/fixrate ath$ifnum auto 1 $rate
+            else
+                /sbin/fixrate ath$ifnum auto 0 $rate
+            fi
+        fi
+    fi
+
+done
+
+cfg -c
+
+## here is for atheros wireless module and txpower
+#a_rfmode=`cfg -v AP_RFPARAM | cut -f 3 -d ':'`
+#a_rfmode_2=`cfg -v AP_RFPARAM_2 | cut -f 3 -d ':'`
+a_country=`cfg -v WIFI_COUNTRY`
+a_country_2=`cfg -v WIFI_COUNTRY_2`
+MODLIST=`lsmod | cut -f1,0 -d" "|grep ath_hal`
+#if [ $rfmode != $a_rfmode -o $rfmode_2 != $a_rfmode_2 -o $country != $a_country -o $country_2 != $a_country_2 ]; then
+if [ $b_country != $a_country -o $b_country_2 != $a_country_2 ]; then
+    if [  "${MODLIST}" = "ath_hal" ]; then
+	/etc/ath/apdown
+    fi
+fi
+/etc/ath/apup
+## here is for wireless common params
+my_vaps="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
+for i in $my_vaps;
+do
+    device=`uci get wireless.@wifi-iface[$i].device`
+    if [ "$device" = "" ]; then
+        break
+    fi
+    hidden=`uci get wireless.@wifi-iface[$i].hidden`
+    doth=`uci get wireless.@wifi-iface[$i].doth`
+    isolate=`uci get wireless.@wifi-iface[$i].isolate`
+    mcast_rate=`uci get wireless.@wifi-iface[$i].mcast_rate`
+    frag=`uci get wireless.@wifi-iface[$i].frag`
+    rts=`uci get wireless.@wifi-iface[$i].rts`
+    wmm=`uci get wireless.@wifi-iface[$i].wmm`
+    wdssep=`uci get wireless.@wifi-iface[$i].wdssep`
+    acl=`uci get wireless.@wifi-iface[$i].macpolicy`
+    maclist=`uci get wireless.@wifi-iface[$i].maclist`
+    if [ "$doth" != "" ]; then
+        iwpriv ath$i doth 1
+    else
+        iwpriv ath$i doth 0
+    fi
+    if [ "$isolate" != "" -o "$wdssep" != "" ]; then
+        iwpriv ath$i ap_bridge 1
+    else
+        iwpriv ath$i ap_bridge 0
+    fi
+    if [ "$mcast_rate" != "" ]; then
+        iwpriv ath$i mcast_rate ${mcast_rate}
+    else
+        iwpriv ath$i mcast_rate 10000
+    fi
+    if [ "$frag" != "" ]; then
+        iwconfig ath$i frag ${frag}
+    fi
+    if [ "$rts" != "" ]; then
+        iwconfig ath$i rts ${rts}
+    fi
+    if [ "$wmm" != "" ]; then
+        iwpriv ath$i wmm 1
+    else
+        iwpriv ath$i wmm 0
+    fi
+    if [ "$hidden" != "" ]; then
+        iwpriv ath$i hide_ssid 1
+    else
+        iwpriv ath$i hide_ssid 0
+    fi
+    if [ "$acl" = "allow" ]; then
+        iwpriv ath$i maccmd 1
+    elif [ "$acl" = "deny" ]; then
+        iwpriv ath$i maccmd 2
+    fi
+    for mac in $maclist
+    do
+        iwpriv ath$i addmac $mac
+    done
+done
+## here is for br-lan's mtu size
+mtu=`uci get network.lan.mtu`
+if [ $mtu != "" ]; then
+    ifconfig br-lan mtu $mtu
+fi
+## here is for wireless countrycode
+#for ifnum in 0 1;
+#do
+#    regdomain=`uci get wireless.ath$ifnum.regdomain`
+#    country=`uci get wireless.ath$ifnum.country`
+#    outdoor=`uci get wireless.ath$ifnum.outdoor`
+#    if [ $country != "" ]; then
+#        if [ $outdoor = "1" ]; then
+#            iwpriv wifi$ifnum setCountry $country\O
+#        else
+#            iwpriv wifi$ifnum setCountry $country\I
+#        fi
+#        if [ $regdomain != "" ]; then
+#            iwpriv wifi$ifnum setCountryID $regdomain
+#        fi
+#    else
+#        iwpriv wifi$ifnum setCountry DB
+#    fi
+#done
+## here is for countrycode related params, eg. txpower shortgi fix rates
+for i in $my_vaps;
+do
+    device=`uci get wireless.@wifi-iface[$i].device`
+    txpower5g=`uci get wireless.ath0.txpower`
+    txpower2g=`uci get wireless.ath1.txpower`
+    if [ $txpower5g -gt 31 ]; then
+	txpower5g=31
+    fi 
+    if [ $txpower2g -gt 31 ]; then
+	txpower2g=31
+    fi
+    if [ "$device" = "" ]; then
+        break
+    elif [ "$device" = "ath0" ]; then
+	country=`uci get wireless.ath0.country`
+        shortgi=`uci get wireless.ath0.shortgi`
+	if [ $country != "CN" ]; then
+            iwconfig ath$i txpower $txpower5g
+        else
+            if [ $((txpower5g+5)) -gt 10 ]; then
+                iwconfig ath$i txpower $((txpower5g+5))
+            else
+                iwconfig ath$i txpower 10
+            fi
+        fi
+	if [ "$shortgi" != "" ]; then
+	    iwpriv ath0 shortgi 1
+        else
+            iwpriv ath0 shortgi 0
+        fi
+    else
+	country=`uci get wireless.ath1.country`
+	shortgi=`uci get wireless.ath1.shortgi`
+	if [ $country = "CN" ]; then 
+	    iwconfig ath$i txpower $txpower2g
+	else
+	    if [ $((txpower2g+3)) -gt 7 ]; then
+	        iwconfig ath$i txpower $((txpower2g+3))
+	    else
+		iwconfig ath$i txpower 7
+	    fi
+	fi
+	if [ "$shortgi" != "" ]; then
+            iwpriv ath1 shortgi 1
+        else
+            iwpriv ath1 shortgi 0
+        fi
+    fi
+done
+
+rm /tmp/upwifi

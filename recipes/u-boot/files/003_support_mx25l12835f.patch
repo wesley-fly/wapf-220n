@@ -1,0 +1,108 @@
+--- aaa/include/configs/P1010RDB.h	2013-06-20 13:23:17.346629104 +0800
++++ bbb/include/configs/P1010RDB.h	2013-06-20 13:06:16.182661077 +0800
+@@ -518,6 +518,7 @@
+ #define CONFIG_FSL_ESPI
+ #define CONFIG_SPI_FLASH
+ #define CONFIG_SPI_FLASH_SPANSION
++#define CONFIG_SPI_FLASH_MACRONIX
+ #define CONFIG_CMD_SF
+ #define CONFIG_SF_DEFAULT_SPEED		50000000
+ #define CONFIG_SF_DEFAULT_MODE		SPI_MODE_3
+
+--- aaa/drivers/mtd/spi/macronix.c	2010-12-23 03:22:14.000000000 +0800
++++ bbb/drivers/mtd/spi/macronix.c	2013-06-20 13:10:04.014653943 +0800
+@@ -102,7 +102,7 @@
+ 		.pages_per_sector = 16,
+ 		.sectors_per_block = 16,
+ 		.nr_blocks = 256,
+-		.name = "MX25L12805D",
++		.name = "MX25L12835F",
+ 	},
+ 	{
+ 		.idcode = 0x2618,
+@@ -122,15 +122,9 @@
+ 	u8 status;
+ 	u8 cmd = CMD_MX25XX_RDSR;
+ 
+-	ret = spi_xfer(spi, 8, &cmd, NULL, SPI_XFER_BEGIN);
+-	if (ret) {
+-		debug("SF: Failed to send command %02x: %d\n", cmd, ret);
+-		return ret;
+-	}
+-
+ 	timebase = get_timer(0);
+ 	do {
+-		ret = spi_xfer(spi, 8, NULL, &status, 0);
++		ret = spi_flash_cmd(spi, CMD_MX25XX_RDSR, &status, sizeof(status));
+ 		if (ret)
+ 			return -1;
+ 
+@@ -139,12 +133,9 @@
+ 
+ 	} while (get_timer(timebase) < timeout);
+ 
+-	spi_xfer(spi, 0, NULL, NULL, SPI_XFER_END);
+-
+ 	if ((status & MACRONIX_SR_WIP) == 0)
+ 		return 0;
+ 
+-	/* Timed out */
+ 	return -1;
+ }
+ 
+@@ -167,6 +158,41 @@
+ 
+ 	return spi_flash_read_common(flash, cmd, sizeof(cmd), buf, len);
+ }
++static int macronix_read_fast_chunks(struct spi_flash *flash,
++				u32 offset, size_t data_len, void *buf)
++{
++	struct macronix_spi_flash *mcx = to_macronix_spi_flash(flash);
++	unsigned long page_addr;
++	unsigned long page_size;
++	unsigned int max_tran_len = flash->spi->max_transfer_length;
++	u8 cmd[5];
++	size_t len;
++	int ret=0;
++	
++	page_size = mcx->params->page_size;
++	int num_chunks = data_len / max_tran_len + (data_len % max_tran_len ? 1 : 0);
++	while(num_chunks --) {
++		len = min(data_len , max_tran_len);
++		page_addr = offset / page_size;
++
++		cmd[0] = CMD_READ_ARRAY_FAST;
++		cmd[1] = page_addr >> 8;
++		cmd[2] = page_addr;
++		cmd[3] = offset % page_size;
++		cmd[4] = 0x00;
++		debug
++			("READ: 0x%x => cmd = { 0x%02x 0x%02x%02x%02x%02x } len = 0x%x\n",
++			offset, cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], len);
++		ret = spi_flash_read_common(flash, cmd, sizeof(cmd), buf, len);
++		if (ret < 0)
++			return ret;
++
++		offset += max_tran_len;
++		buf += max_tran_len;
++		data_len -= max_tran_len;
++ 	}
++	return ret;
++}
+ 
+ static int macronix_write(struct spi_flash *flash,
+ 			  u32 offset, size_t len, const void *buf)
+@@ -326,7 +352,10 @@
+ 
+ 	mcx->flash.write = macronix_write;
+ 	mcx->flash.erase = macronix_erase;
+-	mcx->flash.read = macronix_read_fast;
++      	if (spi->max_transfer_length)
++		mcx->flash.read = macronix_read_fast_chunks;
++	else
++		mcx->flash.read = macronix_read_fast;	
+ 	mcx->flash.size = params->page_size * params->pages_per_sector
+ 	    * params->sectors_per_block * params->nr_blocks;
+ 
+ 
+

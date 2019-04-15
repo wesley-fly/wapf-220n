@@ -1,0 +1,99 @@
+--- a/drivers/net/phy/ar8035.c	1970-01-01 08:00:00.000000000 +0800
++++ b/drivers/net/phy/ar8035.c	2013-01-05 17:28:31.096641009 +0800
+@@ -0,0 +1,84 @@
++/*
++ * drivers/net/phy/ar8035.c
++ *
++ * Driver for Atheros ar8035 PHY
++ *
++ * Author: xa.browan
++ *
++ */
++#include <linux/phy.h>
++
++#define AR8035_PHYSR		0x11
++#define AR8035_PHYSR_DUPLEX	0x2000
++#define AR8035_PHYSR_SPEED	0xc000
++#define AR8035_INER		0x12
++#define AR8035_INER_INIT	0x6400
++#define AR8035_INSR		0x13
++
++#define AR8035_PHY_ID		0x004dd072
++#define AR8035_PHY_ID_MASK	0x00ffffff
++
++MODULE_DESCRIPTION("Atheros AR8035 PHY driver");
++MODULE_AUTHOR("xa.browan");
++MODULE_LICENSE("GPL");
++
++static int ar8035_ack_interrupt(struct phy_device *phydev)
++{
++	int err;
++
++	err = phy_read(phydev, AR8035_INSR);
++
++	return (err < 0) ? err : 0;
++}
++
++static int ar8035_config_intr(struct phy_device *phydev)
++{
++	int err;
++
++	if (phydev->interrupts == PHY_INTERRUPT_ENABLED)
++		err = phy_write(phydev, AR8035_INER,
++				AR8035_INER_INIT);
++	else
++		err = phy_write(phydev, AR8035_INER, 0);
++
++	return err;
++}
++
++static struct phy_driver ar8035_driver = {
++	.phy_id		= AR8035_PHY_ID,
++	.name		= "AR8035 Gigabit Ethernet",
++	.phy_id_mask	= AR8035_PHY_ID_MASK,
++	.features	= PHY_GBIT_FEATURES,
++	.flags		= PHY_IGNORE_INTERRUPT,//PHY_HAS_INTERRUPT,
++	.config_aneg	= &genphy_config_aneg,
++	.read_status	= &genphy_read_status,
++	.ack_interrupt	= &ar8035_ack_interrupt,
++	.config_intr	= &ar8035_config_intr,
++	//.suspend	= &genphy_suspend,
++	//.resume		= &genphy_resume,
++	.driver		= { .owner = THIS_MODULE,},
++};
++
++static int __init ar8035_init(void)
++{
++	int ret;
++
++	ret = phy_driver_register(&ar8035_driver);
++
++	return ret;
++}
++
++static void __exit ar8035_exit(void)
++{
++	phy_driver_unregister(&ar8035_driver);
++}
++
++module_init(ar8035_init);
++module_exit(ar8035_exit);
++
++static struct mdio_device_id ar8035_tbl[] = {
++	{ AR8035_PHY_ID, AR8035_PHY_ID_MASK },
++	{ }
++};
++
++MODULE_DEVICE_TABLE(mdio, ar8035_tbl);
+
+--- a/drivers/net/phy/Makefile	2011-01-26 18:54:01.000000000 +0800
++++ b/drivers/net/phy/Makefile	2013-01-05 16:23:38.163733436 +0800
+@@ -2,6 +2,7 @@
+ 
+ libphy-objs			:= phy.o phy_device.o mdio_bus.o
+ 
++obj-y				+= ar8035.o
+ obj-$(CONFIG_PHYLIB)		+= libphy.o
+ obj-$(CONFIG_MARVELL_PHY)	+= marvell.o
+ obj-$(CONFIG_DAVICOM_PHY)	+= davicom.o
+

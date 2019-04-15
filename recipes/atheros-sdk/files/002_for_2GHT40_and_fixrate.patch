@@ -1,0 +1,50 @@
+--- aaa/rootfs/cgiCommon/etc/ath.dual/makeVAP	2013-06-18 13:27:33.664153859 +0800
++++ bbb/rootfs/cgiCommon/etc/ath.dual/makeVAP	2013-06-21 09:33:44.096355186 +0800
+@@ -264,7 +264,7 @@
+     # turn on halfgi
+     iwpriv ${APNAME} shortgi $R_SHORTGI
+ 
+-#    iwpriv ${APNAME} noedgech $NO_EDGE_CH
++    # iwpriv ${APNAME} noedgech $NO_EDGE_CH
+ 
+     iwpriv ${APNAME} mode $CH_MODE
+ 
+@@ -285,7 +285,12 @@
+     if [ "${IS11G}" != "" -o "${IS11NG}" != "" ]; then
+         iwpriv ${APNAME} vap_doth 0
+     fi
+-	
++
++    # This is disable coext HT20/40 at 2G band, just for test
++    IS11NGHT40=`echo $CH_MODE | grep 11NGHT40`
++    if [ "${IS11NGHT40}" != "" ]; then
++        iwpriv ${APNAME} disablecoext 1
++    fi	
+ ####################
+ ####### TEMP WORKAROUND
+ ####################
+@@ -346,7 +351,7 @@
+     
+     if [ "${R_RATECTL}" != "auto" ]; then
+         iwpriv ${APNAME} set11NRates $R_MANRATE
+-        iwpriv ${APNAME} set11NRetries $R_MANRETRIES
++        iwpriv ${APNAME} set11NRetries 0x04040404
+     fi
+ 
+     #
+
+--- aaa/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-06-18 13:27:33.600153858 +0800
++++ bbb/rootfs/pb9x-2.6.31/etc/ath/apcfg	2013-06-21 09:36:12.452350541 +0800
+@@ -71,7 +71,9 @@
+ cfg -a AMPDUMIN_2=${AMPDUMIN_2:=32768}
+ cfg -a CWMMODE=${CWMMODE:=1}
+ cfg -a RATECTL=${RATECTL:="auto"}
+-cfg -a MANRETRIES=${MANRETRIES:=0x04040404}
++cfg -a MANRATE=${MANRATE:=0}
++cfg -a RATECTL_2=${RATECTL_2:="auto"}
++cfg -a MANRATE_2=${MANRATE_2:=0}
+ cfg -a RX_CHAINMASK=${RX_CHAINMASK:=0}
+ cfg -a RX_CHAINMASK_2=${RX_CHAINMASK_2:=0}
+ cfg -a TX_CHAINMASK=${TX_CHAINMASK:=0}
+
+

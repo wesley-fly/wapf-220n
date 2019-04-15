@@ -1,0 +1,253 @@
+#!/bin/sh
+
+##################################
+# $1 ----> athN
+# $2 ----> mode (0:legicy 1:ht20 2:ht40)
+# $3 ----> gi (0,1)
+# $4 ----> rate
+##################################
+
+if [ $4 = "" ]; then
+    exit
+else
+    if [ $1 = "ath0" ]; then
+        cfg -a RATECTL=manual
+    else
+        cfg -a RATECTL_2=manual
+    fi
+fi
+
+if [ $4 = "7" ]; then
+    if [ $1 = "ath0" ]; then
+    	cfg -a MANRATE=0x87
+    else
+        cfg -a MANRATE_2=0x87	
+    fi
+    exit
+fi
+if [ $4 = "15" ]; then
+    if [ $1 = "ath0" ]; then
+        cfg -a MANRATE=0x8f
+    else
+        cfg -a MANRATE_2=0x8f
+    fi
+    exit
+fi
+if [ $2 = "11b" ]; then
+    if [ $1 = "ath0" ]; then
+    if [ $4 -le "1" ]; then
+        cfg -a MANRATE=0x1b  
+    elif [ $4 -le "2" ]; then
+        cfg -a MANRATE=0x1a
+    elif [ $4 -le "5" ]; then
+        cfg -a MANRATE=0x19
+    elif [ $4 -le "11" ]; then
+        cfg -a MANRATE=0x18
+    fi      	
+    else
+    if [ $4 -le "1" ]; then
+        cfg -a MANRATE_2=0x1b  
+    elif [ $4 -le "2" ]; then
+        cfg -a MANRATE_2=0x1a
+    elif [ $4 -le "5" ]; then
+        cfg -a MANRATE_2=0x19
+    elif [ $4 -le "11" ]; then
+        cfg -a MANRATE_2=0x18
+    fi        
+    fi
+elif [ $2 = "11g" -o $2 = "11a" ]; then
+    if [ $1 = "ath0" ]; then
+    if [ $4 -le "6" ]; then
+        cfg -a MANRATE=0x0b
+    elif [ $4 -le "9" ]; then
+        cfg -a MANRATE=0x0f
+    elif [ $4 -le "12" ]; then
+        cfg -a MANRATE=0x0a
+    elif [ $4 -le "18" ]; then
+        cfg -a MANRATE=0x0e
+    elif [ $4 -le "24" ]; then
+        cfg -a MANRATE=0x09
+    elif [ $4 -le "36" ]; then
+        cfg -a MANRATE=0x0d
+    elif [ $4 -le "48" ]; then
+        cfg -a MANRATE=0x08
+    elif [ $4 -le "54" ]; then
+        cfg -a MANRATE=0x0c
+    fi
+    else
+    if [ $4 -le "6" ]; then
+        cfg -a MANRATE_2=0x0b
+    elif [ $4 -le "9" ]; then
+        cfg -a MANRATE_2=0x0f
+    elif [ $4 -le "12" ]; then
+        cfg -a MANRATE_2=0x0a
+    elif [ $4 -le "18" ]; then
+        cfg -a MANRATE_2=0x0e
+    elif [ $4 -le "24" ]; then
+        cfg -a MANRATE_2=0x09
+    elif [ $4 -le "36" ]; then
+        cfg -a MANRATE_2=0x0d
+    elif [ $4 -le "48" ]; then
+        cfg -a MANRATE_2=0x08
+    elif [ $4 -le "54" ]; then
+        cfg -a MANRATE_2=0x0c
+    fi
+    fi
+elif [ $2 = "11gnht20" -o $2 = "11naht20" -o $2 = "auto" ]; then
+    if [ $1 = "ath0" ]; then
+    if [ $3 = "0" ]; then
+	if [ $4 -le "19" ]; then
+	    cfg -a MANRATE=0x90	
+	elif [ $4 -le "39" ]; then
+            cfg -a MANRATE=0x91
+	elif [ $4 -le "58" ]; then
+            cfg -a MANRATE=0x92
+	elif [ $4 -le "78" ]; then
+            cfg -a MANRATE=0x93
+	elif [ $4 -le "117" ]; then
+            cfg -a MANRATE=0x94
+	elif [ $4 -le "156" ]; then
+            cfg -a MANRATE=0x95
+	elif [ $4 -le "175" ]; then
+            cfg -a MANRATE=0x96
+	elif [ $4 -le "195" ]; then
+            cfg -a MANRATE=0x97
+	fi
+    else
+        if [ $4 -le "21" ]; then
+            cfg -a MANRATE=0x90
+        elif [ $4 -le "43" ]; then
+            cfg -a MANRATE=0x91
+        elif [ $4 -le "65" ]; then
+            cfg -a MANRATE=0x92
+        elif [ $4 -le "86" ]; then
+            cfg -a MANRATE=0x93
+        elif [ $4 -le "130" ]; then
+            cfg -a MANRATE=0x94
+        elif [ $4 -le "173" ]; then
+            cfg -a MANRATE=0x95
+        elif [ $4 -le "195" ]; then
+            cfg -a MANRATE=0x96
+        elif [ $4 -le "217" ]; then
+            cfg -a MANRATE=0x97
+        fi
+    fi
+    else
+    if [ $3 = "0" ]; then
+	if [ $4 -le "19" ]; then
+	    cfg -a MANRATE_2=0x90	
+	elif [ $4 -le "39" ]; then
+            cfg -a MANRATE_2=0x91
+	elif [ $4 -le "58" ]; then
+            cfg -a MANRATE_2=0x92
+	elif [ $4 -le "78" ]; then
+            cfg -a MANRATE_2=0x93
+	elif [ $4 -le "117" ]; then
+            cfg -a MANRATE_2=0x94
+	elif [ $4 -le "156" ]; then
+            cfg -a MANRATE_2=0x95
+	elif [ $4 -le "175" ]; then
+            cfg -a MANRATE_2=0x96
+	elif [ $4 -le "195" ]; then
+            cfg -a MANRATE_2=0x97
+	fi
+    else
+        if [ $4 -le "21" ]; then
+            cfg -a MANRATE_2=0x90
+        elif [ $4 -le "43" ]; then
+            cfg -a MANRATE_2=0x91
+        elif [ $4 -le "65" ]; then
+            cfg -a MANRATE_2=0x92
+        elif [ $4 -le "86" ]; then
+            cfg -a MANRATE_2=0x93
+        elif [ $4 -le "130" ]; then
+            cfg -a MANRATE_2=0x94
+        elif [ $4 -le "173" ]; then
+            cfg -a MANRATE_2=0x95
+        elif [ $4 -le "195" ]; then
+            cfg -a MANRATE_2=0x96
+        elif [ $4 -le "217" ]; then
+            cfg -a MANRATE_2=0x97
+        fi
+    fi
+    fi
+elif [ $2 = "11gnht40" -o $2 = "11naht40" ]; then
+    if [ $1 = "ath0" ]; then
+    if [ $3 = "0" ]; then
+        if [ $4 -le "40" ]; then
+            cfg -a MANRATE=0x90
+        elif [ $4 -le "81" ]; then
+            cfg -a MANRATE=0x91
+        elif [ $4 -le "121" ]; then
+            cfg -a MANRATE=0x92
+        elif [ $4 -le "162" ]; then
+            cfg -a MANRATE=0x93
+        elif [ $4 -le "243" ]; then
+            cfg -a MANRATE=0x94
+        elif [ $4 -le "324" ]; then
+            cfg -a MANRATE=0x95
+        elif [ $4 -le "364" ]; then
+            cfg -a MANRATE=0x96
+        elif [ $4 -le "405" ]; then
+            cfg -a MANRATE=0x97
+        fi
+    else
+        if [ $4 -le "45" ]; then
+            cfg -a MANRATE=0x90
+        elif [ $4 -le "90" ]; then
+            cfg -a MANRATE=0x91
+        elif [ $4 -le "135" ]; then
+            cfg -a MANRATE=0x92
+        elif [ $4 -le "180" ]; then
+            cfg -a MANRATE=0x93
+        elif [ $4 -le "270" ]; then
+            cfg -a MANRATE=0x94
+        elif [ $4 -le "360" ]; then
+            cfg -a MANRATE=0x95
+        elif [ $4 -le "405" ]; then
+            cfg -a MANRATE=0x96
+        elif [ $4 -le "450" ]; then
+            cfg -a MANRATE=0x97
+        fi
+    fi
+    else
+    if [ $3 = "0" ]; then
+        if [ $4 -le "40" ]; then
+            cfg -a MANRATE_2=0x90
+        elif [ $4 -le "81" ]; then
+            cfg -a MANRATE_2=0x91
+        elif [ $4 -le "121" ]; then
+            cfg -a MANRATE_2=0x92
+        elif [ $4 -le "162" ]; then
+            cfg -a MANRATE_2=0x93
+        elif [ $4 -le "243" ]; then
+            cfg -a MANRATE_2=0x94
+        elif [ $4 -le "324" ]; then
+            cfg -a MANRATE_2=0x95
+        elif [ $4 -le "364" ]; then
+            cfg -a MANRATE_2=0x96
+        elif [ $4 -le "405" ]; then
+            cfg -a MANRATE_2=0x97
+        fi
+    else
+        if [ $4 -le "45" ]; then
+            cfg -a MANRATE_2=0x90
+        elif [ $4 -le "90" ]; then
+            cfg -a MANRATE_2=0x91
+        elif [ $4 -le "135" ]; then
+            cfg -a MANRATE_2=0x92
+        elif [ $4 -le "180" ]; then
+            cfg -a MANRATE_2=0x93
+        elif [ $4 -le "270" ]; then
+            cfg -a MANRATE_2=0x94
+        elif [ $4 -le "360" ]; then
+            cfg -a MANRATE_2=0x95
+        elif [ $4 -le "405" ]; then
+            cfg -a MANRATE_2=0x96
+        elif [ $4 -le "450" ]; then
+            cfg -a MANRATE_2=0x97
+        fi
+    fi
+    fi
+fi
+
